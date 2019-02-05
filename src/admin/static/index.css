@@ -1,0 +1,61 @@
+.trigger {
+    font-size: 18px;
+    line-height: 64px;
+    padding: 0 24px;
+    cursor: pointer;
+    transition: color .3s;
+}
+  
+.trigger:hover {
+    color: #f88b0e;
+}
+  
+.logo {
+    height: 32px;
+    background: rgba(255,255,255,.2);
+    margin: 16px;
+    color: #fff;
+    text-align: center;
+    padding-top: 2%;
+}
+
+.ant-menu.ant-menu-dark .ant-menu-item-selected,
+.ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {
+  background-color: #f88b0e;
+}
+
+.buttonRed {
+    color: #fff;
+    background-color: #ea2c2c;
+    border-color: #ea2c2c
+}
+
+.buttonRed:hover, .buttonRed:focus {
+    color: #fff;
+    background-color: #ec6969;
+    border-color: #ec6969
+}
+
+.buttonGreen {
+    color: #fff;
+    background-color: #13a54b;
+    border-color: #13a54b
+}
+
+.buttonGreen:hover, .buttonGreen:focus {
+    color: #fff;
+    background-color: #54b87a;
+    border-color: #54b87a
+}
+
+.buttonOrange {
+    color: #fff;
+    background-color: #f88b0e;
+    border-color: #f88b0e
+}
+
+.buttonOrange:hover, .buttonOrange:focus {
+    color: #fff;
+    background-color: #f3a449;
+    border-color: #f3a449
+}
