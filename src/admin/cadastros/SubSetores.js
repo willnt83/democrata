@@ -134,6 +134,7 @@ class SubSetores extends Component {
         }
     }
 
+
     showSubSetoresModal = (showSubSetoresModal) => {
         // Se estiver fechando
         if(!showSubSetoresModal){
