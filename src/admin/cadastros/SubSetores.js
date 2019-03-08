@@ -27,67 +27,62 @@ const styles = ({
     }
 })
 
-const statusOptions = [
-    {key: 'ativo', description: 'Ativo'},
-    {key: 'inativo', description: 'Inativo'}
+const ativoOptions = [
+    {value: 'Y', description: 'Sim'},
+    {value: 'N', description: 'Não'}
 
 ]
 
-class SubSetores extends Component {
+class Subsetores extends Component {
     constructor(props) {
         super()
-        props.setPageTitle('Sub-setores')
+        props.setPageTitle('Subsetores')
     }
 
     state = {
+        subsetorId: null,
         tableData: [],
-        showSubSetoresModal: false,
-        inputId: null,
-        inputNome: null,
-        inputStatus: null,
-        inputSetor: null,
-        selectedRowKeys: [],
+        showSubsetoresModal: false,
         tableLoading: false,
-        buttonSalvarSubSetor: false,
-        visible: false,
+        buttonSalvarSubsetor: false,
         setoresOptions: []
     }
 
     requestGetSetores = () => {
         axios
-        .get('http://localhost:5000/api/getSetores')
+        .get('http://localhost/getSetores')
         .then(res => {
             if(res.data){
-                var setoresOptions = res.data.map(setor => {
+                var setoresOptions = res.data.payload.map(setor => {
                     return{
-                        key: setor.id,
-                        nome: setor.nome
+                        value: setor.id,
+                        description: setor.nome
                     }
                 })
                 this.setState({setoresOptions})
             }
         })
         .catch(error => {
-            console.log(error);
+            console.log(error)
         })
     }
 
-    requestGetSubSetores = () => {
+    requestGetSubsetores = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost:5000/api/getSubSetores')
+        .get('http://localhost/getSubsetores')
         .then(res => {
             if(res.data){
-                console.log('response get', res.data)
-                var tableData = res.data.map(subSetor => {
-                    console.log('setor status', subSetor.status)
-                    var status = subSetor.status ? 'Ativo' : 'Inativo'
+                var tableData = res.data.payload.map(subsetor => {
+                    var ativo = subsetor.ativo === 'Y' ? 'Sim' : 'Não'
                     return({
-                        key: subSetor.id,
-                        nome: subSetor.nome,
-                        status: status,
+                        key: subsetor.id,
+                        nome: subsetor.nome,
+                        ativo: ativo,
+                        ativoValue: subsetor.ativo,
                         setor: {
-                            id: subSetor.setor.id
+                            id: subsetor.setor.id,
+                            nome: subsetor.setor.nome
                         }
                     })
                 })
@@ -99,84 +94,64 @@ class SubSetores extends Component {
             this.setState({tableLoading: false})
         })
         .catch(error => {
-            console.log(error);
+            console.log(error)
             this.setState({tableLoading: false})
         })
     }
 
-    requestCreateUpdateSubSetor = (request) => {
-        console.log('request', request)
-        this.setState({buttonSalvarSubSetor: true})
-        axios.post('http://localhost:5000/api/createUpdateSubSetor', request)
+    requestCreateUpdateSubsetor = (request) => {
+        this.setState({buttonSalvarSubsetor: true})
+        axios.post('http://localhost/createUpdateSubsetor', request)
         .then(res => {
-            console.log('response', res.data)
-            this.showSubSetoresModal(false)
-            this.requestGetSubSetores()
-            this.setState({buttonSalvarSubSetor: false})
+            this.showSubsetoresModal(false)
+            this.requestGetSubsetores()
+            this.setState({buttonSalvarSubsetor: false})
         })
         .catch(error =>{
             console.log(error)
-            this.setState({buttonSalvarSubSetor: false})
+            this.setState({buttonSalvarSubsetor: false})
         })
     }
 
-    componentWillMount(){
-        this.requestGetSubSetores()
-    }
-
-    componentWillUpdate(nextProps, nextState){
-        if(this.state.inputNome !== nextState.inputNome){
-            this.props.form.setFieldsValue({
-                nome: nextState.inputNome,
-                status: nextState.inputStatus,
-                setor: nextState.inputSetor
-            })
-        }
-    }
-
-
-    showSubSetoresModal = (showSubSetoresModal) => {
+    showSubsetoresModal = (showSubsetoresModal) => {
         // Se estiver fechando
-        if(!showSubSetoresModal){
-            this.setState({
-                inputId: null,
-                inputNome: null,
-                inputStatus: null
-            })
+        if(!showSubsetoresModal){
+            this.props.form.resetFields()
+            this.setState({subsetorId: null})
         }
-
-        this.setState({showSubSetoresModal})
+        this.setState({showSubsetoresModal})
     }
 
-    loadSubSetoresModal = (record) => {
+    loadSubsetoresModal = (record) => {
         this.requestGetSetores()
         if(typeof(record) !== "undefined") {
             // Edit
-            // Settando os valores da row selecionada nas state variables
-            this.setState({
-                inputId: record.key,
-                inputNome: record.nome,
-                inputStatus: record.status
+            this.props.form.setFieldsValue({
+                nome: record.nome,
+                ativo: record.ativoValue,
+                setor: record.setor.id
             })
+            this.setState({subsetorId: record.key})
         }
-        this.showSubSetoresModal(true)
+        this.showSubsetoresModal(true)
     }
 
-    handleDeleteSubSetor = () => {
-
+    handleDeleteSubsetor = (id) => {
+        this.setState({tableLoading: true})
+        axios
+        .get('http://localhost/deleteSubsetor?id='+id)
+        .then(res => {
+            this.requestGetSubsetores()
+        })
+        .catch(error => {
+            console.log(error)
+        })
     }
 
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
-                this.setState({
-                    inputNome: values.nome,
-                    inputStatus: values.status,
-                    inputSetor: values.setor
-                })
-
-                var id = this.state.inputId ? this.state.inputId : ''
-                var status = values.status === 'ativo' ? true : false
+                var id = this.state.subsetorId ? this.state.subsetorId : null
                 var setor = {
                     id: values.setor
                 }
@@ -184,11 +159,11 @@ class SubSetores extends Component {
                 var request = {
                     id: id,
                     nome: values.nome,
-                    status: status,
+                    ativo: values.ativo,
                     setor: setor
                 }
 
-                this.requestCreateUpdateSubSetor(request)
+                this.requestCreateUpdateSubsetor(request)
             }
             else{
                 console.log('erro no formulário')
@@ -204,74 +179,30 @@ class SubSetores extends Component {
         return 0
     }
 
-    handleSearch = (selectedKeys, confirm) => () => {
-        confirm()
-        this.setState({ searchText: selectedKeys[0] })
-    }
-
-    handleReset = clearFilters => () => {
-        clearFilters()
-        this.setState({ searchText: '' })
-    }
-
-    handleChange = name => event => {
-        this.setState({
-            [name]: event.target.value,
-        })
+    componentWillMount(){
+        this.requestGetSubsetores()
     }
 
     render(){
-        const { classes } = this.props
-        const {selectedRowKeys } = this.state
-        const hasSelected = selectedRowKeys.length > 0
-
-        const { getFieldDecorator } = this.props.form;
-
+        const { getFieldDecorator } = this.props.form
         const columns = [{
             title: 'ID',
             dataIndex: 'key',
             sorter: (a, b) => a.key - b.key,
-        }, {
+        },
+        {
             title: 'Descrição',
             dataIndex: 'nome',
-            sorter: (a, b) => this.compareByAlph(a.description, b.description),
-            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-                <div className={classes.customFilterDropdown}>
-                    <Input
-                        className={classes.customFilterDropdownInput}
-                        ref={ele => this.searchInput = ele}
-                        placeholder="Buscar"
-                        value={selectedKeys[0]}
-                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                        onPressEnter={this.handleSearch(selectedKeys, confirm)}
-                    />
-                    <Button className={classes.customFilterDropdownButton} type="primary" onClick={this.handleSearch(selectedKeys, confirm)}>Buscar</Button>
-                    <Button className={classes.customFilterDropdownButton} onClick={this.handleReset(clearFilters)}>Limpar</Button>
-                </div>
-            ),
-            filterIcon: filtered => <Icon type="search" style={{ color: filtered ? '#108ee9' : '#aaa' }} />,
-            onFilter: (value, record) => record.description.toLowerCase().includes(value.toLowerCase()),
-            onFilterDropdownVisibleChange: (visible) => {
-                if (visible) {
-                    setTimeout(() => {
-                        this.searchInput.focus()
-                    })
-                }
-            },
-            render: (text) => {
-                const { searchText } = this.state
-                return searchText ? (
-                    <span>
-                        {text.split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i')).map((fragment, i) => (
-                            fragment.toLowerCase() === searchText.toLowerCase()
-                            ? <span key={i} className="highlight">{fragment}</span> : fragment // eslint-disable-line
-                        ))}
-                    </span>
-                ) : text
-            }
-        }, {
-            title: 'Status',
-            dataIndex: 'status',
+            sorter: (a, b) => this.compareByAlph(a.description, b.description)
+        },
+        {
+            title: 'Setor',
+            dataIndex: 'setor.nome',
+            sorter: (a, b) => this.compareByAlph(a.description, b.description)
+        },
+        {
+            title: 'Ativo',
+            dataIndex: 'ativo',
             align: 'center',
             width: 150,
             filters: [{
@@ -282,8 +213,9 @@ class SubSetores extends Component {
                 value: 'Inativo',
             }],
             filterMultiple: false,
-            onFilter: (value, record) => record.labelStatus.indexOf(value) === 0
-        }, {
+            onFilter: (value, record) => record.ativo.indexOf(value) === 0
+        },
+        {
             title: 'Operação',
             colSpan: 2,
             dataIndex: 'operacao',
@@ -292,8 +224,8 @@ class SubSetores extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadSubSetoresModal(record)} />
-                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteSubSetor(record.id)}>
+                        <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadSubsetoresModal(record)} />
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteSubsetor(record.key)}>
                             <a href="/admin/cadastros/sub-setores" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
                         </Popconfirm>
                     </React.Fragment>
@@ -313,13 +245,10 @@ class SubSetores extends Component {
 
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
-                        <Tooltip title="Cadastrar um novo Sub-setor?" placement="right">
-                            <Button className="buttonGreen" onClick={() => this.loadSubSetoresModal()}><Icon type="plus" /> Novo Sub-setor</Button>
-                            </Tooltip>
-                            <span style={{ marginLeft: 8 }}>
-                                {hasSelected ? `Selected ${selectedRowKeys.length} items` : ''}
-                            </span>
-                            </Col>
+                        <Tooltip title="Cadastrar um novo Subsetor?" placement="right">
+                            <Button className="buttonGreen" onClick={() => this.loadSubsetoresModal()}><Icon type="plus" /> Novo Subsetor</Button>
+                        </Tooltip>
+                    </Col>
                 </Row>
                 
                 <Table
@@ -328,12 +257,12 @@ class SubSetores extends Component {
                     loading={this.state.tableLoading}
                 />
                 <Modal
-                    title="Cadastro de Sub-setor"
-                    visible={this.state.showSubSetoresModal}
-                    onCancel={() => this.showSubSetoresModal(false)}
+                    title="Cadastro de Subsetores"
+                    visible={this.state.showSubsetoresModal}
+                    onCancel={() => this.showSubsetoresModal(false)}
                     footer={[
-                        <Button key="back" onClick={() => this.showSubSetoresModal(false)}><Icon type="close" /> Cancelar</Button>,
-                        <Button key="submit" type="primary" loading={this.state.buttonSalvarSubSetor} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
+                        <Button key="back" onClick={() => this.showSubsetoresModal(false)}><Icon type="close" /> Cancelar</Button>,
+                        <Button key="submit" type="primary" loading={this.state.buttonSalvarSubsetor} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
                     <Form layout="vertical">
@@ -343,13 +272,13 @@ class SubSetores extends Component {
                             {getFieldDecorator('nome', {
                                 rules: [
                                     {
-                                        required: true, message: 'Por favor informe o nome do sub-setor',
+                                        required: true, message: 'Por favor informe o nome do subsetor',
                                     }
                                 ]
                             })(
                                 <Input
                                     id="nome"
-                                    placeholder="Digite o nome do sub-setor"
+                                    placeholder="Digite o nome do subsetor"
                                 />
                             )}
                         </Form.Item>
@@ -361,21 +290,27 @@ class SubSetores extends Component {
                                 >
                                     {
                                         this.state.setoresOptions.map((option) => {
-                                            return (<Select.Option key={option.key}>{option.nome}</Select.Option>)
+                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
                                         })
                                     }
                                 </Select>
                             )}
                         </Form.Item>
-                        <Form.Item label="Status">
-                            {getFieldDecorator('status')(
+                        <Form.Item label="Ativo">
+                            {getFieldDecorator('ativo', {
+                                rules: [
+                                    {
+                                        required: true, message: 'Por favor selecione',
+                                    }
+                                ]
+                            })(
                                 <Select
                                     style={{ width: '100%' }}
                                     placeholder="Selecione"
                                 >
                                     {
-                                        statusOptions.map((option) => {
-                                            return (<Select.Option key={option.key}>{option.description}</Select.Option>)
+                                        ativoOptions.map((option) => {
+                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
                                         })
                                     }
                                 </Select>
@@ -398,4 +333,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(BackEndRequests(withStyles(styles)(Form.create()(SubSetores))))
+export default connect(MapStateToProps, mapDispatchToProps)(BackEndRequests(withStyles(styles)(Form.create()(Subsetores))))

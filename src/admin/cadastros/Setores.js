@@ -1,36 +1,14 @@
 import React, { Component } from 'react'
 import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select } from 'antd'
 import { Tooltip } from '@material-ui/core/'
-import { withStyles } from '@material-ui/core/styles'
-import BackEndRequests from '../hocs/BackEndRequests'
 import { connect } from 'react-redux'
 import axios from "axios"
 
 const { Content } = Layout
 
-const styles = ({
-    customFilterDropdown: {
-        padding: 8,
-        borderRadius: 6,
-        background: '#fff',
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .2)'
-    },
-    customFilterDropdownInput: {
-        width: 130,
-        marginRight: 8
-    },
-    customFilterDropdownButton: {
-        marginRight: 8
-    },
-    highlight: {
-        color: '#f50'
-    }
-})
-
-const statusOptions = [
-    {key: 'ativo', description: 'Ativo'},
-    {key: 'inativo', description: 'Inativo'}
-
+const ativoOptions = [
+    {value: 'Y', description: 'Sim'},
+    {value: 'N', description: 'Não'}
 ]
 
 class Setores extends Component {
@@ -40,32 +18,26 @@ class Setores extends Component {
     }
 
     state = {
+        setorId: null,
         tableData: [],
         showSetoresModal: false,
-        inputId: null,
-        inputNome: null,
-        inputStatus: null,
-        selectedRowKeys: [],
         tableLoading: false,
         buttonSalvarSetor: false,
-
-        visible: false
     }
 
     requestGetSetores = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost:5000/api/getSetores')
+        .get('http://localhost/getSetores')
         .then(res => {
-            if(res.data){
-                console.log('response get', res.data)
-                var tableData = res.data.map(setor => {
-                    console.log('setor status', setor.status)
-                    var status = setor.status ? 'Ativo' : 'Inativo'
+            if(res.data.payload){
+                var tableData = res.data.payload.map(setor => {
+                    var ativo = setor.ativo === 'Y' ? 'Sim' : 'Não'
                     return({
                         key: setor.id,
                         nome: setor.nome,
-                        status: status
+                        ativo: ativo,
+                        ativoValue: setor.ativo
                     })
                 })
                 this.setState({tableData})
@@ -76,87 +48,71 @@ class Setores extends Component {
             this.setState({tableLoading: false})
         })
         .catch(error => {
-            console.log(error);
+            console.log(error)
             this.setState({tableLoading: false})
         })
     }
 
     requestCreateUpdateSetor = (request) => {
-        console.log('request', request)
+        console.log('requestCreateUpdateSetor request', request)
         this.setState({buttonSalvarSetor: true})
-        axios.post('http://localhost:5000/api/createUpdateSetor', request)
+        axios.post('http://localhost/createUpdateSetor', request)
         .then(res => {
-            console.log('response', res.data)
             this.showSetoresModal(false)
             this.requestGetSetores()
             this.setState({buttonSalvarSetor: false})
         })
         .catch(error =>{
             console.log(error)
-            this.setState({buttonSalvarSetor: false})
+            this.setState({buttonSalvarUnidade: false})
         })
-    }
-
-    componentWillMount(){
-        this.requestGetSetores()
-    }
-
-    componentWillUpdate(nextProps, nextState){
-        if(this.state.inputNome !== nextState.inputNome){
-            this.props.form.setFieldsValue({
-                nome: nextState.inputNome,
-                status: nextState.inputStatus
-            })
-        }
     }
 
     showSetoresModal = (showSetoresModal) => {
         // Se estiver fechando
         if(!showSetoresModal){
-            this.setState({
-                inputId: null,
-                inputNome: null,
-                inputStatus: null
-            })
+            this.props.form.resetFields()
+            this.setState({setorId: null})
         }
 
         this.setState({showSetoresModal})
     }
 
     loadSetoresModal = (record) => {
+        console.log('loadSetoresModal', record)
         if(typeof(record) !== "undefined") {
             // Edit
-            // Settando os valores da row selecionada nas state variables
-            this.setState({
-                inputId: record.key,
-                inputNome: record.nome,
-                inputStatus: record.status
+            this.props.form.setFieldsValue({
+                nome: record.nome,
+                ativo: record.ativoValue
             })
+            this.setState({setorId: record.key})
         }
         this.showSetoresModal(true)
     }
 
-    handleDeleteSetor = () => {
-
+    handleDeleteSetor = (id) => {
+        this.setState({tableLoading: true})
+        axios
+        .get('http://localhost/deleteSetor?id='+id)
+        .then(res => {
+            console.log('deleteUnidade response', res)
+            this.requestGetSetores()
+        })
+        .catch(error => {
+            console.log(error)
+        })
     }
 
-    handleFormSubmit = (event) => {
+    handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
-                this.setState({
-                    inputNome: values.nome,
-                    inputStatus: values.status
-                })
-
-                var id = this.state.inputId ? this.state.inputId : ''
-                var status = values.status === 'ativo' ? true : false
-
+                var id = this.state.setorId ? this.state.setorId : null
                 var request = {
                     id: id,
                     nome: values.nome,
-                    status: status
+                    ativo: values.ativo
                 }
-
                 this.requestCreateUpdateSetor(request)
             }
             else{
@@ -173,29 +129,12 @@ class Setores extends Component {
         return 0
     }
 
-    handleSearch = (selectedKeys, confirm) => () => {
-        confirm()
-        this.setState({ searchText: selectedKeys[0] })
-    }
-
-    handleReset = clearFilters => () => {
-        clearFilters()
-        this.setState({ searchText: '' })
-    }
-
-    handleChange = name => event => {
-        this.setState({
-            [name]: event.target.value,
-        })
+    componentWillMount(){
+        this.requestGetSetores()
     }
 
     render(){
-        const { classes } = this.props
-        const {selectedRowKeys } = this.state
-        const hasSelected = selectedRowKeys.length > 0
-
-        const { getFieldDecorator } = this.props.form;
-
+        const { getFieldDecorator } = this.props.form
         const columns = [{
             title: 'ID',
             dataIndex: 'key',
@@ -203,44 +142,10 @@ class Setores extends Component {
         }, {
             title: 'Descrição',
             dataIndex: 'nome',
-            sorter: (a, b) => this.compareByAlph(a.description, b.description),
-            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-                <div className={classes.customFilterDropdown}>
-                    <Input
-                        className={classes.customFilterDropdownInput}
-                        ref={ele => this.searchInput = ele}
-                        placeholder="Buscar"
-                        value={selectedKeys[0]}
-                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                        onPressEnter={this.handleSearch(selectedKeys, confirm)}
-                    />
-                    <Button className={classes.customFilterDropdownButton} type="primary" onClick={this.handleSearch(selectedKeys, confirm)}>Buscar</Button>
-                    <Button className={classes.customFilterDropdownButton} onClick={this.handleReset(clearFilters)}>Limpar</Button>
-                </div>
-            ),
-            filterIcon: filtered => <Icon type="search" style={{ color: filtered ? '#108ee9' : '#aaa' }} />,
-            onFilter: (value, record) => record.description.toLowerCase().includes(value.toLowerCase()),
-            onFilterDropdownVisibleChange: (visible) => {
-                if (visible) {
-                    setTimeout(() => {
-                        this.searchInput.focus()
-                    })
-                }
-            },
-            render: (text) => {
-                const { searchText } = this.state
-                return searchText ? (
-                    <span>
-                        {text.split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i')).map((fragment, i) => (
-                            fragment.toLowerCase() === searchText.toLowerCase()
-                            ? <span key={i} className="highlight">{fragment}</span> : fragment // eslint-disable-line
-                        ))}
-                    </span>
-                ) : text
-            }
+            sorter: (a, b) => this.compareByAlph(a.description, b.description)
         }, {
-            title: 'Status',
-            dataIndex: 'status',
+            title: 'Ativo',
+            dataIndex: 'ativo',
             align: 'center',
             width: 150,
             filters: [{
@@ -251,7 +156,7 @@ class Setores extends Component {
                 value: 'Inativo',
             }],
             filterMultiple: false,
-            onFilter: (value, record) => record.labelStatus.indexOf(value) === 0
+            onFilter: (value, record) => record.ativo.indexOf(value) === 0
         }, {
             title: 'Operação',
             colSpan: 2,
@@ -262,7 +167,7 @@ class Setores extends Component {
                 return(
                     <React.Fragment>
                         <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadSetoresModal(record)} />
-                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteSetor(record.id)}>
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteSetor(record.key)}>
                             <a href="/admin/cadastros/setores" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
                         </Popconfirm>
                     </React.Fragment>
@@ -284,11 +189,8 @@ class Setores extends Component {
                     <Col span={24} align="end">
                         <Tooltip title="Cadastrar um novo setor?" placement="right">
                             <Button className="buttonGreen" onClick={() => this.loadSetoresModal()}><Icon type="plus" /> Novo Setor</Button>
-                            </Tooltip>
-                            <span style={{ marginLeft: 8 }}>
-                                {hasSelected ? `Selected ${selectedRowKeys.length} items` : ''}
-                            </span>
-                            </Col>
+                        </Tooltip>
+                    </Col>
                 </Row>
                 
                 <Table
@@ -297,7 +199,7 @@ class Setores extends Component {
                     loading={this.state.tableLoading}
                 />
                 <Modal
-                    title="Cadastro de Setor"
+                    title="Cadastro de Setores"
                     visible={this.state.showSetoresModal}
                     onCancel={() => this.showSetoresModal(false)}
                     footer={[
@@ -322,15 +224,21 @@ class Setores extends Component {
                                 />
                             )}
                         </Form.Item>
-                        <Form.Item label="Status">
-                            {getFieldDecorator('status')(
+                        <Form.Item label="Ativo">
+                            {getFieldDecorator('ativo', {
+                                rules: [
+                                    {
+                                        required: true, message: 'Por favor selecione',
+                                    }
+                                ]
+                            })(
                                 <Select
                                     style={{ width: '100%' }}
                                     placeholder="Selecione"
                                 >
                                     {
-                                        statusOptions.map((option) => {
-                                            return (<Select.Option key={option.key}>{option.description}</Select.Option>)
+                                        ativoOptions.map((option) => {
+                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
                                         })
                                     }
                                 </Select>
@@ -343,14 +251,10 @@ class Setores extends Component {
     }
 }
 
-const MapStateToProps = (state) => {
-	return {
-	}
-}
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(BackEndRequests(withStyles(styles)(Form.create()(Setores))))
+export default connect(null, mapDispatchToProps)(Form.create()(Setores))

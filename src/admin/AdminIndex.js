@@ -12,9 +12,14 @@ import ListMenu from "./layout/ListMenu"
 import Unidades from "./cadastros/Unidades"
 import Usuarios from "./cadastros/Usuarios"
 import Setores from "./cadastros/Setores"
-import SubSetores from "./cadastros/SubSetores"
+import SubSetores from "./cadastros/Subsetores"
 import Produtos from "./cadastros/Produtos"
-import SubProdutos from "./cadastros/SubProdutos"
+import SubProdutos from "./cadastros/Subprodutos"
+import Conjuntos from "./cadastros/Conjuntos"
+import LinhaDeProducao from "./cadastros/LinhaDeProducao"
+import Cores from "./cadastros/Cores"
+import Producao from "./producao/Producao"
+import Acompanhamento from "./producao/Acompanhamento"
 
 
 const { Header, Sider, Footer } = Layout
@@ -52,8 +57,8 @@ const routes = [
 		main: () => <Setores />
 	},
 	{
-		path: "/admin/cadastros/sub-setores",
-		sidebar: () => <div>Cadastro/Sub-setores</div>,
+		path: "/admin/cadastros/subsetores",
+		sidebar: () => <div>Cadastro/Subsetores</div>,
 		main: () => <SubSetores />
 	},
 	{
@@ -62,9 +67,36 @@ const routes = [
 		main: () => <Produtos />
 	},
 	{
-		path: "/admin/cadastros/sub-produtos",
-		sidebar: () => <div>Cadastro/Sub-produtos</div>,
+		path: "/admin/cadastros/subprodutos",
+		sidebar: () => <div>Cadastro/Subprodutos</div>,
 		main: () => <SubProdutos />
+	},
+	{
+		path: "/admin/cadastros/conjuntos",
+		sidebar: () => <div>Cadastro/Conjuntos</div>,
+		main: () => <Conjuntos />
+	},
+	{
+		path: "/admin/cadastros/linha-de-producao",
+		sidebar: () => <div>Cadastro/Linha de Produção</div>,
+		main: () => <LinhaDeProducao />
+	},
+	{
+		path: "/admin/cadastros/cores",
+		sidebar: () => <div>Cadastro/Cores</div>,
+		main: () => <Cores />
+	},
+	{
+		path: "/admin/producao",
+		exact: true,
+		sidebar: () => <div>Produção</div>,
+		main: () => <Producao />
+	},
+	{
+		path: "/admin/producao/acompanhamento",
+		exact: true,
+		sidebar: () => <div>Produção/Acompanhamento</div>,
+		main: () => <Acompanhamento />
 	}
 ];
 

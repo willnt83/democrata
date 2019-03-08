@@ -1,36 +1,14 @@
 import React, { Component } from 'react'
 import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select } from 'antd'
 import { Tooltip } from '@material-ui/core/'
-import { withStyles } from '@material-ui/core/styles'
-import BackEndRequests from '../hocs/BackEndRequests'
 import { connect } from 'react-redux'
 import axios from "axios"
 
 const { Content } = Layout
 
-const styles = ({
-    customFilterDropdown: {
-        padding: 8,
-        borderRadius: 6,
-        background: '#fff',
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .2)'
-    },
-    customFilterDropdownInput: {
-        width: 130,
-        marginRight: 8
-    },
-    customFilterDropdownButton: {
-        marginRight: 8
-    },
-    highlight: {
-        color: '#f50'
-    }
-})
-
-const statusOptions = [
-    {key: 'ativo', description: 'Ativo'},
-    {key: 'inativo', description: 'Inativo'}
-
+const ativoOptions = [
+    {value: 'Y', description: 'Sim'},
+    {value: 'N', description: 'Não'}
 ]
 
 class Unidades extends Component {
@@ -40,35 +18,26 @@ class Unidades extends Component {
     }
 
     state = {
+        unidadeId: null,
         tableData: [],
         showUnidadesModal: false,
-        inputId: null,
-        inputNome: null,
-        inputStatus: null,
-        selectedRowKeys: [],
         tableLoading: false,
-        buttonSalvarUnidade: false,
-
-        loading: false,
-        visible: false
-        
-        
-
-
+        buttonSalvarUnidade: false
     }
 
     requestGetUnidades = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost:5000/api/getUnidades')
+        .get('http://localhost/getUnidades')
         .then(res => {
-            if(res.data){
-                var tableData = res.data.map(unidade => {
-                    var status = unidade.status ? 'Ativo' : 'Inativo'
+            if(res.data.payload){
+                var tableData = res.data.payload.map(unidade => {
+                    var ativo = unidade.ativo === 'Y' ? 'Sim' : 'Não'
                     return({
                         key: unidade.id,
                         nome: unidade.nome,
-                        status: status
+                        ativo: ativo,
+                        ativoValue: unidade.ativo
                     })
                 })
                 this.setState({tableData})
@@ -79,14 +48,14 @@ class Unidades extends Component {
             this.setState({tableLoading: false})
         })
         .catch(error => {
-            console.log(error);
+            console.log(error)
             this.setState({tableLoading: false})
         })
     }
 
     requestCreateUpdateUnidade = (request) => {
         this.setState({buttonSalvarUnidade: true})
-        axios.post('http://localhost:5000/api/createUpdateUnidade', request)
+        axios.post('http://localhost/createUpdateUnidade', request)
         .then(res => {
             this.showUnidadesModal(false)
             this.requestGetUnidades()
@@ -98,64 +67,48 @@ class Unidades extends Component {
         })
     }
 
-    componentWillMount(){
-        this.requestGetUnidades()
-    }
-
-    componentWillUpdate(nextProps, nextState){
-        if(this.state.inputNome !== nextState.inputNome){
-            this.props.form.setFieldsValue({
-                nome: nextState.inputNome,
-                status: nextState.inputStatus
-            })
-        }
-    }
-
     showUnidadesModal = (showUnidadesModal) => {
         // Se estiver fechando
         if(!showUnidadesModal){
-            this.setState({
-                inputId: null,
-                inputNome: null,
-                inputStatus: null
-            })
+            this.props.form.resetFields()
+            this.setState({unidadeId: null})
         }
-
         this.setState({showUnidadesModal})
     }
 
     loadUnidadesModal = (record) => {
         if(typeof(record) !== "undefined") {
             // Edit
-            // Settando os valores da row selecionada nas state variables
-            this.setState({
-                inputId: record.key,
-                inputNome: record.nome,
-                inputStatus: record.status
+            this.props.form.setFieldsValue({
+                nome: record.nome,
+                ativo: record.ativoValue
             })
+            this.setState({unidadeId: record.key})
         }
         this.showUnidadesModal(true)
     }
 
-    handleDeleteUnidade = () => {
-
+    handleDeleteUnidade = (id) => {
+        this.setState({tableLoading: true})
+        axios
+        .get('http://localhost/deleteUnidade?id='+id)
+        .then(res => {
+            console.log('deleteUnidade response', res)
+            this.requestGetUnidades()
+        })
+        .catch(error => {
+            console.log(error)
+        })
     }
 
-    handleFormSubmit = (event) => {
+    handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
-                this.setState({
-                    inputNome: values.nome,
-                    inputStatus: values.status
-                })
-
-                var id = this.state.inputId ? this.state.inputId : ''
-                var status = values.status === 'ativo' ? true : false
-
+                var id = this.state.unidadeId ? this.state.unidadeId : null
                 var request = {
                     id: id,
                     nome: values.nome,
-                    status: status
+                    ativo: values.ativo
                 }
                 this.requestCreateUpdateUnidade(request)
             }
@@ -173,29 +126,12 @@ class Unidades extends Component {
         return 0
     }
 
-    handleSearch = (selectedKeys, confirm) => () => {
-        confirm()
-        this.setState({ searchText: selectedKeys[0] })
-    }
-
-    handleReset = clearFilters => () => {
-        clearFilters()
-        this.setState({ searchText: '' })
-    }
-
-    handleChange = name => event => {
-        this.setState({
-            [name]: event.target.value,
-        })
+    componentWillMount(){
+        this.requestGetUnidades()
     }
 
     render(){
-        const { classes } = this.props
-        const {selectedRowKeys } = this.state
-        const hasSelected = selectedRowKeys.length > 0
-
-        const { getFieldDecorator } = this.props.form;
-
+        const { getFieldDecorator } = this.props.form
         const columns = [{
             title: 'ID',
             dataIndex: 'key',
@@ -203,44 +139,10 @@ class Unidades extends Component {
         }, {
             title: 'Descrição',
             dataIndex: 'nome',
-            sorter: (a, b) => this.compareByAlph(a.description, b.description),
-            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-                <div className={classes.customFilterDropdown}>
-                    <Input
-                        className={classes.customFilterDropdownInput}
-                        ref={ele => this.searchInput = ele}
-                        placeholder="Buscar"
-                        value={selectedKeys[0]}
-                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                        onPressEnter={this.handleSearch(selectedKeys, confirm)}
-                    />
-                    <Button className={classes.customFilterDropdownButton} type="primary" onClick={this.handleSearch(selectedKeys, confirm)}>Buscar</Button>
-                    <Button className={classes.customFilterDropdownButton} onClick={this.handleReset(clearFilters)}>Limpar</Button>
-                </div>
-            ),
-            filterIcon: filtered => <Icon type="search" style={{ color: filtered ? '#108ee9' : '#aaa' }} />,
-            onFilter: (value, record) => record.description.toLowerCase().includes(value.toLowerCase()),
-            onFilterDropdownVisibleChange: (visible) => {
-                if (visible) {
-                    setTimeout(() => {
-                        this.searchInput.focus()
-                    })
-                }
-            },
-            render: (text) => {
-                const { searchText } = this.state
-                return searchText ? (
-                    <span>
-                        {text.split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i')).map((fragment, i) => (
-                            fragment.toLowerCase() === searchText.toLowerCase()
-                            ? <span key={i} className="highlight">{fragment}</span> : fragment // eslint-disable-line
-                        ))}
-                    </span>
-                ) : text
-            }
+            sorter: (a, b) => this.compareByAlph(a.description, b.description)
         }, {
-            title: 'Status',
-            dataIndex: 'status',
+            title: 'Ativo',
+            dataIndex: 'ativo',
             align: 'center',
             width: 150,
             filters: [{
@@ -251,7 +153,7 @@ class Unidades extends Component {
                 value: 'Inativo',
             }],
             filterMultiple: false,
-            onFilter: (value, record) => record.labelStatus.indexOf(value) === 0
+            onFilter: (value, record) => record.ativo.indexOf(value) === 0
         }, {
             title: 'Operação',
             colSpan: 2,
@@ -262,7 +164,7 @@ class Unidades extends Component {
                 return(
                     <React.Fragment>
                         <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadUnidadesModal(record)} />
-                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteUnidade(record.id)}>
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteUnidade(record.key)}>
                             <a href="/admin/cadastros/unidades" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
                         </Popconfirm>
                     </React.Fragment>
@@ -284,11 +186,8 @@ class Unidades extends Component {
                     <Col span={24} align="end">
                         <Tooltip title="Cadastrar Nova Unidade" placement="right">
                             <Button className="buttonGreen" onClick={() => this.loadUnidadesModal()}><Icon type="plus" /> Nova Unidade</Button>
-                            </Tooltip>
-                            <span style={{ marginLeft: 8 }}>
-                                {hasSelected ? `Selected ${selectedRowKeys.length} items` : ''}
-                            </span>
-                            </Col>
+                        </Tooltip>
+                    </Col>
                 </Row>
                 
                 <Table
@@ -297,7 +196,7 @@ class Unidades extends Component {
                     loading={this.state.tableLoading}
                 />
                 <Modal
-                    title="Cadastro de Unidade"
+                    title="Cadastro de Unidades"
                     visible={this.state.showUnidadesModal}
                     onCancel={() => this.showUnidadesModal(false)}
                     footer={[
@@ -322,15 +221,21 @@ class Unidades extends Component {
                                 />
                             )}
                         </Form.Item>
-                        <Form.Item label="Status">
-                            {getFieldDecorator('status')(
+                        <Form.Item label="Ativo">
+                            {getFieldDecorator('ativo', {
+                                rules: [
+                                    {
+                                        required: true, message: 'Por favor selecione',
+                                    }
+                                ]
+                            })(
                                 <Select
                                     style={{ width: '100%' }}
                                     placeholder="Selecione"
                                 >
                                     {
-                                        statusOptions.map((option) => {
-                                            return (<Select.Option key={option.key}>{option.description}</Select.Option>)
+                                        ativoOptions.map((option) => {
+                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
                                         })
                                     }
                                 </Select>
@@ -343,14 +248,10 @@ class Unidades extends Component {
     }
 }
 
-const MapStateToProps = (state) => {
-	return {
-	}
-}
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(BackEndRequests(withStyles(styles)(Form.create()(Unidades))))
+export default connect(null, mapDispatchToProps)(Form.create()(Unidades))

@@ -59,3 +59,11 @@
     background-color: #f3a449;
     border-color: #f3a449
 }
+
+.gridTitle {
+    font-weight: 800
+}
+
+.rowAcompanhamento:first-child{
+    margin-top: 12px
+}

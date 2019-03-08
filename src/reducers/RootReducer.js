@@ -1,9 +1,6 @@
 const initState = {
-    pageTitle: [],
-    habilidades: [],
-    conteudos: [],
-    areasDeConhecimento: [],
-    questoes: []
+    producaoMainData: [],
+    producaoAcompanhamento: []
 }
 
 const RootReducer = (state = initState, action) => {
@@ -13,28 +10,16 @@ const RootReducer = (state = initState, action) => {
             pageTitle: action.pageTitle
         }
     }
-    else if(action.type === 'SET_HABILIDADES'){
+    else if(action.type === 'SET_PRODUCAOMAINDATA'){
         return {
             ...state,
-            habilidades: action.habilidades
+            producaoMainData: action.producao
         }
     }
-    else if(action.type === 'SET_CONTEUDOS'){
-        return{
+    else if(action.type === 'SET_PRODUCAOACOMPANHAMENTO'){
+        return {
             ...state,
-            conteudos: action.conteudos
-        }
-    }
-    else if(action.type === 'SET_AREAS_DE_CONHECIMENTO'){
-        return{
-            ...state,
-            areasDeConhecimento: action.areasDeConhecimento
-        }
-    }
-    else if(action.type === 'SET_QUESTOES'){
-        return{
-            ...state,
-            questoes: action.questoes
+            producaoAcompanhamento: action.producaoAcompanhamento
         }
     }
     return state;
