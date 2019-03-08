@@ -83,6 +83,7 @@ class AcompanhamentoSetor extends Component {
     */
 
     render(){
+        console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
         const { getFieldDecorator, getFieldValue } = this.props.form
         const rows = this.props.producaoAcompanhamento
         .filter(setor => {
@@ -152,7 +153,7 @@ class AcompanhamentoSetor extends Component {
                     </Col>
                 </Row>
 
-                <Row style={{backgroundColor: '#cbd8ed', padding: '0 10px 0 10px', marginBottom: 12}}>
+                <Row type="flex" style={{backgroundColor: '#cbd8ed', padding: '0 10px 0 10px', marginBottom: 12, alignItems: 'center'}}>
                     <Col span={8}>
                         <h3>Produtos</h3>
                     </Col>
