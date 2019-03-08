@@ -27,7 +27,7 @@ class Acompanhamento extends Component {
 
     requestGetProducaoAcompanhamento = (id) => {
         axios
-        .get('http://localhost/getProducaoAcompanhamento?id_producao='+id)
+        .get('http://testedemocrata.tk/getProducaoAcompanhamento?id_producao='+id)
         .then(res => {
             if(res.data.payload){
                 // Tabs

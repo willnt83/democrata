@@ -28,7 +28,7 @@ class Cores extends Component {
     requestGetCores = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getCores')
+        .get('http://testedemocrata.tk/getCores')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(cor => {
@@ -55,7 +55,7 @@ class Cores extends Component {
 
     requestCreateUpdateCor = (request) => {
         this.setState({buttonSalvarCor: true})
-        axios.post('http://localhost/createUpdateCor', request)
+        axios.post('http://testedemocrata.tk/createUpdateCor', request)
         .then(res => {
             this.showCoresModal(false)
             this.requestGetCores()
@@ -91,7 +91,7 @@ class Cores extends Component {
     handleDeleteCor = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteCor?id='+id)
+        .get('http://testedemocrata.tk/deleteCor?id='+id)
         .then(res => {
             this.requestGetCores()
         })

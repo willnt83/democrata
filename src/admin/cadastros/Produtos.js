@@ -46,7 +46,7 @@ class Produtos extends Component {
     requestGetProdutosFull = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getProdutosFull')
+        .get('http://testedemocrata.tk/getProdutosFull')
         .then(res => {
             if(res.data){
                 var tableData = res.data.payload.map(produto => {
@@ -76,7 +76,7 @@ class Produtos extends Component {
 
     requestCreateUpdateProduto = (request) => {
         this.setState({buttonSalvarProduto: true})
-        axios.post('http://localhost/createUpdateProduto', request)
+        axios.post('http://testedemocrata.tk/createUpdateProduto', request)
         .then(res => {
             if(res.data.success){
                 this.showProdutosModal(false)
@@ -95,7 +95,7 @@ class Produtos extends Component {
     
     requestGetSetoresPorLinhaDeProducao = (id) => {
         axios
-        .get('http://localhost/getSetoresPorLinhaDeProducao?id='+id)
+        .get('http://testedemocrata.tk/getSetoresPorLinhaDeProducao?id='+id)
         .then(res => {
             if(res.data){
                 var setoresPorLinhadeProducao = res.data.payload
@@ -125,7 +125,7 @@ class Produtos extends Component {
     loadCoresOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getCores?ativo=Y')
+        .get('http://testedemocrata.tk/getCores?ativo=Y')
         .then(res => {
             if(res.data){
                 var coresOptions = res.data.payload.map(cor => {
@@ -156,7 +156,7 @@ class Produtos extends Component {
     loadLinhasDeProducaoOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getLinhasDeProducao?ativo=Y')
+        .get('http://testedemocrata.tk/getLinhasDeProducao?ativo=Y')
         .then(res => {
             if(res.data){
                 var linhasDeProducaoOptions = res.data.payload.map(linhaDeProducao => {
@@ -186,7 +186,7 @@ class Produtos extends Component {
 
     loadConjuntosOptions = () => {
         axios
-        .get('http://localhost/getConjuntos?ativo=Y')
+        .get('http://testedemocrata.tk/getConjuntos?ativo=Y')
         .then(res => {
             this.setState({
                 conjuntosOptions: res.data.payload.map(conjunto => {
@@ -261,7 +261,7 @@ class Produtos extends Component {
     handleDeleteProduto = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteProduto?id='+id)
+        .get('http://testedemocrata.tk/deleteProduto?id='+id)
         .then(res => {
             this.requestGetProdutosFull()
         })

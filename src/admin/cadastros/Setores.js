@@ -28,7 +28,7 @@ class Setores extends Component {
     requestGetSetores = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getSetores')
+        .get('http://testedemocrata.tk/getSetores')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(setor => {
@@ -56,7 +56,7 @@ class Setores extends Component {
     requestCreateUpdateSetor = (request) => {
         console.log('requestCreateUpdateSetor request', request)
         this.setState({buttonSalvarSetor: true})
-        axios.post('http://localhost/createUpdateSetor', request)
+        axios.post('http://testedemocrata.tk/createUpdateSetor', request)
         .then(res => {
             this.showSetoresModal(false)
             this.requestGetSetores()
@@ -94,7 +94,7 @@ class Setores extends Component {
     handleDeleteSetor = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteSetor?id='+id)
+        .get('http://testedemocrata.tk/deleteSetor?id='+id)
         .then(res => {
             console.log('deleteUnidade response', res)
             this.requestGetSetores()

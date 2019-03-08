@@ -28,7 +28,7 @@ class Unidades extends Component {
     requestGetUnidades = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getUnidades')
+        .get('http://testedemocrata.tk/getUnidades')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(unidade => {
@@ -55,7 +55,7 @@ class Unidades extends Component {
 
     requestCreateUpdateUnidade = (request) => {
         this.setState({buttonSalvarUnidade: true})
-        axios.post('http://localhost/createUpdateUnidade', request)
+        axios.post('http://testedemocrata.tk/createUpdateUnidade', request)
         .then(res => {
             this.showUnidadesModal(false)
             this.requestGetUnidades()
@@ -91,7 +91,7 @@ class Unidades extends Component {
     handleDeleteUnidade = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteUnidade?id='+id)
+        .get('http://testedemocrata.tk/deleteUnidade?id='+id)
         .then(res => {
             console.log('deleteUnidade response', res)
             this.requestGetUnidades()

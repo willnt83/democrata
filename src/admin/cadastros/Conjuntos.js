@@ -42,7 +42,7 @@ class Conjuntos extends Component {
     requestGetConjuntos = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getConjuntos')
+        .get('http://testedemocrata.tk/getConjuntos')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(conjunto => {
@@ -72,7 +72,7 @@ class Conjuntos extends Component {
     loadSetoresOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getSetores?ativo=Y')
+        .get('http://testedemocrata.tk/getSetores?ativo=Y')
         .then(res => {
             if(res.data.payload){
                 this.setState({
@@ -101,7 +101,7 @@ class Conjuntos extends Component {
     loadSubprodutosOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getSubprodutos?ativo=Y')
+        .get('http://testedemocrata.tk/getSubprodutos?ativo=Y')
         .then(res => {
             if(res.data){
                 this.setState({
@@ -130,7 +130,7 @@ class Conjuntos extends Component {
 
     requestCreateUpdateConjunto = (request) => {
         this.setState({buttonSalvarConjunto: true})
-        axios.post('http://localhost/createUpdateConjunto', request)
+        axios.post('http://testedemocrata.tk/createUpdateConjunto', request)
         .then(res => {
             this.showConjuntosModal(false)
             this.requestGetConjuntos()
@@ -202,7 +202,7 @@ class Conjuntos extends Component {
     handleDeleteConjunto = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteConjunto?id='+id)
+        .get('http://testedemocrata.tk/deleteConjunto?id='+id)
         .then(res => {
             this.requestGetConjuntos()
         })

@@ -28,7 +28,7 @@ class Subprodutos extends Component {
     requestGetSubprodutos = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getSubprodutos')
+        .get('http://testedemocrata.tk/getSubprodutos')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(subproduto => {
@@ -55,7 +55,7 @@ class Subprodutos extends Component {
 
     requestCreateUpdateSubproduto = (request) => {
         this.setState({buttonSalvarSubproduto: true})
-        axios.post('http://localhost/createUpdateSubproduto', request)
+        axios.post('http://testedemocrata.tk/createUpdateSubproduto', request)
         .then(res => {
             this.showSubprodutosModal(false)
             this.requestGetSubprodutos()
@@ -92,7 +92,7 @@ class Subprodutos extends Component {
     handleDeleteSubproduto = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteSubproduto?id='+id)
+        .get('http://testedemocrata.tk/deleteSubproduto?id='+id)
         .then(res => {
             this.requestGetSubprodutos()
         })

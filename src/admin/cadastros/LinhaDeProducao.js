@@ -37,7 +37,7 @@ class LinhasDeProducao extends Component {
     requestGetLinhasDeProducao = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getLinhasDeProducao')
+        .get('http://testedemocrata.tk/getLinhasDeProducao')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(linhaDeProducao => {
@@ -67,7 +67,7 @@ class LinhasDeProducao extends Component {
     loadSetoresOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getSetores?ativo=Y')
+        .get('http://testedemocrata.tk/getSetores?ativo=Y')
         .then(res => {
             console.log('response', res.data.payload)
             if(res.data.payload){
@@ -96,7 +96,7 @@ class LinhasDeProducao extends Component {
 
     requestCreateUpdateLinhaDeProducao = (request) => {
         this.setState({buttonSalvarLinhaDeProducao: true})
-        axios.post('http://localhost/createUpdateLinhaDeProducao', request)
+        axios.post('http://testedemocrata.tk/createUpdateLinhaDeProducao', request)
         .then(res => {
             this.showLinhasDeProducaoModal(false)
             this.requestGetLinhasDeProducao()
@@ -167,7 +167,7 @@ class LinhasDeProducao extends Component {
     handleDeleteLinhaDeProducao = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteLinhaDeProducao?id='+id)
+        .get('http://testedemocrata.tk/deleteLinhaDeProducao?id='+id)
         .then(res => {
             this.requestGetLinhasDeProducao()
         })

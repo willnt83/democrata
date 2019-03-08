@@ -40,7 +40,7 @@ class Producao extends Component {
     requestGetProducoes = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getProducoes')
+        .get('http://testedemocrata.tk/getProducoes')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(producao => {
@@ -71,7 +71,7 @@ class Producao extends Component {
 
     requestCreateUpdateProducao = (request) => {
         this.setState({buttonSalvarProducaoLoading: true})
-        axios.post('http://localhost/createUpdateProducao', request)
+        axios.post('http://testedemocrata.tk/createUpdateProducao', request)
         .then(res => {
             this.showProducaoModal(false)
             this.requestGetProducoes()
@@ -89,7 +89,7 @@ class Producao extends Component {
 
     loadProdutosOptions = () => {
         axios
-        .get('http://localhost/getProdutos?ativo=Y')
+        .get('http://testedemocrata.tk/getProdutos?ativo=Y')
         .then(res => {
             if(res.data.success){
                 this.setState({

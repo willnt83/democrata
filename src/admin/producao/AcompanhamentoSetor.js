@@ -39,10 +39,52 @@ class AcompanhamentoSetor extends Component {
     handleChangeDataAcompanhamento = (value) => {
         this.setState({dataAcompanhamento: value})
     }
-
+    /*
     buildAcompanhamentoRows = (producaoAcompanhamento) => {
+        
+        console.log('fields rendered...')
+        if(this.state.firstRender === true)
+            this.setState({rows, fieldsRendered: true, firstRender: false})
+    }
+    */
+
+    componentWillMount(){
+        if(this.state.firstRender)
+            this.buildDataAcompanhamentoOptions()
+    }
+
+    /*
+    componentWillReceiveProps(props){
+        this.buildAcompanhamentoRows(props.producaoAcompanhamento)
+    }
+    */
+
+    /*
+    componentDidUpdate(nextProps, nextState){
+        console.log('componentWillUpdate... fieldsRendered', this.state.fieldsRendered)
+        if(this.state.fieldsRendered === true){
+
+
+            var realizadoQuantidade = []
+            var i = 0
+            while(i < 90){
+                realizadoQuantidade.push(44)
+                i++
+            }
+
+            console.log('realizadoQuantidade', realizadoQuantidade)
+            
+            this.props.form.setFieldsValue({
+                realizadoQuantidade
+            })
+            this.setState({fieldsRendered: false})
+        }
+    }
+    */
+
+    render(){
         const { getFieldDecorator, getFieldValue } = this.props.form
-        const rows = producaoAcompanhamento
+        const rows = this.props.producaoAcompanhamento
         .filter(setor => {
             return (this.props.idSetor === setor.id && setor.dataInicial === this.state.dataAcompanhamento)
         })
@@ -87,67 +129,6 @@ class AcompanhamentoSetor extends Component {
                 })
             )
         })
-        console.log('fields rendered...')
-        if(this.state.firstRender === true)
-            this.setState({rows, fieldsRendered: true, firstRender: false})
-    }
-
-    componentWillMount(){
-        if(this.state.firstRender)
-            this.buildDataAcompanhamentoOptions()
-    }
-
-    componentWillReceiveProps(props){
-        this.buildAcompanhamentoRows(props.producaoAcompanhamento)
-    }
-
-    componentDidUpdate(nextProps, nextState){
-        console.log('componentWillUpdate... fieldsRendered', this.state.fieldsRendered)
-        if(this.state.fieldsRendered === true){
-            console.log('entrou...')
-            /*
-            var realizadoQuantidade = this.props.producaoAcompanhamento
-            .filter(setor => {
-                return (this.props.idSetor === setor.id && setor.dataInicial === this.state.dataAcompanhamento)
-            })
-            .map(setor => {
-                return(
-                    setor.produtos.map(produto => {
-                        return(
-                            produto.subprodutos.map(subproduto => {
-                                return(
-                                    subproduto.realizado_quantidade
-                                )
-                            })
-                        )
-                    })
-                )
-            })
-            */
-           /*
-            var keys = []
-            keys = [25]
-            */
-
-            var realizadoQuantidade = []
-            var i = 0
-            while(i < 90){
-                realizadoQuantidade.push(44)
-                i++
-            }
-
-            console.log('realizadoQuantidade', realizadoQuantidade)
-            
-            this.props.form.setFieldsValue({
-                realizadoQuantidade
-            })
-            this.setState({fieldsRendered: false})
-        }
-    }
-
-    render(){
-        const { getFieldDecorator, getFieldValue } = this.props.form
-
         return(
             <Form layout="inline">
                 <Row>
@@ -189,7 +170,7 @@ class AcompanhamentoSetor extends Component {
                         </Row>
                     </Col>
                 </Row>
-                {this.state.rows}
+                {rows}
             </Form>
         )
     }

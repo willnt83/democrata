@@ -28,7 +28,7 @@ class Usuarios extends Component {
     requestGetUsuarios = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getUsuarios')
+        .get('http://testedemocrata.tk/getUsuarios')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(usuario => {
@@ -55,7 +55,7 @@ class Usuarios extends Component {
 
     requestCreateUpdateUsuario = (request) => {
         this.setState({buttonSalvarUsuario: true})
-        axios.post('http://localhost/createUpdateUsuario', request)
+        axios.post('http://testedemocrata.tk/createUpdateUsuario', request)
         .then(res => {
             this.showUsuariosModal(false)
             this.requestGetUsuarios()
@@ -91,7 +91,7 @@ class Usuarios extends Component {
     handleDeleteUsuario = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteUsuario?id='+id)
+        .get('http://testedemocrata.tk/deleteUsuario?id='+id)
         .then(res => {
             this.requestGetUsuarios()
         })

@@ -50,7 +50,7 @@ class Subsetores extends Component {
 
     requestGetSetores = () => {
         axios
-        .get('http://localhost/getSetores')
+        .get('http://testedemocrata.tk/getSetores')
         .then(res => {
             if(res.data){
                 var setoresOptions = res.data.payload.map(setor => {
@@ -70,7 +70,7 @@ class Subsetores extends Component {
     requestGetSubsetores = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/getSubsetores')
+        .get('http://testedemocrata.tk/getSubsetores')
         .then(res => {
             if(res.data){
                 var tableData = res.data.payload.map(subsetor => {
@@ -101,7 +101,7 @@ class Subsetores extends Component {
 
     requestCreateUpdateSubsetor = (request) => {
         this.setState({buttonSalvarSubsetor: true})
-        axios.post('http://localhost/createUpdateSubsetor', request)
+        axios.post('http://testedemocrata.tk/createUpdateSubsetor', request)
         .then(res => {
             this.showSubsetoresModal(false)
             this.requestGetSubsetores()
@@ -139,7 +139,7 @@ class Subsetores extends Component {
     handleDeleteSubsetor = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://localhost/deleteSubsetor?id='+id)
+        .get('http://testedemocrata.tk/deleteSubsetor?id='+id)
         .then(res => {
             this.requestGetSubsetores()
         })
