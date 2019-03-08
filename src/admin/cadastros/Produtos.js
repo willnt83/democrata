@@ -388,7 +388,13 @@ class Produtos extends Component {
                                     placeholder="Informe o conjunto"
                                 >
                                     {
-                                        this.state.conjuntosOptions.map((option) => {
+                                        this.state.conjuntosOptions
+                                        .filter(option => {
+                                            console.log('option', option)
+                                            console.log('this.state.setores[index].id', this.state.setores[index].id)
+                                            return (option.idSetor == this.state.setores[index].id)
+                                        })
+                                        .map((option) => {
                                             //if(option.idSetor === this.state.setores[index].id)
                                                 return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
                                             //else
