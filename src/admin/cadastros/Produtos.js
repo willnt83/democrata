@@ -188,8 +188,10 @@ class Produtos extends Component {
         axios
         .get('http://testedemocrata.tk/getConjuntos?ativo=Y')
         .then(res => {
+            console.log('response conjunto', res.data.payload)
             this.setState({
                 conjuntosOptions: res.data.payload.map(conjunto => {
+                    console.log('conjunto...', conjunto)
                     return({
                         value: conjunto.id,
                         description: conjunto.nome,
@@ -348,6 +350,7 @@ class Produtos extends Component {
                 return(conjunto.id)
             })
 
+            console.log('conjuntos', conjuntos)
             // Atualizando id, que é a variável que controla o add e remove de campos
             id = (this.state.conjuntos.length)
 
@@ -363,6 +366,7 @@ class Produtos extends Component {
     }
 
     render(){
+        console.log('this.state.conjuntoOptions', this.state.conjuntoOptions)
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
@@ -385,10 +389,10 @@ class Produtos extends Component {
                                 >
                                     {
                                         this.state.conjuntosOptions.map((option) => {
-                                            if(option.idSetor === this.state.setores[index].id)
+                                            //if(option.idSetor === this.state.setores[index].id)
                                                 return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                            else
-                                                return null
+                                            //else
+                                                //return null
                                         })
                                     }
                                 </Select>
