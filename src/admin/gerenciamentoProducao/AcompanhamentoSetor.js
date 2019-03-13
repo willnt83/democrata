@@ -1,22 +1,16 @@
 import React, { Component } from 'react'
-//import { Layout, Tabs, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, DatePicker, Divider } from 'antd'
-import { Row, Col, Divider, Form, Input, Select } from 'antd'
-//import { Tooltip } from '@material-ui/core/'
+import { Row, Col, Divider, Form, Input, Select, Button, Icon } from 'antd'
 import { connect } from 'react-redux'
 //import axios from "axios"
 import { withRouter } from "react-router-dom"
-//import ptBr from 'antd/lib/locale-provider/pt_BR'
 import moment from 'moment'
-import 'moment/locale/pt-br'
-moment.locale('pt-br')
 
 class AcompanhamentoSetor extends Component {
     state = {
         dataAcompanhamentoOptions: [],
         dataAcompanhamento: moment().format('YYYY-MM-DD'),
         fieldsRendered: false,
-        firstRender: true,
-        rows: null
+        firstRender: true
     }
 
     buildDataAcompanhamentoOptions = () => {
@@ -39,52 +33,76 @@ class AcompanhamentoSetor extends Component {
     handleChangeDataAcompanhamento = (value) => {
         this.setState({dataAcompanhamento: value})
     }
-    /*
+
+    handleFormSubmit = () => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            console.log('values', values)
+        })
+    }
+
     buildAcompanhamentoRows = (producaoAcompanhamento) => {
-        
         console.log('fields rendered...')
         if(this.state.firstRender === true)
-            this.setState({rows, fieldsRendered: true, firstRender: false})
+            this.setState({fieldsRendered: true, firstRender: false})
     }
-    */
 
     componentWillMount(){
         if(this.state.firstRender)
             this.buildDataAcompanhamentoOptions()
     }
 
-    /*
     componentWillReceiveProps(props){
         this.buildAcompanhamentoRows(props.producaoAcompanhamento)
     }
-    */
 
-    /*
-    componentDidUpdate(nextProps, nextState){
-        console.log('componentWillUpdate... fieldsRendered', this.state.fieldsRendered)
+    componentWillUpdate(nextProps, nextState){
         if(this.state.fieldsRendered === true){
-
-
+            console.log('componentWillUpdate... fieldsRendered')
+            console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
+            var aux = []
             var realizadoQuantidade = []
-            var i = 0
-            while(i < 90){
-                realizadoQuantidade.push(44)
-                i++
-            }
-
-            console.log('realizadoQuantidade', realizadoQuantidade)
-            
-            this.props.form.setFieldsValue({
-                realizadoQuantidade
+            var index = null
+            this.props.producaoAcompanhamento
+            .filter(setor => {
+                return (this.props.idSetor === setor.id && setor.dataInicial === this.state.dataAcompanhamento)
             })
+            .map(setor => {
+                return(
+                    setor.produtos.map(produto => {
+                        return(
+                            produto.subprodutos.map(subprodutos => {
+                                aux.push({
+                                    id: subprodutos.idAcompanhamento,
+                                    realizadoQuantidade: subprodutos.realizadoQuantidade
+                                })
+                                return({
+                                    id: subprodutos.idAcompanhamento,
+                                    realizadoQuantidade: subprodutos.realizadoQuantidade
+                                })
+                            })
+                        )
+                    })
+                )
+            })
+
+            aux.forEach(item => {
+            })
+
+            /* Funcionam
+            this.props.form.setFieldsValue({'realizadoQuantidade["id_172"]' : 99})
+            */
+
+            var varName = 'realizadoQuantidade["id_172"]';
+
+            this.props.form.setFieldsValue({'`${varName}`' : 99})
             this.setState({fieldsRendered: false})
         }
     }
-    */
 
     render(){
-        console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
-        const { getFieldDecorator, getFieldValue } = this.props.form
+        
+        //const { getFieldDecorator, getFieldValue } = this.props.form
+        const { getFieldDecorator } = this.props.form
         const rows = this.props.producaoAcompanhamento
         .filter(setor => {
             return (this.props.idSetor === setor.id && setor.dataInicial === this.state.dataAcompanhamento)
@@ -100,16 +118,16 @@ class AcompanhamentoSetor extends Component {
                                 </Col>
                                 <Col span={16} align="begining">
                                     {
-                                        produto.subprodutos.map(subproduto => {
+                                        produto.subprodutos.map((subproduto, index) => {
                                             return(
                                                 <Row key={subproduto.id} type="flex" style={{alignItems: 'center'}}>
                                                     <Col span={12}><h4> - {subproduto.nome}</h4></Col>
                                                     <Col span={12}>
                                                         <Row type="flex" style={{alignItems: 'center'}}>
                                                             <Col span={12} align="middle">
-                                                                <Form.Item key={subproduto.id} style={{width: '24%', marginBottom: 0}} onValuesChange={this.handleBlurRealizadoQuantidade}>
-                                                                    {getFieldDecorator(`realizadoQuantidade[${subproduto.id_acompanhamento}]`)(
-                                                                        <Input />
+                                                                <Form.Item key={subproduto.id} style={{width: '24%', marginBottom: 0}}>
+                                                                    {getFieldDecorator(`realizadoQuantidade["id_${subproduto.idAcompanhamento}"]`)(
+                                                                        <Input onChange={this.handleQuantidadeRealizadoChange} />
                                                                     )}
                                                                 </Form.Item>
                                                             </Col>
@@ -172,6 +190,9 @@ class AcompanhamentoSetor extends Component {
                     </Col>
                 </Row>
                 {rows}
+                <Row type="flex">
+                    <Button key="submit" type="primary" onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
+                </Row>
             </Form>
         )
     }

@@ -28,7 +28,7 @@ class Subprodutos extends Component {
     requestGetSubprodutos = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getSubprodutos')
+        .get(this.props.backEndPoint + '/getSubprodutos')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(subproduto => {
@@ -55,7 +55,7 @@ class Subprodutos extends Component {
 
     requestCreateUpdateSubproduto = (request) => {
         this.setState({buttonSalvarSubproduto: true})
-        axios.post('http://testedemocrata.tk/createUpdateSubproduto', request)
+        axios.post(this.props.backEndPoint + '/createUpdateSubproduto', request)
         .then(res => {
             this.showSubprodutosModal(false)
             this.requestGetSubprodutos()
@@ -92,7 +92,7 @@ class Subprodutos extends Component {
     handleDeleteSubproduto = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/deleteSubproduto?id='+id)
+        .get(this.props.backEndPoint + '/deleteSubproduto?id='+id)
         .then(res => {
             this.requestGetSubprodutos()
         })
@@ -248,10 +248,16 @@ class Subprodutos extends Component {
     }
 }
 
+const MapStateToProps = (state) => {
+	return {
+        backEndPoint: state.backEndPoint
+	}
+}
+
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
     }
 }
 
-export default connect(null, mapDispatchToProps)(Form.create()(Subprodutos))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(Subprodutos))

@@ -1,152 +1,146 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import axios from 'axios';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import LockIcon from '@material-ui/icons/LockOutlined';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import withStyles from '@material-ui/core/styles/withStyles';
-import AdminIndex from './AdminIndex';
+import React, { Component } from 'react'
+import { Layout, Row, Col, Form, Icon, Input, Button, Card, notification } from 'antd'
+import { connect } from 'react-redux'
+import { withRouter } from "react-router-dom"
+import axios from 'axios'
 
-const styles = theme => ({
-  layout: {
-    width: 'auto',
-    display: 'block', // Fix IE11 issue.
-    marginLeft: theme.spacing.unit * 3,
-    marginRight: theme.spacing.unit * 3,
-    [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
-      width: 400,
-      marginLeft: 'auto',
-      marginRight: 'auto',
-    },
-  },
-  paper: {
-    marginTop: theme.spacing.unit * 8,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 3}px ${theme.spacing.unit * 3}px`,
-  },
-  avatar: {
-    margin: theme.spacing.unit,
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE11 issue.
-    marginTop: theme.spacing.unit,
-  },
-  submit: {
-    marginTop: theme.spacing.unit * 3,
-	},
-	loginWarning: {
-		color: 'red',
-		marginTop: 10,
-		fontWeight: 'bold'
-	}
-});
+const { Content } = Layout;
 
 class SignIn extends Component {
-	constructor(props) {
-    super(props);
-    this.state = {
-			invalidLogin: null,
-			usuario: '',
-			senha: '',
-			logado: true
-		};
+	state =  {
+		entrarButtonLoading: false
+	}
+	showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 5
+        }
+        notification.open(args)
+	}
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+	handleLoginSubmit = (event) => {
+		event.preventDefault();
+		this.props.form.validateFieldsAndScroll((err, values) => {
+            if (!err) {
+				this.setState({ entrarButtonLoading: true })
+				axios.post(this.props.backEndPoint + '/login', {
+					email: values.email,
+					senha: values.senha
+				})
+				.then(res => {
+					if(res.data.success){
+						var session = {
+							idSession: res.headers['token'],
+							usuario: {
+								id: res.data.payload.id,
+								nome: res.data.payload.nome
+							},
+							perfil: res.data.payload.perfil,
+							administrador: res.data.payload.administrativo
+						}
+						console.log('session', session)
+						this.props.setSession(session)
+						this.setState({entrarButtonLoading: false})
+
+						console.log('token', res.headers['token'])
+						axios.defaults.headers = {
+							'Authorization': res.headers['token']
+						}
+						if(res.data.payload.administrativo === 'Y')
+							this.props.history.push('/admin')
+						else
+							this.props.history.push('/producao')
+					}
+					else{
+						this.showNotification(res.data.msg, false)
+						this.setState({entrarButtonLoading: false})
+					}
+				})
+				.catch(error =>{
+					console.log(error)
+					this.setState({
+						entrarButtonLoading: false
+					})
+				})
+            }
+        })
 	}
-	
-	handleChange(event) {
-		const target = event.target;
-		const name = target.name;
-		const value = target.value;
-		
-		this.setState({
-			[name]: value
-		});
-	}
-	
-	handleSubmit(event) {
-		axios.post(`http://localhost:5000/api/login/user`, {
-			usuario: this.state.usuario,
-			senha: this.state.senha
-		})
-		.then(res => {
-			if(res.data === '{Status: success}') { // Alterar
-				this.setState({'logado': true});
-			}
-			else
-				this.setState({invalidLogin: 'Usuário ou senha inválidos!'});
-	
-		})
-		.catch(error =>{
-				console.log(error)
-		})
-    event.preventDefault();
-	}
-	
+
 	render () {
-		const { classes } = this.props;
-		if(this.state.logado) {
-			return <AdminIndex logado={this.state.logado} />
-		}
+		const { getFieldDecorator } = this.props.form;
 		return (
-			<React.Fragment>
-				<CssBaseline />
-				<main className={classes.layout}>
-					<Paper className={classes.paper}>
-						<Avatar className={classes.avatar}>
-							<LockIcon />
-						</Avatar>
-						<Typography contained="headline">Entrar no sistema</Typography>
-						<Typography className={classes.loginWarning} contained="headline">{this.state.invalidLogin}</Typography>
-						<form className={classes.form} onSubmit={this.handleSubmit}>
-							<FormControl margin="normal" required fullWidth>
-								<InputLabel htmlFor="usuario">Usuário</InputLabel>
-								<Input
-									name="usuario"
-									autoFocus
-									value={this.state.value}
-									onChange={this.handleChange}
-								/>
-							</FormControl>
-							<FormControl margin="normal" required fullWidth>
-								<InputLabel htmlFor="senha">Senha</InputLabel>
-								<Input
-									name="senha"
-									type="password"
-									id="senha"
-									value={this.state.value}
-									onChange={this.handleChange}
-								/>
-							</FormControl>
-							<Button
-								type="submit"
-								fullWidth
-								contained="raised"
-								color="primary"
-								className={classes.submit}
-							>
-								Entrar
-							</Button>
-						</form>
-					</Paper>
-				</main>
-			</React.Fragment>
-		);
+			<Content
+				id="mainContent"
+				style={{
+					padding: "50px 24px 0 24px",
+					background: "#fff"
+				}}
+			>
+				<Row>
+					<Col span={24} align="center">
+						<Card
+							style={{ width: 400, minHeight: 461, marginTop: 50 }}
+						>
+							<Row style={{marginTop: 20, paddingBottom: 20}}>
+								<Col span={24} align="center">
+									<h1>DEMOCRATA DECOR</h1>
+									<h4>Sistema de Gerenciamento de Linhas de Produção</h4>
+								</Col>
+							</Row>
+							<Row style={{paddingBottom: 20}}>
+								<Col span={24} align="center" style={{color: 'red', fontSize: 40}}>
+									<Icon type="lock" />
+								</Col>
+							</Row>
+							<Form onSubmit={this.handleLoginSubmit} className="login-form">
+								<Form.Item>
+									{getFieldDecorator('email', {
+										rules: [{ required: true, message: 'Informe o e-mail' }],
+									})(
+										<Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="E-mail" />
+									)}
+								</Form.Item>
+								<Form.Item>
+								{getFieldDecorator('senha', {
+									rules: [{ required: true, message: 'Informe a senha' }],
+								})(
+									<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Senha" />
+								)}
+								</Form.Item>
+								<Form.Item style={{padding: 10}}>
+									<Button type="primary" htmlType="submit" className="login-form-button" loading={this.state.entrarButtonLoading}>Entrar</Button>
+								</Form.Item>
+							</Form>
+						</Card>
+					</Col>
+				</Row>
+			</Content>
+		)
 	}
 }
 
-SignIn.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
+const MapStateToProps = (state) => {
+	return {
+		backEndPoint: state.backEndPoint,
+		session: state.session
+	}
+}
 
-export default withStyles(styles)(SignIn);
+const mapDispatchToProps = (dispatch) => {
+    return {
+		setSession: (session) => { dispatch({ type: 'SET_SESSION', session }) }
+    }
+}
+
+export default connect(MapStateToProps, mapDispatchToProps)(withRouter(Form.create()(SignIn)))

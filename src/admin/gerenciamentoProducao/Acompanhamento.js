@@ -27,7 +27,7 @@ class Acompanhamento extends Component {
 
     requestGetProducaoAcompanhamento = (id) => {
         axios
-        .get('http://testedemocrata.tk/getProducaoAcompanhamento?id_producao='+id)
+        .get(this.props.backEndPoint + '/getProducaoAcompanhamento?id_producao='+id)
         .then(res => {
             if(res.data.payload){
                 // Tabs
@@ -79,8 +79,10 @@ class Acompanhamento extends Component {
     }
 }
 
+
 const MapStateToProps = (state) => {
 	return {
+        backEndPoint: state.backEndPoint,
         producaoMainData: state.producaoMainData
 	}
 }

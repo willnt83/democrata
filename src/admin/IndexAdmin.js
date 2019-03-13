@@ -1,7 +1,8 @@
 import React, { Component } from "react"
-import { Layout, Icon } from "antd"
+import { Layout, Icon, Row, Col } from "antd"
 import { BrowserRouter as Router, Route } from "react-router-dom"
 import { connect } from 'react-redux'
+import moment from 'moment'
 
 import "antd/dist/antd.css"
 import "./static/index.css"
@@ -11,15 +12,15 @@ import ListMenu from "./layout/ListMenu"
 
 import Unidades from "./cadastros/Unidades"
 import Usuarios from "./cadastros/Usuarios"
+import PerfisDeAcesso from "./cadastros/PerfisDeAcesso"
 import Setores from "./cadastros/Setores"
-import SubSetores from "./cadastros/Subsetores"
 import Produtos from "./cadastros/Produtos"
 import SubProdutos from "./cadastros/Subprodutos"
 import Conjuntos from "./cadastros/Conjuntos"
 import LinhaDeProducao from "./cadastros/LinhaDeProducao"
 import Cores from "./cadastros/Cores"
-import Producao from "./producao/Producao"
-import Acompanhamento from "./producao/Acompanhamento"
+import Producao from "./gerenciamentoProducao/Producao"
+import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
 
 
 const { Header, Sider, Footer } = Layout
@@ -52,14 +53,14 @@ const routes = [
 		main: () => <Usuarios />
 	},
 	{
+		path: "/admin/cadastros/perfis-de-acesso",
+		sidebar: () => <div>Cadastro/Perfis de Acesso</div>,
+		main: () => <PerfisDeAcesso />
+	},
+	{
 		path: "/admin/cadastros/setores",
 		sidebar: () => <div>Cadastro/Setores</div>,
 		main: () => <Setores />
-	},
-	{
-		path: "/admin/cadastros/subsetores",
-		sidebar: () => <div>Cadastro/Subsetores</div>,
-		main: () => <SubSetores />
 	},
 	{
 		path: "/admin/cadastros/produtos",
@@ -100,7 +101,7 @@ const routes = [
 	}
 ];
 
-class AdminIndex extends Component {
+class IndexAdmin extends Component {
 	state = {
 		collapsed: false
 	};
@@ -120,12 +121,19 @@ class AdminIndex extends Component {
 					</Sider>
 					<Layout>
 						<Header style={{ background: "#fff", padding: 0 }}>
-							<Icon
-								className="trigger"
-								type={this.state.collapsed ? "menu-unfold" : "menu-fold"}
-								onClick={this.toggle}
-							/>
-							<PageTitle pageTitle={this.props.pageTitle} />
+							<Row style={{paddingRight: '24px'}}>
+								<Col span={10}>
+									<Icon
+									className="trigger"
+									type={this.state.collapsed ? "menu-unfold" : "menu-fold"}
+									onClick={this.toggle}
+									/>
+									<PageTitle pageTitle={this.props.pageTitle} />
+								</Col>
+								<Col span={14} align="end">
+									<h4><Icon type="user" style={{marginRight: '8px'}} />{this.props.session.usuario.nome} / {this.props.session.perfil.nome}</h4>
+								</Col>
+							</Row>
 						</Header>
 						{
 							routes.map((route, index) => (
@@ -138,7 +146,7 @@ class AdminIndex extends Component {
 							))
 						}
 
-						<Footer style={{ textAlign: "center" }}>Democrata Decor ©2018</Footer>
+						<Footer style={{ textAlign: "center" }}>Democrata Decor ©{moment().format('YYYY')}</Footer>
 					</Layout>
 				</Layout>
 			</Router>
@@ -148,8 +156,9 @@ class AdminIndex extends Component {
 
 const MapStateToProps = (state) => {
   return {
-    pageTitle: state.pageTitle
+	pageTitle: state.pageTitle,
+	session: state.session
   }
 }
 
-export default connect(MapStateToProps)(AdminIndex);
+export default connect(MapStateToProps)(IndexAdmin);

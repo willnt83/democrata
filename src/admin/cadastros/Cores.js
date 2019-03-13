@@ -28,7 +28,7 @@ class Cores extends Component {
     requestGetCores = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getCores')
+        .get(this.props.backEndPoint + '/getCores')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(cor => {
@@ -55,7 +55,7 @@ class Cores extends Component {
 
     requestCreateUpdateCor = (request) => {
         this.setState({buttonSalvarCor: true})
-        axios.post('http://testedemocrata.tk/createUpdateCor', request)
+        axios.post(this.props.backEndPoint + '/createUpdateCor', request)
         .then(res => {
             this.showCoresModal(false)
             this.requestGetCores()
@@ -91,7 +91,7 @@ class Cores extends Component {
     handleDeleteCor = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/deleteCor?id='+id)
+        .get(this.props.backEndPoint + '/deleteCor?id='+id)
         .then(res => {
             this.requestGetCores()
         })
@@ -248,10 +248,16 @@ class Cores extends Component {
     }
 }
 
+const MapStateToProps = (state) => {
+	return {
+        backEndPoint: state.backEndPoint
+	}
+}
+
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
     }
 }
 
-export default connect(null, mapDispatchToProps)(Form.create()(Cores))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(Cores))

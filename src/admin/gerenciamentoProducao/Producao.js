@@ -40,7 +40,7 @@ class Producao extends Component {
     requestGetProducoes = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getProducoes')
+        .get(this.props.backEndPoint + '/getProducoes')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(producao => {
@@ -71,7 +71,7 @@ class Producao extends Component {
 
     requestCreateUpdateProducao = (request) => {
         this.setState({buttonSalvarProducaoLoading: true})
-        axios.post('http://testedemocrata.tk/createUpdateProducao', request)
+        axios.post(this.props.backEndPoint + '/createUpdateProducao', request)
         .then(res => {
             this.showProducaoModal(false)
             this.requestGetProducoes()
@@ -89,7 +89,7 @@ class Producao extends Component {
 
     loadProdutosOptions = () => {
         axios
-        .get('http://testedemocrata.tk/getProdutos?ativo=Y')
+        .get(this.props.backEndPoint + '/getProdutos?ativo=Y')
         .then(res => {
             if(res.data.success){
                 this.setState({
@@ -441,6 +441,12 @@ class Producao extends Component {
     }
 }
 
+const MapStateToProps = (state) => {
+	return {
+        backEndPoint: state.backEndPoint
+	}
+}
+
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) },
@@ -448,4 +454,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(null, mapDispatchToProps)(Form.create()(withRouter(Producao)))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(withRouter(Producao)))

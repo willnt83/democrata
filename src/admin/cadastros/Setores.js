@@ -28,7 +28,7 @@ class Setores extends Component {
     requestGetSetores = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getSetores')
+        .get(this.props.backEndPoint + '/getSetores')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(setor => {
@@ -56,7 +56,7 @@ class Setores extends Component {
     requestCreateUpdateSetor = (request) => {
         console.log('requestCreateUpdateSetor request', request)
         this.setState({buttonSalvarSetor: true})
-        axios.post('http://testedemocrata.tk/createUpdateSetor', request)
+        axios.post(this.props.backEndPoint + '/createUpdateSetor', request)
         .then(res => {
             this.showSetoresModal(false)
             this.requestGetSetores()
@@ -94,7 +94,7 @@ class Setores extends Component {
     handleDeleteSetor = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/deleteSetor?id='+id)
+        .get(this.props.backEndPoint + '/deleteSetor?id='+id)
         .then(res => {
             console.log('deleteUnidade response', res)
             this.requestGetSetores()
@@ -251,10 +251,16 @@ class Setores extends Component {
     }
 }
 
+const MapStateToProps = (state) => {
+	return {
+        backEndPoint: state.backEndPoint
+	}
+}
+
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
     }
 }
 
-export default connect(null, mapDispatchToProps)(Form.create()(Setores))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(Setores))

@@ -37,7 +37,7 @@ class LinhasDeProducao extends Component {
     requestGetLinhasDeProducao = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getLinhasDeProducao')
+        .get(this.props.backEndPoint + '/getLinhasDeProducao')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(linhaDeProducao => {
@@ -67,7 +67,7 @@ class LinhasDeProducao extends Component {
     loadSetoresOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getSetores?ativo=Y')
+        .get(this.props.backEndPoint + '/getSetores?ativo=Y')
         .then(res => {
             console.log('response', res.data.payload)
             if(res.data.payload){
@@ -96,7 +96,7 @@ class LinhasDeProducao extends Component {
 
     requestCreateUpdateLinhaDeProducao = (request) => {
         this.setState({buttonSalvarLinhaDeProducao: true})
-        axios.post('http://testedemocrata.tk/createUpdateLinhaDeProducao', request)
+        axios.post(this.props.backEndPoint + '/createUpdateLinhaDeProducao', request)
         .then(res => {
             this.showLinhasDeProducaoModal(false)
             this.requestGetLinhasDeProducao()
@@ -167,7 +167,7 @@ class LinhasDeProducao extends Component {
     handleDeleteLinhaDeProducao = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/deleteLinhaDeProducao?id='+id)
+        .get(this.props.backEndPoint + '/deleteLinhaDeProducao?id='+id)
         .then(res => {
             this.requestGetLinhasDeProducao()
         })
@@ -429,10 +429,16 @@ class LinhasDeProducao extends Component {
     }
 }
 
+const MapStateToProps = (state) => {
+	return {
+        backEndPoint: state.backEndPoint
+	}
+}
+
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
     }
 }
 
-export default connect(null, mapDispatchToProps)(Form.create()(LinhasDeProducao))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(LinhasDeProducao))

@@ -42,7 +42,7 @@ class Conjuntos extends Component {
     requestGetConjuntos = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getConjuntos')
+        .get(this.props.backEndPoint + '/getConjuntos')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(conjunto => {
@@ -72,7 +72,7 @@ class Conjuntos extends Component {
     loadSetoresOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getSetores?ativo=Y')
+        .get(this.props.backEndPoint + '/getSetores?ativo=Y')
         .then(res => {
             if(res.data.payload){
                 this.setState({
@@ -83,7 +83,7 @@ class Conjuntos extends Component {
                         })
                     }),
                     setoresSelectStatus: {
-                        placeholder: 'Selecione o subproduto',
+                        placeholder: 'Selecione o setor',
                         disabled: false
                     }
                 })
@@ -101,7 +101,7 @@ class Conjuntos extends Component {
     loadSubprodutosOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getSubprodutos?ativo=Y')
+        .get(this.props.backEndPoint + '/getSubprodutos?ativo=Y')
         .then(res => {
             if(res.data){
                 this.setState({
@@ -130,7 +130,7 @@ class Conjuntos extends Component {
 
     requestCreateUpdateConjunto = (request) => {
         this.setState({buttonSalvarConjunto: true})
-        axios.post('http://testedemocrata.tk/createUpdateConjunto', request)
+        axios.post(this.props.backEndPoint + '/createUpdateConjunto', request)
         .then(res => {
             this.showConjuntosModal(false)
             this.requestGetConjuntos()
@@ -202,7 +202,7 @@ class Conjuntos extends Component {
     handleDeleteConjunto = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/deleteConjunto?id='+id)
+        .get(this.props.backEndPoint + '/deleteConjunto?id='+id)
         .then(res => {
             this.requestGetConjuntos()
         })
@@ -491,10 +491,16 @@ class Conjuntos extends Component {
     }
 }
 
+const MapStateToProps = (state) => {
+	return {
+        backEndPoint: state.backEndPoint
+	}
+}
+
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
     }
 }
 
-export default connect(null, mapDispatchToProps)(Form.create()(Conjuntos))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(Conjuntos))

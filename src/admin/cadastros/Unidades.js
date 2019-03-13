@@ -28,7 +28,7 @@ class Unidades extends Component {
     requestGetUnidades = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getUnidades')
+        .get(this.props.backEndPoint + '/getUnidades')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(unidade => {
@@ -55,7 +55,7 @@ class Unidades extends Component {
 
     requestCreateUpdateUnidade = (request) => {
         this.setState({buttonSalvarUnidade: true})
-        axios.post('http://testedemocrata.tk/createUpdateUnidade', request)
+        axios.post(this.props.backEndPoint + '/createUpdateUnidade', request)
         .then(res => {
             this.showUnidadesModal(false)
             this.requestGetUnidades()
@@ -91,7 +91,7 @@ class Unidades extends Component {
     handleDeleteUnidade = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/deleteUnidade?id='+id)
+        .get(this.props.backEndPoint + '/deleteUnidade?id='+id)
         .then(res => {
             console.log('deleteUnidade response', res)
             this.requestGetUnidades()
@@ -248,10 +248,16 @@ class Unidades extends Component {
     }
 }
 
+const MapStateToProps = (state) => {
+	return {
+        backEndPoint: state.backEndPoint
+	}
+}
+
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
     }
 }
 
-export default connect(null, mapDispatchToProps)(Form.create()(Unidades))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(Unidades))

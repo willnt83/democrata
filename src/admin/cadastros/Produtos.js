@@ -46,7 +46,7 @@ class Produtos extends Component {
     requestGetProdutosFull = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getProdutosFull')
+        .get(this.props.backEndPoint + '/getProdutosFull')
         .then(res => {
             if(res.data){
                 var tableData = res.data.payload.map(produto => {
@@ -76,7 +76,7 @@ class Produtos extends Component {
 
     requestCreateUpdateProduto = (request) => {
         this.setState({buttonSalvarProduto: true})
-        axios.post('http://testedemocrata.tk/createUpdateProduto', request)
+        axios.post(this.props.backEndPoint + '/createUpdateProduto', request)
         .then(res => {
             if(res.data.success){
                 this.showProdutosModal(false)
@@ -95,7 +95,7 @@ class Produtos extends Component {
     
     requestGetSetoresPorLinhaDeProducao = (id) => {
         axios
-        .get('http://testedemocrata.tk/getSetoresPorLinhaDeProducao?id='+id)
+        .get(this.props.backEndPoint + '/getSetoresPorLinhaDeProducao?id='+id)
         .then(res => {
             if(res.data){
                 var setoresPorLinhadeProducao = res.data.payload
@@ -125,7 +125,7 @@ class Produtos extends Component {
     loadCoresOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getCores?ativo=Y')
+        .get(this.props.backEndPoint + '/getCores?ativo=Y')
         .then(res => {
             if(res.data){
                 var coresOptions = res.data.payload.map(cor => {
@@ -156,7 +156,7 @@ class Produtos extends Component {
     loadLinhasDeProducaoOptions = () => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/getLinhasDeProducao?ativo=Y')
+        .get(this.props.backEndPoint + '/getLinhasDeProducao?ativo=Y')
         .then(res => {
             if(res.data){
                 var linhasDeProducaoOptions = res.data.payload.map(linhaDeProducao => {
@@ -186,7 +186,7 @@ class Produtos extends Component {
 
     loadConjuntosOptions = () => {
         axios
-        .get('http://testedemocrata.tk/getConjuntos?ativo=Y')
+        .get(this.props.backEndPoint + '/getConjuntos?ativo=Y')
         .then(res => {
             console.log('response conjunto', res.data.payload)
             this.setState({
@@ -263,7 +263,7 @@ class Produtos extends Component {
     handleDeleteProduto = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get('http://testedemocrata.tk/deleteProduto?id='+id)
+        .get(this.props.backEndPoint + '/deleteProduto?id='+id)
         .then(res => {
             this.requestGetProdutosFull()
         })
@@ -390,15 +390,10 @@ class Produtos extends Component {
                                     {
                                         this.state.conjuntosOptions
                                         .filter(option => {
-                                            console.log('option', option)
-                                            console.log('this.state.setores[index].id', this.state.setores[index].id)
-                                            return (option.idSetor == this.state.setores[index].id)
+                                            return (option.idSetor === this.state.setores[index].id)
                                         })
                                         .map((option) => {
-                                            //if(option.idSetor === this.state.setores[index].id)
-                                                return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                            //else
-                                                //return null
+                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
                                         })
                                     }
                                 </Select>
@@ -589,8 +584,10 @@ class Produtos extends Component {
 
 const MapStateToProps = (state) => {
 	return {
+        backEndPoint: state.backEndPoint
 	}
 }
+
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) }
