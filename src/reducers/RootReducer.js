@@ -1,5 +1,6 @@
 const initState = {
-    backEndPoint: 'http://localhost',
+    //backEndPoint: 'http://localhost',
+    backEndPoint: 'http://testedemocrata.tk',
     session: {
         idSession: null,
         usuario: {
@@ -14,9 +15,6 @@ const initState = {
     },
     producaoMainData: [],
     producaoAcompanhamento: []
-
-
-    
 }
 
 const RootReducer = (state = initState, action) => {
