@@ -139,6 +139,7 @@ class Setores extends Component {
     }
 
     render(){
+        console.log('this.props',this.props)
         const { getFieldDecorator } = this.props.form
         const columns = [{
             title: 'ID',
