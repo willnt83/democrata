@@ -49,11 +49,9 @@ class SignIn extends Component {
 							perfil: res.data.payload.perfil,
 							administrador: res.data.payload.administrativo
 						}
-						console.log('session', session)
 						this.props.setSession(session)
 						this.setState({entrarButtonLoading: false})
 
-						console.log('token', res.headers['token'])
 						axios.defaults.headers = {
 							'Authorization': res.headers['token']
 						}
