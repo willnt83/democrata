@@ -88,6 +88,11 @@ class Setores extends Component {
             })
             this.setState({setorId: record.key})
         }
+        else{
+            this.props.form.setFieldsValue({
+                ativo: 'Y'
+            })
+        }
         this.showSetoresModal(true)
     }
 
@@ -207,44 +212,50 @@ class Setores extends Component {
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarSetor} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item
-                            label="Nome"
-                        >
-                            {getFieldDecorator('nome', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor informe o nome do setor',
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="nome"
-                                    placeholder="Digite o nome do setor"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Ativo">
-                            {getFieldDecorator('ativo', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
+                    <Row>
+                        <Col span={24} id="colCadastroDeSetores" style={{position: 'relative'}}>
+                            <Form layout="vertical">
+                                <Form.Item
+                                    label="Nome"
                                 >
-                                    {
-                                        ativoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                    </Form>
+                                    {getFieldDecorator('nome', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o nome do setor',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o nome do setor"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Ativo">
+                                    {getFieldDecorator('ativo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById('colCadastroDeSetores')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                ativoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                            </Form>
+                        </Col>
+                    </Row>
                 </Modal>
           </Content>
         )

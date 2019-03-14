@@ -69,7 +69,6 @@ class LinhasDeProducao extends Component {
         axios
         .get(this.props.backEndPoint + '/getSetores?ativo=Y')
         .then(res => {
-            console.log('response', res.data.payload)
             if(res.data.payload){
                 this.setState({
                     setoresOptions: res.data.payload.map(setor => {
@@ -118,7 +117,6 @@ class LinhasDeProducao extends Component {
     }
 
     loadLinhasDeProducaoModal = (record) => {
-        console.log('record', record)
         this.loadSetoresOptions()
         if(typeof(record) !== "undefined") {
             // Edit
@@ -137,6 +135,11 @@ class LinhasDeProducao extends Component {
                 linhaDeProducaoId: record.key,
                 dynamicFieldsRendered: true,
                 setores: record.setores
+            })
+        }
+        else{
+            this.props.form.setFieldsValue({
+                ativo: 'Y'
             })
         }
         this.showLinhasDeProducaoModal(true)
@@ -211,7 +214,6 @@ class LinhasDeProducao extends Component {
 
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
-            console.log('values', values)
             if (!err){
                 var id = this.state.linhaDeProducaoId ? this.state.linhaDeProducaoId : null
 
@@ -235,7 +237,6 @@ class LinhasDeProducao extends Component {
                     ativo: values.ativo,
                     setores: setores
                 }
-                console.log('request', request)
                 this.requestCreateUpdateLinhaDeProducao(request)
             }
             else{
@@ -265,6 +266,8 @@ class LinhasDeProducao extends Component {
                                     style={{ width: '100%' }}
                                     placeholder={this.state.setoresSelectStatus.placeholder}
                                     disabled={this.state.setoresSelectStatus.disabled}
+                                    getPopupContainer={() => document.getElementById('colCadastroLinhasDeProducao')}
+                                    allowClear={true}
                                 >
                                     {
                                         this.state.setoresOptions.map((option) => {
@@ -377,52 +380,58 @@ class LinhasDeProducao extends Component {
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarLinhaDeProducao} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item
-                            label="Nome"
-                        >
-                            {getFieldDecorator('nome', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor informe o nome da linha de produção',
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="nome"
-                                    placeholder="Digite o nome da linha de produção"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Ativo">
-                            {getFieldDecorator('ativo', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
+                    <Row>
+                        <Col span={24} id="colCadastroLinhasDeProducao" style={{position: 'relative'}}>
+                            <Form layout="vertical">
+                                <Form.Item
+                                    label="Nome"
                                 >
-                                    {
-                                        ativoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        <Divider />
-                        <h4>Composição da Linha de Produção</h4>
-                        {composicaoItems}
-                        <Row>
-                            <Col span={24}>
-                                <Button key="primary" title="Novo setor" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
-                            </Col>
-                        </Row>
-                    </Form>
+                                    {getFieldDecorator('nome', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o nome da linha de produção',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o nome da linha de produção"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Ativo">
+                                    {getFieldDecorator('ativo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById("colCadastroLinhasDeProducao")}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                ativoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                <Divider />
+                                <h4>Composição da Linha de Produção</h4>
+                                {composicaoItems}
+                                <Row>
+                                    <Col span={24}>
+                                        <Button key="primary" title="Novo setor" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
+                                    </Col>
+                                </Row>
+                            </Form>
+                        </Col>
+                    </Row>
                 </Modal>
           </Content>
         )

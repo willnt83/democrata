@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { Row, Col, Divider, Form, Input, Select, Button, Icon } from 'antd'
+import { Row, Col, Divider, Form, Input, Select, Icon, notification } from 'antd'
 import { connect } from 'react-redux'
-//import axios from "axios"
+import axios from "axios"
 import { withRouter } from "react-router-dom"
 import moment from 'moment'
 
@@ -9,8 +9,27 @@ class AcompanhamentoSetor extends Component {
     state = {
         dataAcompanhamentoOptions: [],
         dataAcompanhamento: moment().format('YYYY-MM-DD'),
-        fieldsRendered: false,
+        //dataAcompanhamento: '2019-03-14',
+        tryToSetValues: true,
         firstRender: true
+    }
+
+    requestUpdateRealizadoQuantidade = (request) => {
+        axios
+        .post(this.props.backEndPoint + '/updateRealizadoQuantidade', request)
+        .then(res => {
+            if(res.data.success){
+                var id = this.props.producaoMainData ? this.props.producaoMainData.key : null
+                this.props.requestGetProducaoAcompanhamento(id)
+                this.showNotification(res.data.msg, true)
+            }
+            else{
+                this.showNotification(res.data.msg, false)
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
     }
 
     buildDataAcompanhamentoOptions = () => {
@@ -31,19 +50,80 @@ class AcompanhamentoSetor extends Component {
     }
 
     handleChangeDataAcompanhamento = (value) => {
-        this.setState({dataAcompanhamento: value})
+        this.setState({dataAcompanhamento: value, tryToSetValues: true})
     }
 
-    handleFormSubmit = () => {
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            console.log('values', values)
+    handleQuantidadeRealizadoBlur = (element) => {
+        var idAcompanhamento = element.target.id.replace('realizadoQuantidade_', '')
+
+        var request = {
+            idAcompanhamento: parseInt(idAcompanhamento),
+            realizadoQuantidade: parseInt(element.target.value)
+        }
+
+        this.requestUpdateRealizadoQuantidade(request)
+    }
+
+    setRealizadoQuantidadeValues = () => {
+        var aux = []
+        this.props.producaoAcompanhamento
+        .filter(setor => {
+            return (parseInt(this.props.idSetor) === setor.id)
         })
+        .map(setor => {
+            return(
+                setor.producoes.filter(producao => {
+                    return(producao.dataInicial === this.state.dataAcompanhamento)
+                })
+                .map(producao => {
+                    return(
+                        producao.produtos.map(produto => {
+                            return(
+                                produto.subprodutos.map(subprodutos => {
+                                    aux.push({
+                                        id: subprodutos.idAcompanhamento,
+                                        realizadoQuantidade: subprodutos.realizadoQuantidade
+                                    })
+                                    return({
+                                        id: subprodutos.idAcompanhamento,
+                                        realizadoQuantidade: subprodutos.realizadoQuantidade
+                                    })
+                                })
+                            )
+                        })
+                    )
+                })
+            )
+        })
+
+        var strObj = '{'
+        var comma = ''
+        aux.forEach((item, index) => {
+            comma = index === 0 ? '' : ', '
+            strObj += comma+'"realizadoQuantidade_'+item.id+'": "'+item.realizadoQuantidade+'"'
+        })
+        strObj += '}'
+        var obj  = JSON.parse(strObj)
+        this.props.form.setFieldsValue(obj)
     }
 
-    buildAcompanhamentoRows = (producaoAcompanhamento) => {
-        console.log('fields rendered...')
-        if(this.state.firstRender === true)
-            this.setState({fieldsRendered: true, firstRender: false})
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 1
+        }
+        notification.open(args)
     }
 
     componentWillMount(){
@@ -51,98 +131,75 @@ class AcompanhamentoSetor extends Component {
             this.buildDataAcompanhamentoOptions()
     }
 
-    componentWillReceiveProps(props){
-        this.buildAcompanhamentoRows(props.producaoAcompanhamento)
-    }
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.idSetor !== prevProps.idSetor && this.state.tryToSetValues === false){
+            this.setState({tryToSetValues: true})
+        }
 
-    componentWillUpdate(nextProps, nextState){
-        if(this.state.fieldsRendered === true){
-            console.log('componentWillUpdate... fieldsRendered')
-            console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
-            var aux = []
-            var realizadoQuantidade = []
-            var index = null
-            this.props.producaoAcompanhamento
-            .filter(setor => {
-                return (this.props.idSetor === setor.id && setor.dataInicial === this.state.dataAcompanhamento)
-            })
-            .map(setor => {
-                return(
-                    setor.produtos.map(produto => {
-                        return(
-                            produto.subprodutos.map(subprodutos => {
-                                aux.push({
-                                    id: subprodutos.idAcompanhamento,
-                                    realizadoQuantidade: subprodutos.realizadoQuantidade
-                                })
-                                return({
-                                    id: subprodutos.idAcompanhamento,
-                                    realizadoQuantidade: subprodutos.realizadoQuantidade
-                                })
-                            })
-                        )
-                    })
-                )
-            })
-
-            aux.forEach(item => {
-            })
-
-            /* Funcionam
-            this.props.form.setFieldsValue({'realizadoQuantidade["id_172"]' : 99})
-            */
-
-            var varName = 'realizadoQuantidade["id_172"]';
-
-            this.props.form.setFieldsValue({'`${varName}`' : 99})
-            this.setState({fieldsRendered: false})
+        if((prevState.tryToSetValues === false && this.state.tryToSetValues === true) || this.state.firstRender === true){
+            this.setRealizadoQuantidadeValues()
+            this.setState({tryToSetValues: false, firstRender: false})
         }
     }
 
     render(){
-        
-        //const { getFieldDecorator, getFieldValue } = this.props.form
         const { getFieldDecorator } = this.props.form
         const rows = this.props.producaoAcompanhamento
         .filter(setor => {
-            return (this.props.idSetor === setor.id && setor.dataInicial === this.state.dataAcompanhamento)
+            return (parseInt(this.props.idSetor) === setor.id)
         })
         .map(setor => {
             return(
-                setor.produtos.map(produto => {
+                setor.producoes.filter(producao => {
+                    return(producao.dataInicial === this.state.dataAcompanhamento)
+                })
+                .map(producao => {
                     return(
-                        <React.Fragment key={produto.id}>
+                        <React.Fragment key={producao.id}>
                             <Row type="flex" style={{padding: '0 10px 0 10px', alignItems: 'center'}}>
-                                <Col span={8} style={{paddingLeft: 10}}>
-                                    <h4>{produto.nome}</h4>
+                                <Col span={6} style={{paddingLeft: 10}}>
+                                    <h4>{producao.nome}</h4>
                                 </Col>
-                                <Col span={16} align="begining">
-                                    {
-                                        produto.subprodutos.map((subproduto, index) => {
-                                            return(
-                                                <Row key={subproduto.id} type="flex" style={{alignItems: 'center'}}>
-                                                    <Col span={12}><h4> - {subproduto.nome}</h4></Col>
-                                                    <Col span={12}>
-                                                        <Row type="flex" style={{alignItems: 'center'}}>
-                                                            <Col span={12} align="middle">
-                                                                <Form.Item key={subproduto.id} style={{width: '24%', marginBottom: 0}}>
-                                                                    {getFieldDecorator(`realizadoQuantidade["id_${subproduto.idAcompanhamento}"]`)(
-                                                                        <Input onChange={this.handleQuantidadeRealizadoChange} />
-                                                                    )}
-                                                                </Form.Item>
-                                                            </Col>
-                                                            <Col span={12} align="middle">
-                                                                <h4>{subproduto.total_quantidade}</h4>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
-                                            )
-                                        })
-                                    }
+                                <Col span={18}>
+                                {
+                                producao.produtos.map(produto => {
+                                    return(
+                                        <Row key={produto.id} type="flex" style={{padding: '0 10px 0 10px', alignItems: 'center'}}>
+                                            <Col span={8} style={{paddingLeft: 10}}>
+                                                <h4>{produto.nome} ({produto.cor.nome})</h4>
+                                            </Col>
+                                            <Col span={16} align="begining">
+                                                {
+                                                    produto.subprodutos.map((subproduto, index) => {
+                                                        return(
+                                                            <Row key={subproduto.id} type="flex" style={{alignItems: 'center'}}>
+                                                                <Col span={12}><h4> - {subproduto.nome}</h4></Col>
+                                                                <Col span={12}>
+                                                                    <Row type="flex" style={{alignItems: 'center'}}>
+                                                                        <Col span={12} align="middle">
+                                                                            <Form.Item key={subproduto.id} style={{width: '24%', marginBottom: 0}}>
+                                                                                {getFieldDecorator(`realizadoQuantidade_${subproduto.idAcompanhamento}`)(
+                                                                                    <Input onBlur={this.handleQuantidadeRealizadoBlur} />
+                                                                                )}
+                                                                            </Form.Item>
+                                                                        </Col>
+                                                                        <Col span={12} align="middle">
+                                                                            <h4>{subproduto.totalQuantidade}</h4>
+                                                                        </Col>
+                                                                    </Row>
+                                                                </Col>
+                                                            </Row>
+                                                        )
+                                                    })
+                                                }
+                                            </Col>
+                                        </Row>
+                                    )
+                                })
+                                }
                                 </Col>
                             </Row>
-                            <Divider style={{margin: '12px 0'}}/>
+                            <Divider style={{margin: '12px 0'}} />
                         </React.Fragment>
                     )
                 })
@@ -152,6 +209,11 @@ class AcompanhamentoSetor extends Component {
             <Form layout="inline">
                 <Row>
                     <Col span={24}>
+                        <h3>Produção {this.props.nomeSetor}</h3>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col span={24}>
                         <Form.Item label="Data do acompanhamento" title="Data de acompanhamento">
                             {getFieldDecorator('dataAcompanhamento', {
                                 initialValue: moment().format('YYYY-MM-DD')
@@ -159,6 +221,8 @@ class AcompanhamentoSetor extends Component {
                                 <Select
                                     style={{ width: '100%' }}
                                     onChange={this.handleChangeDataAcompanhamento}
+                                    getPopupContainer={() => document.getElementById('contentAcompanhamento')}
+                                    allowClear={true}
                                 >
                                     {
                                         this.state.dataAcompanhamentoOptions.map((item) => {
@@ -172,13 +236,16 @@ class AcompanhamentoSetor extends Component {
                 </Row>
 
                 <Row type="flex" style={{backgroundColor: '#cbd8ed', padding: '0 10px 0 10px', marginBottom: 12, alignItems: 'center'}}>
-                    <Col span={8}>
+                    <Col span={6}>
+                        <h3>Produções</h3>
+                    </Col>
+                    <Col span={6}>
                         <h3>Produtos</h3>
                     </Col>
-                    <Col span={8}>
+                    <Col span={6}>
                         <h3>Conjuntos</h3>
                     </Col>
-                    <Col span={8} align="middle">
+                    <Col span={6} align="middle">
                         <Row>
                             <Col span={12} align="middle">
                                 <h3>Realizado</h3>
@@ -190,9 +257,6 @@ class AcompanhamentoSetor extends Component {
                     </Col>
                 </Row>
                 {rows}
-                <Row type="flex">
-                    <Button key="submit" type="primary" onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
-                </Row>
             </Form>
         )
     }
@@ -200,7 +264,9 @@ class AcompanhamentoSetor extends Component {
 
 const MapStateToProps = (state) => {
 	return {
-        producaoAcompanhamento: state.producaoAcompanhamento
+        backEndPoint: state.backEndPoint,
+        producaoAcompanhamento: state.producaoAcompanhamento,
+        producaoMainData: state.producaoMainData
 	}
 }
 

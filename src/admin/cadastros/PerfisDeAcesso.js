@@ -125,7 +125,6 @@ class PerfisDeAcesso extends Component {
 
     loadPerfisModal = (record) => {
         this.loadSetoresOptions()
-        console.log('loadPerfisModal', record)
         if(typeof(record) !== "undefined") {
             // Edit
             if(record.administrativoValue === 'N'){
@@ -135,10 +134,14 @@ class PerfisDeAcesso extends Component {
             this.props.form.setFieldsValue({
                 nome: record.nome,
                 administrativo: record.administrativoValue,
-                setor: record.setor.id,
                 ativo: record.ativoValue
             })
             this.setState({perfilId: record.key})
+        }
+        else{
+            this.props.form.setFieldsValue({
+                ativo: 'Y'
+            })
         }
         this.showPerfisModal(true)
     }
@@ -271,6 +274,8 @@ class PerfisDeAcesso extends Component {
                             placeholder={this.state.setoresSelectStatus.placeholder}
                             disabled={this.state.setoresSelectStatus.disabled}
                             onChange={this.handleSetorChange}
+                            getPopupContainer={() => document.getElementById('colCadastroDePerfis')}
+                            allowClear={true}
                         >
                             {
                                 this.state.setoresOptions.map((option) => {
@@ -316,66 +321,74 @@ class PerfisDeAcesso extends Component {
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarPerfil} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item
-                            label="Nome"
-                        >
-                            {getFieldDecorator('nome', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor informe o nome do perfil',
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="nome"
-                                    placeholder="Digite o nome do perfil"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Nível de Acesso">
-                            {getFieldDecorator('administrativo', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
-                                    onChange={this.handleAdministrativoChange}
+                    <Row>
+                        <Col span={24} id="colCadastroDePerfis" style={{position: 'relative'}}>
+                            <Form layout="vertical">
+                                <Form.Item
+                                    label="Nome"
                                 >
-                                    {
-                                        nivelAcessoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        {setorField}
-                        <Form.Item label="Ativo">
-                            {getFieldDecorator('ativo', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
-                                >
-                                    {
-                                        ativoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                    </Form>
+                                    {getFieldDecorator('nome', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o nome do perfil',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o nome do perfil"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Nível de Acesso">
+                                    {getFieldDecorator('administrativo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            onChange={this.handleAdministrativoChange}
+                                            getPopupContainer={() => document.getElementById('colCadastroDePerfis')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                nivelAcessoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                {setorField}
+                                <Form.Item label="Ativo">
+                                    {getFieldDecorator('ativo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById('colCadastroDePerfis')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                ativoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                            </Form>
+                        </Col>
+                    </Row>
                 </Modal>
           </Content>
         )

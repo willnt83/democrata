@@ -48,6 +48,18 @@
     border-color: #54b87a
 }
 
+.buttonBlue {
+    color: #fff;
+    background-color: #3c3fe0;
+    border-color: #3c3fe0
+}
+
+.buttonBlue:hover, .buttonBlue:focus {
+    color: #fff;
+    background-color: #3d60d3;
+    border-color: #3d60d3
+}
+
 .buttonOrange {
     color: #fff;
     background-color: #f88b0e;

@@ -188,10 +188,8 @@ class Produtos extends Component {
         axios
         .get(this.props.backEndPoint + '/getConjuntos?ativo=Y')
         .then(res => {
-            console.log('response conjunto', res.data.payload)
             this.setState({
                 conjuntosOptions: res.data.payload.map(conjunto => {
-                    console.log('conjunto...', conjunto)
                     return({
                         value: conjunto.id,
                         description: conjunto.nome,
@@ -256,6 +254,11 @@ class Produtos extends Component {
                 conjuntos
             })
         }
+        else{
+            this.props.form.setFieldsValue({
+                ativo: 'Y'
+            })
+        }
 
         this.showProdutosModal(true)
     }
@@ -291,10 +294,7 @@ class Produtos extends Component {
                         })
                     })
                 }
-                console.log('request', request)
-
                 this.requestCreateUpdateProduto(request)
-
             }
             else{
                 console.log('erro no formulário')
@@ -350,7 +350,6 @@ class Produtos extends Component {
                 return(conjunto.id)
             })
 
-            console.log('conjuntos', conjuntos)
             // Atualizando id, que é a variável que controla o add e remove de campos
             id = (this.state.conjuntos.length)
 
@@ -366,7 +365,6 @@ class Produtos extends Component {
     }
 
     render(){
-        console.log('this.state.conjuntoOptions', this.state.conjuntoOptions)
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
@@ -382,15 +380,23 @@ class Produtos extends Component {
                     </Col>
                     <Col span={12}>
                         <Form.Item>
-                            {getFieldDecorator(`conjuntos[${k}]`)(
+                            {getFieldDecorator(`conjuntos[${k}]`, {
+                                rules: [
+                                    {
+                                        required: true, message: 'Por favor informe o conjunto',
+                                    }
+                                ]
+                            })(
                                 <Select
                                     style={{ width: '100%' }}
                                     placeholder="Informe o conjunto"
+                                    getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
+                                    allowClear={true}
                                 >
                                     {
                                         this.state.conjuntosOptions
                                         .filter(option => {
-                                            return (option.idSetor === this.state.setores[index].id)
+                                            return (option.idSetor === parseInt(this.state.setores[index].id))
                                         })
                                         .map((option) => {
                                             return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
@@ -489,93 +495,103 @@ class Produtos extends Component {
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarProduto} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item label="Nome">
-                            {getFieldDecorator('nome', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor informe o nome do produto',
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="nome"
-                                    placeholder="Digite o nome do produto"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Cor">
-                            {getFieldDecorator('cor', {
-                                rules: [{
-                                    required: true, message: "Informe a cor"
-                                }],
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder={this.state.coresSelectStatus.placeholder}
-                                    disabled={this.state.coresSelectStatus.disabled}
-                                >
-                                    {
-                                        this.state.coresOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Ativo">
-                            {getFieldDecorator('ativo', {
-                                rules: [{
-                                    required: true, message: "Campo obrigatório"
-                                }],
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
-                                >
-                                    {
-                                        ativoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Linha de Produção">
-                            {getFieldDecorator('linhaDeProducao', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Informe a linha de produção',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder={this.state.linhasDeProducaoSelectStatus.placeholder}
-                                    disabled={this.state.linhasDeProducaoSelectStatus.disabled}
-                                    onChange={this.handleLinhaDeProducaoChange}
-                                >
-                                    {
-                                        this.state.linhasDeProducaoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        <Row style={{display: this.state.setoresFields}}>
-                            <Col span={24}>
-                                <Divider />
-                                <h4>Linha de Produção</h4>
-                                <Row gutter={5} className="gridTitle">
-                                    <Col span={4} align="middle">Ordem</Col>
-                                    <Col span={8}>Setor</Col>
-                                    <Col span={12}>Conjunto</Col>
+                    <Row>
+                        <Col span={24} id="colCadastroDeProdutos" style={{position: 'relative'}}>
+                            <Form layout="vertical">
+                                <Form.Item label="Nome">
+                                    {getFieldDecorator('nome', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o nome do produto',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o nome do produto"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Cor">
+                                    {getFieldDecorator('cor', {
+                                        rules: [{
+                                            required: true, message: "Informe a cor"
+                                        }],
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder={this.state.coresSelectStatus.placeholder}
+                                            disabled={this.state.coresSelectStatus.disabled}
+                                            getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                this.state.coresOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Ativo">
+                                    {getFieldDecorator('ativo', {
+                                        rules: [{
+                                            required: true, message: "Campo obrigatório"
+                                        }],
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                ativoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Linha de Produção">
+                                    {getFieldDecorator('linhaDeProducao', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Informe a linha de produção',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder={this.state.linhasDeProducaoSelectStatus.placeholder}
+                                            disabled={this.state.linhasDeProducaoSelectStatus.disabled}
+                                            onChange={this.handleLinhaDeProducaoChange}
+                                            getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                this.state.linhasDeProducaoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                <Row style={{display: this.state.setoresFields}}>
+                                    <Col span={24}>
+                                        <Divider />
+                                        <h4>Linha de Produção</h4>
+                                        <Row gutter={5} className="gridTitle">
+                                            <Col span={4} align="middle">Ordem</Col>
+                                            <Col span={8}>Setor</Col>
+                                            <Col span={12}>Conjunto</Col>
+                                        </Row>
+                                        {composicaoItems}
+                                    </Col>
                                 </Row>
-                                {composicaoItems}
-                            </Col>
-                        </Row>
-                    </Form>
+                            </Form>
+                        </Col>
+                    </Row>
                 </Modal>
           </Content>
         )

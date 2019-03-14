@@ -129,6 +129,11 @@ class Usuarios extends Component {
             })
             this.setState({usuarioId: record.key})
         }
+        else{
+            this.props.form.setFieldsValue({
+                ativo: 'Y'
+            })
+        }
         this.showUsuariosModal(true)
     }
 
@@ -306,124 +311,132 @@ class Usuarios extends Component {
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarUsuario} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item
-                            label="Nome"
-                        >
-                            {getFieldDecorator('nome', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor informe o nome',
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="nome"
-                                    placeholder="Digite o nome do usuário"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item
-                            label="E-mail"
-                        >
-                            {getFieldDecorator('email', {
-                                rules: [
-                                    {
-                                        type: 'email', message: 'Endereço de e-mail inválido',
-                                    },
-                                    {
-                                        required: true, message: 'Por favor informe o endereço e-mail',
-                                    }
-                                ],
-                            })(
-                                <Input
-                                    id="email"
-                                    placeholder="Digite o endereço de e-mail do usuário"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item
-                            label="Senha"
-                        >
-                            {getFieldDecorator('senha', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor informe a senha',
-                                    },
-                                    {
-                                        validator: this.validateToNextPassword,
-                                    }
-                                ],
-                            })(
-                                <Input
-                                    id="senha"
-                                    type="password"
-                                    placeholder="Digite a senha"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item
-                            label="Confirmação de Senha"
-                        >
-                            {getFieldDecorator('confirmacaoSenha', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor confirme a senha',
-                                    },
-                                    {
-                                        validator: this.compareToFirstPassword,
-                                    }
-                                ],
-                            })(
-                                <Input
-                                    id="senhaConfirmacao"
-                                    type="password"
-                                    placeholder="Confirme a senha"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Perfil do Usuário">
-                            {getFieldDecorator('perfil', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione o perfil',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder={this.state.perfisSelectStatus.placeholder}
-                                    disabled={this.state.perfisSelectStatus.disabled}
+                    <Row>
+                        <Col span={24} id="colCadastroDeUsuarios" style={{position: 'relative'}}>
+                            <Form layout="vertical">
+                                <Form.Item
+                                    label="Nome"
                                 >
-                                    {
-                                        this.state.perfisOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Ativo">
-                            {getFieldDecorator('ativo', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
+                                    {getFieldDecorator('nome', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o nome',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o nome do usuário"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item
+                                    label="E-mail"
                                 >
-                                    {
-                                        ativoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                    </Form>
+                                    {getFieldDecorator('email', {
+                                        rules: [
+                                            {
+                                                type: 'email', message: 'Endereço de e-mail inválido',
+                                            },
+                                            {
+                                                required: true, message: 'Por favor informe o endereço e-mail',
+                                            }
+                                        ],
+                                    })(
+                                        <Input
+                                            id="email"
+                                            placeholder="Digite o endereço de e-mail do usuário"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item
+                                    label="Senha"
+                                >
+                                    {getFieldDecorator('senha', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a senha',
+                                            },
+                                            {
+                                                validator: this.validateToNextPassword,
+                                            }
+                                        ],
+                                    })(
+                                        <Input
+                                            id="senha"
+                                            type="password"
+                                            placeholder="Digite a senha"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item
+                                    label="Confirmação de Senha"
+                                >
+                                    {getFieldDecorator('confirmacaoSenha', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor confirme a senha',
+                                            },
+                                            {
+                                                validator: this.compareToFirstPassword,
+                                            }
+                                        ],
+                                    })(
+                                        <Input
+                                            id="senhaConfirmacao"
+                                            type="password"
+                                            placeholder="Confirme a senha"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Perfil do Usuário">
+                                    {getFieldDecorator('perfil', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione o perfil',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder={this.state.perfisSelectStatus.placeholder}
+                                            disabled={this.state.perfisSelectStatus.disabled}
+                                            getPopupContainer={() => document.getElementById('colCadastroDeUsuarios')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                this.state.perfisOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Ativo">
+                                    {getFieldDecorator('ativo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById('colCadastroDeUsuarios')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                ativoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                            </Form>
+                        </Col>
+                    </Row>
                 </Modal>
           </Content>
         )

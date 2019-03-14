@@ -22,12 +22,14 @@ class Acompanhamento extends Component {
     }
 
     state = {
-        tabs: []
+        tabs: [],
+        tabSetorId: "1"
     }
 
     requestGetProducaoAcompanhamento = (id) => {
+        var filter = id !== null ? '?id_producao='+id : ''
         axios
-        .get(this.props.backEndPoint + '/getProducaoAcompanhamento?id_producao='+id)
+        .get(this.props.backEndPoint + '/getProducaoAcompanhamento'+filter)
         .then(res => {
             if(res.data.payload){
                 // Tabs
@@ -50,26 +52,35 @@ class Acompanhamento extends Component {
         })
     }
 
-    componentWillMount(){
-        this.requestGetProducaoAcompanhamento(this.props.producaoMainData.key)
+    handleTabChange = (key) => {
+        this.setState({tabSetorId: key})
+    }
+
+    componentWillReceiveProps(nextProps){
+        var key = !nextProps.producaoMainData ? null : this.props.producaoMainData.key
+        this.requestGetProducaoAcompanhamento(key)
     }
 
     render(){
         return(
             <Content
+                id="contentAcompanhamento"
                 style={{
                     margin: "24px 16px",
                     padding: 24,
                     background: "#fff",
-                    minHeight: 280
+                    minHeight: 280,
+                    position: 'relative'
                 }}
             >
-                <Tabs defaultActiveKey="1">
+                <Tabs defaultActiveKey="1" onChange={this.handleTabChange}>
                     {
                         this.state.tabs.map(setor => {
-                            return(<Tabs.TabPane tab={setor.description} key={setor.key}>
-                                <AcompanhamentoSetor idSetor={setor.key} />
-                            </Tabs.TabPane>)
+                            return(
+                                <Tabs.TabPane key={setor.key} tab={setor.description}>
+                                    <AcompanhamentoSetor idSetor={this.state.tabSetorId} nomeSetor={setor.description} requestGetProducaoAcompanhamento={this.requestGetProducaoAcompanhamento} />
+                                </Tabs.TabPane>
+                            )
                         })
                         
                     }

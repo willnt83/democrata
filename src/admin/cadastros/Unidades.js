@@ -85,6 +85,11 @@ class Unidades extends Component {
             })
             this.setState({unidadeId: record.key})
         }
+        else{
+            this.props.form.setFieldsValue({
+                ativo: 'Y'
+            })
+        }
         this.showUnidadesModal(true)
     }
 
@@ -204,44 +209,50 @@ class Unidades extends Component {
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarUnidade} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item
-                            label="Nome"
-                        >
-                            {getFieldDecorator('nome', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor informe o nome da unidade',
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="nome"
-                                    placeholder="Digite o nome da unidade"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Ativo">
-                            {getFieldDecorator('ativo', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
+                    <Row>
+                        <Col span={24} id="colCadastroDeUnidades" style={{position: 'relative'}}>
+                            <Form layout="vertical">
+                                <Form.Item
+                                    label="Nome"
                                 >
-                                    {
-                                        ativoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                    </Form>
+                                    {getFieldDecorator('nome', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o nome da unidade',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o nome da unidade"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Ativo">
+                                    {getFieldDecorator('ativo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById('colCadastroDeUnidades')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                ativoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                            </Form>
+                        </Col>
+                    </Row>
                 </Modal>
           </Content>
         )

@@ -174,6 +174,11 @@ class Conjuntos extends Component {
                 subprodutos: record.subprodutos
             })
         }
+        else{
+            this.props.form.setFieldsValue({
+                ativo: 'Y'
+            })
+        }
         this.showConjuntosModal(true)
     }
 
@@ -289,7 +294,7 @@ class Conjuntos extends Component {
         const keys = getFieldValue('keys')
         const composicaoItems = keys.map((k, index) => (
             <Row key={k} gutter={5}>
-                <Col span={18}>
+                <Col span={18} id="subprodutos" style={{position: 'relative'}}>
                     <Form.Item>
                         {getFieldDecorator(`subprodutos[${k}]`, {
                             rules: [{
@@ -300,6 +305,8 @@ class Conjuntos extends Component {
                                 style={{ width: '100%' }}
                                 placeholder={this.state.subprodutosSelectStatus.placeholder}
                                 disabled={this.state.subprodutosSelectStatus.disabled}
+                                getPopupContainer={() => document.getElementById('subprodutos')}
+                                allowClear={true}
                             >
                                 {
                                     this.state.subprodutosOptions.map((option) => {
@@ -418,73 +425,81 @@ class Conjuntos extends Component {
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarConjunto} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item
-                            label="Nome"
-                        >
-                            {getFieldDecorator('nome', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor informe o nome do conjunto',
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="nome"
-                                    placeholder="Digite o nome do conjunto"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Ativo">
-                            {getFieldDecorator('ativo', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
+                    <Row>
+                        <Col span={24} id="colCadastroDeConjuntos" style={{position: 'relative'}}>
+                            <Form layout="vertical">
+                                <Form.Item
+                                    label="Nome"
                                 >
-                                    {
-                                        ativoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Setor">
-                            {getFieldDecorator('setor', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione o setor',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder={this.state.setoresSelectStatus.placeholder}
-                                    disabled={this.state.setoresSelectStatus.disabled}
-                                >
-                                    {
-                                        this.state.setoresOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        <Divider />
-                        <h4>Composição do Conjunto</h4>
-                        {composicaoItems}
-                        <Row>
-                            <Col span={24}>
-                                <Button key="primary" title="Novo subproduto" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
-                            </Col>
-                        </Row>
-                    </Form>
+                                    {getFieldDecorator('nome', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o nome do conjunto',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o nome do conjunto"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Ativo">
+                                    {getFieldDecorator('ativo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById('colCadastroDeConjuntos')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                ativoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Setor">
+                                    {getFieldDecorator('setor', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione o setor',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder={this.state.setoresSelectStatus.placeholder}
+                                            disabled={this.state.setoresSelectStatus.disabled}
+                                            getPopupContainer={() => document.getElementById('colCadastroDeConjuntos')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                this.state.setoresOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                <Divider />
+                                <h4>Composição do Conjunto</h4>
+                                {composicaoItems}
+                                <Row>
+                                    <Col span={24}>
+                                        <Button key="primary" title="Novo subproduto" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
+                                    </Col>
+                                </Row>
+                            </Form>
+                        </Col>
+                    </Row>
                 </Modal>
           </Content>
         )

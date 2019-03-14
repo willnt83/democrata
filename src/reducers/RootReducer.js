@@ -57,6 +57,12 @@ const RootReducer = (state = initState, action) => {
             producaoMainData: action.producao
         }
     }
+    else if(action.type === 'RESET_PRODUCAOMAINDATA'){
+        return{
+            ...state,
+            producaoMainData: []
+        }
+    }
     else if(action.type === 'SET_PRODUCAOACOMPANHAMENTO'){
         return {
             ...state,

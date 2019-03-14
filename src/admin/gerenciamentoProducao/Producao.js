@@ -114,7 +114,6 @@ class Producao extends Component {
     }
 
     loadProducaoModal = (record) => {
-        console.log('record', record)
         this.loadProdutosOptions()
         if(typeof(record) !== "undefined"){
             // Edit
@@ -144,7 +143,6 @@ class Producao extends Component {
 
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
-            console.log('values', values)
             if(!err){
                 var id = this.state.idProducao ? this.state.idProducao : null
                 var produtos = null
@@ -169,7 +167,6 @@ class Producao extends Component {
                     produtos
                 }
 
-                console.log('request', request)
                 this.requestCreateUpdateProducao(request)
             }
             else{
@@ -212,7 +209,12 @@ class Producao extends Component {
     }
 
     goToAcompanharProducao = (record) => {
-        this.props.setProducaoMainData(record)
+        if(record === 'undefined'){
+            this.props.resetProducaoMainData()
+        }
+        else{
+            this.props.setProducaoMainData(record)
+        }
         this.props.history.push('/admin/producao/acompanhamento')
     }
 
@@ -259,6 +261,8 @@ class Producao extends Component {
                                 style={{ width: '100%' }}
                                 placeholder={this.state.produtosSelectStatus.placeholder}
                                 disabled={this.state.produtosSelectStatus.disabled}
+                                getPopupContainer={() => document.getElementById('colCadastroPCP')}
+                                allowClear={true}
                             >
                                 {
                                     this.state.produtosOptions.map((option) => {
@@ -355,6 +359,7 @@ class Producao extends Component {
 
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
+                        <Button className="buttonBlue" onClick={() => this.goToAcompanharProducao()} style={{marginRight: 10}}><Icon type="eye" /> Visão Geral</Button>
                         <Tooltip title="Criar novo PCP" placement="right">
                             <Button className="buttonGreen" onClick={() => this.loadProducaoModal()}><Icon type="plus" /> Novo PCP</Button>
                         </Tooltip>
@@ -375,66 +380,73 @@ class Producao extends Component {
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarProducaoLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item
-                            label="Nome"
-                        >
-                            {getFieldDecorator('nome', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Campo Nome obrigatório',
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="nome"
-                                    placeholder="Informe o nome do PCP"
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item
-                            label="Data Inicial"
-                        >
-                            {getFieldDecorator('dataInicial', {
-                                rules: [{ required: true, message: 'Campo Data Inicial obrigatório' }]
-                            })(
-                                <DatePicker
-                                    locale={ptBr}
-                                    format="DD/MM/YYYY"
-                                    placeholder="Selecione a data inicial"
-                                    style={ {width: '100%'} }
-                                />
-                            )}
-                        </Form.Item>
-                        <Form.Item label="Ativo">
-                            {getFieldDecorator('ativo', {
-                                rules: [
-                                    {
-                                        required: true, message: 'Por favor selecione',
-                                    }
-                                ]
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Selecione"
+                    <Row>
+                        <Col span={24} id="colCadastroPCP" style={{position: 'relative'}}>
+                            <Form layout="vertical">
+                                <Form.Item
+                                    label="Nome"
                                 >
-                                    {
-                                        ativoOptions.map((option) => {
-                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        <Divider />
-                        <h4>Composição da Produção</h4>
-                        {composicaoItems}
-                        <Row>
-                            <Col span={24}>
-                                <Button key="primary" title="Incluir produto" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
-                            </Col>
-                        </Row>
-                    </Form>
+                                    {getFieldDecorator('nome', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Campo Nome obrigatório',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Informe o nome do PCP"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item
+                                    label="Data Inicial"
+                                >
+                                    {getFieldDecorator('dataInicial', {
+                                        rules: [{ required: true, message: 'Campo Data Inicial obrigatório' }]
+                                    })(
+                                        <DatePicker
+                                            locale={ptBr}
+                                            format="DD/MM/YYYY"
+                                            placeholder="Selecione a data inicial"
+                                            style={ {width: '100%'} }
+                                            getCalendarContainer={() => document.getElementById('colCadastroPCP')}
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Ativo">
+                                    {getFieldDecorator('ativo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById('colCadastroPCP')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                ativoOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
+                                <Divider />
+                                <h4>Composição da Produção</h4>
+                                {composicaoItems}
+                                <Row>
+                                    <Col span={24}>
+                                        <Button key="primary" title="Incluir produto" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
+                                    </Col>
+                                </Row>
+                            </Form>
+                        </Col>
+                    </Row>
                 </Modal>
           </Content>
         )
@@ -450,7 +462,9 @@ const MapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) },
-        setProducaoMainData: (producao) => { dispatch({ type: 'SET_PRODUCAOMAINDATA', producao }) }
+        setProducaoMainData: (producao) => { dispatch({ type: 'SET_PRODUCAOMAINDATA', producao }) },
+        resetProducaoMainData: () => { dispatch({ type: 'RESET_PRODUCAOMAINDATA' }) },
+        
     }
 }
 
