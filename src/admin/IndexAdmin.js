@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { Layout, Icon, Row, Col } from "antd"
-import { BrowserRouter as Router, Route } from "react-router-dom"
+import { BrowserRouter as Router, Route, withRouter } from "react-router-dom"
 import { connect } from 'react-redux'
 import moment from 'moment'
 
@@ -111,6 +111,13 @@ class IndexAdmin extends Component {
 			collapsed: !this.state.collapsed
 		});
 	};
+
+	componentWillMount(){
+		if(this.props.session.administrador !== 'Y'){
+            this.props.resetAll()
+            window.location.replace("/")
+        }
+	}
 	render() {
 		return (
 			<Router>
@@ -161,4 +168,11 @@ const MapStateToProps = (state) => {
   }
 }
 
-export default connect(MapStateToProps)(IndexAdmin);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) },
+        resetAll: () => { dispatch({ type: 'RESET_ALL' }) }
+    }
+}
+
+export default connect(MapStateToProps, mapDispatchToProps)(withRouter(IndexAdmin));
