@@ -173,7 +173,9 @@ class AcompanhamentoSetor extends Component {
                                                     produto.subprodutos.map((subproduto, index) => {
                                                         return(
                                                             <Row key={subproduto.id} type="flex" style={{alignItems: 'center'}}>
-                                                                <Col span={12}><h4> - {subproduto.nome}</h4></Col>
+                                                                <Col span={12} style={{borderWidth: 1}}>
+                                                                    <h4> - {subproduto.nome}</h4>
+                                                                </Col>
                                                                 <Col span={12}>
                                                                     <Row type="flex" style={{alignItems: 'center'}}>
                                                                         <Col span={12} align="middle">
@@ -234,7 +236,7 @@ class AcompanhamentoSetor extends Component {
                     </Col>
                 </Row>
 
-                <Row type="flex" style={{backgroundColor: '#cbd8ed', padding: '0 10px 0 10px', marginBottom: 12, alignItems: 'center'}}>
+                <Row type="flex" style={{backgroundColor: '#cbd8ed', padding: '0 10px 0 10px', marginBottom: 12, alignItems: 'center'}} gutter={8}>
                     <Col span={6}>
                         <h3>Produções</h3>
                     </Col>

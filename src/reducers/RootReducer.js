@@ -1,6 +1,6 @@
 const initState = {
     //backEndPoint: 'http://localhost',
-    backEndPoint: 'http://testedemocrata.tk',
+    backEndPoint: 'https://testedemocrata.tk',
     session: {
         idSession: null,
         usuario: {
