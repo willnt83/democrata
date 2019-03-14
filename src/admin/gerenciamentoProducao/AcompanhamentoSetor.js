@@ -222,7 +222,6 @@ class AcompanhamentoSetor extends Component {
                                     style={{ width: '100%' }}
                                     onChange={this.handleChangeDataAcompanhamento}
                                     getPopupContainer={() => document.getElementById('contentAcompanhamento')}
-                                    allowClear={true}
                                 >
                                     {
                                         this.state.dataAcompanhamentoOptions.map((item) => {
