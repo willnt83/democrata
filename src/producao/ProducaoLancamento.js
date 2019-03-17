@@ -8,6 +8,11 @@ import 'moment/locale/pt-br'
 moment.locale('pt-br')
 
 class ProducaoLancamento extends Component{
+    state = {
+        dataProducao: null,
+        tryToSetValues: true
+    }
+
     requestGetProducaoAcompanhamento = (id) => {
         var filter = id !== null ? '?id_setor='+id : ''
         axios
@@ -24,6 +29,7 @@ class ProducaoLancamento extends Component{
                     })
                 })
                 this.props.setProducaoAcompanhamento(res.data.payload)
+
             }
             else
                 console.log('Nenhum registro encontrado')
@@ -34,7 +40,25 @@ class ProducaoLancamento extends Component{
         })
     }
 
+    requestUpdateRealizadoQuantidade = (request) => {
+        axios
+        .post(this.props.backEndPoint + '/updateRealizadoQuantidade', request)
+        .then(res => {
+            if(res.data.success){
+                this.requestGetProducaoAcompanhamento(this.props.session.perfil.idSetor)
+                this.showNotification(res.data.msg, true)
+            }
+            else{
+                this.showNotification(res.data.msg, false)
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }
+
     showNotification = (msg, success) => {
+        console.log('message', msg)
         var type = null
         var style = null
         if(success){
@@ -46,11 +70,87 @@ class ProducaoLancamento extends Component{
             style = {color: '#f5222d', fontWeight: '800'}
         }
         const args = {
-            messasge: msg,
+            messasge: 'AA',
             icon:  <Icon type={type} style={style} />,
-            duration: 1
+            duration: 3
         }
         notification.open(args)
+    }
+
+    setRealizadoQuantidadeValues = () => {
+        var aux = []
+        this.props.producaoAcompanhamento
+        .map(setor => {
+            return(
+                setor.producoes.filter(producao => {
+                    return(producao.dataInicial === this.state.dataProducao)
+                })
+                .map(producao => {
+                    return(
+                        producao.produtos.map(produto => {
+                            return(
+                                produto.subprodutos.map(subprodutos => {
+                                    aux.push({
+                                        id: subprodutos.idAcompanhamento,
+                                        realizadoQuantidade: subprodutos.realizadoQuantidade
+                                    })
+                                    return({
+                                        id: subprodutos.idAcompanhamento,
+                                        realizadoQuantidade: subprodutos.realizadoQuantidade
+                                    })
+                                })
+                            )
+                        })
+                    )
+                })
+            )
+        })
+        var strObj = '{'
+        var comma = ''
+        aux.forEach((item, index) => {
+            comma = index === 0 ? '' : ', '
+            strObj += comma+'"realizadoQuantidade_'+item.id+'": "'+item.realizadoQuantidade+'"'
+        })
+        strObj += '}'
+        var obj  = JSON.parse(strObj)
+        this.props.form.setFieldsValue(obj)
+    }
+
+    handleChangeDataProducao = (value) => {
+        this.setState({dataProducao: value.format('YYYY-MM-DD'), tryToSetValues: true})
+    }
+
+    handleChangeQuantidadeRealizado = (element) => {
+        if(element.target.value !== ''){
+            var idAcompanhamento = element.target.id.replace('realizadoQuantidade_', '')
+
+            var request = {
+                idAcompanhamento: parseInt(idAcompanhamento),
+                realizadoQuantidade: parseInt(element.target.value)
+            }
+            this.requestUpdateRealizadoQuantidade(request)
+        }
+    }
+
+    handleQuantityChangeClick = (op, id) => {
+        console.log('op', op)
+        var value =  this.props.form.getFieldValue(id)
+        if(op === 'sub'){
+            value--
+        }
+        else{
+            value++
+        }
+        var strObj = '{"'+id+'": '+value+'}';
+        var obj  = JSON.parse(strObj)
+        this.props.form.setFieldsValue(obj)
+
+        var idAcompanhamento = id.replace('realizadoQuantidade_', '')
+        var request = {
+            idAcompanhamento: parseInt(idAcompanhamento),
+            realizadoQuantidade: parseInt(value)
+        }
+        this.requestUpdateRealizadoQuantidade(request)
     }
 
     componentWillMount(){
@@ -58,9 +158,91 @@ class ProducaoLancamento extends Component{
         this.requestGetProducaoAcompanhamento(this.props.session.perfil.idSetor)
     }
 
+    componentDidMount(){
+        this.props.form.setFieldsValue({
+            dataProducao: moment()
+        })
+        this.setState({dataProducao: moment().format('YYYY-MM-DD')})
+    }
+
+    componentDidUpdate(){
+        if((this.state.tryToSetValues === true)){
+            this.setRealizadoQuantidadeValues()
+            this.setState({tryToSetValues: false})
+        }
+    }
+
     render() {
         const { getFieldDecorator } = this.props.form
-        console.log('this.props', this.props)
+        const rows = this.props.producaoAcompanhamento[0].producoes
+        .filter(producao => {
+            return (producao.dataInicial === this.state.dataProducao)
+        })
+        .map(producao => {
+            return(
+                <React.Fragment key={producao.id}>
+                    <Row>
+                        <Col xs={24} align="middle">
+                            <h3>{producao.nome}</h3>
+                        </Col>
+                    </Row>
+                    {
+                        producao.produtos.map(produto => {
+                            return(
+                                <React.Fragment key={produto.id}>
+                                    <Row>
+                                        <Col xs={24} align="begining">
+                                            <h4>Sofá Cartagena</h4>
+                                        </Col>
+                                    </Row>
+                                    {
+                                        produto.subprodutos.map(subproduto => {
+                                            return(
+                                                <React.Fragment key={subproduto.id}>
+                                                    <Row type="flex" justfify="center" align="middle" style={{paddingTop: 10}}>
+                                                        <Col xs={13} style={{fontWeight: 500}}>
+                                                            {subproduto.nome}
+                                                        </Col>
+                                                        <Col xs={11} align="middle">
+                                                            <Row>
+                                                                <Col xs={8}>
+                                                                    <Button className="buttonRed" style={{width: '45px'}} onClick={() => this.handleQuantityChangeClick('sub', 'realizadoQuantidade_'+subproduto.idAcompanhamento)} align="middle"><Icon type="minus" /></Button>
+                                                                </Col>
+                                                                <Col xs={8}>
+                                                                    <Form.Item style={{marginBottom: 0}}>
+                                                                        {getFieldDecorator(`realizadoQuantidade_${subproduto.idAcompanhamento}`)(
+                                                                            
+                                                                            <Input
+                                                                                onChange={this.handleChangeQuantidadeRealizado}
+                                                                                style={{width: '90%', textAlign: 'center'}}
+                                                                            />
+                                                                        )}
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col xs={8}>
+                                                                    <Button type="primary" style={{width: '45px'}} onClick={() => this.handleQuantityChangeClick('add', 'realizadoQuantidade_'+subproduto.idAcompanhamento)}><Icon type="plus" /></Button>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
+                                                    <Row type="flex" justfify="center" align="middle" style={{marginBottom: 10, backgroundColor: '#f0f2f5'}}>
+                                                        <Col xs={24} align="end" style={{padding: '0 5px 0 5px', fontWeight: 500}}>
+                                                            <span>Restantes: 10</span>
+                                                            <span style={{marginLeft: 10}}>Total: {subproduto.totalQuantidade}</span>
+                                                        </Col>
+                                                    </Row>
+                                                </React.Fragment>
+                                            )
+                                        })
+                                    }
+                                </React.Fragment>
+                            )
+                        })
+                    }
+                </React.Fragment>
+            )
+        })
+
         return (
             <Form layout="vertical">
                 <Row>
@@ -68,59 +250,22 @@ class ProducaoLancamento extends Component{
                         <Form.Item
                             label="Data"
                         >
-                            {getFieldDecorator('dataInicial')(
+                            {getFieldDecorator('dataProducao')(
                                 <DatePicker
                                     locale={ptBr}
                                     format="DD/MM/YYYY"
                                     placeholder="Selecione a data"
                                     style={ {width: '100%'} }
                                     getCalendarContainer={() => document.getElementById('colData')}
+                                    onChange={this.handleChangeDataProducao}
                                 />
                             )}
                         </Form.Item>
                     </Col>
                 </Row>
-                <Row>
-                    <Col xs={24} align="middle">
-                        <h3>Produção 1</h3>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xs={24} align="begining">
-                        <h4>Sofá Cartagena</h4>
-                    </Col>
-                </Row>
-                <Row type="flex" justfify="center" align="middle">
-                    <Col xs={13}>
-                        - Braço Direito
-                    </Col>
-                    <Col xs={11} align="middle">
-                        <Row>
-                            <Col xs={8}>
-                                <Button type="primary" style={{width: '40px'}}>-</Button>
-                            </Col>
-                            <Col xs={8}>
-                                <Form.Item style={{marginBottom: 0}}>
-                                    {getFieldDecorator('realizadoQuantidade')(
-                                        
-                                        <Input
-                                            style={{width: '90%'}}
-                                        />
-                                    )}
-                                </Form.Item>
-                            </Col>
-                            <Col xs={8}>
-                                <Button type="primary" style={{width: '40px'}}>+</Button>
-                            </Col>
-                        </Row>
-                    </Col>
-                </Row>
-                <Row type="flex" justfify="center" align="middle" style={{marginBottom: 10, backgroundColor: '#f0f2f5'}}>
-                    <Col xs={24} align="end">
-                        <span>Restantes: 10</span>
-                        <span style={{marginLeft: 10}}>Total: 30</span>
-                    </Col>
-                </Row>
+                {rows}
+                
+                
             </Form>
         )
     }
@@ -129,13 +274,15 @@ class ProducaoLancamento extends Component{
 const MapStateToProps = (state) => {
 	return {
         backEndPoint: state.backEndPoint,
-        session: state.session
+        session: state.session,
+        producaoAcompanhamento: state.producaoAcompanhamento
 	}
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
         setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) },
+        setProducaoAcompanhamento: (producaoAcompanhamento) => { dispatch({ type: 'SET_PRODUCAOACOMPANHAMENTO', producaoAcompanhamento }) }
     }
 }
  

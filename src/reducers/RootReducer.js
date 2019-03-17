@@ -1,6 +1,6 @@
 const initState = {
-    //backEndPoint: 'http://localhost',
-    backEndPoint: 'https://testedemocrata.tk',
+    backEndPoint: 'http://localhost',
+    //backEndPoint: 'https://testedemocrata.tk',
     session: {
         idSession: null,
         usuario: {
@@ -26,8 +26,8 @@ const RootReducer = (state = initState, action) => {
     }
     else if(action.type === 'RESET_ALL'){
         return {
-            //backEndPoint: 'http://localhost',
-            backEndPoint: 'https://testedemocrata.tk',
+            backEndPoint: 'http://localhost',
+            //backEndPoint: 'https://testedemocrata.tk',
             session: {
                 idSession: null,
                 usuario: {
