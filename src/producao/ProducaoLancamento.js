@@ -90,23 +90,16 @@ class ProducaoLancamento extends Component{
                         <h4>Sofá Cartagena</h4>
                     </Col>
                 </Row>
-                <Row type="flex" justfify="center" align="middle" style={{marginBottom: 10}}>
-                    <Col xs={12}>Subprodutos</Col>
-                    <Col xs={8} align="middle">Realizados</Col>
-                    <Col xs={2} align="middle">Tot</Col>
-                    <Col xs={2} align="middle">Sal</Col>
-                    
-                </Row>
                 <Row type="flex" justfify="center" align="middle">
-                    <Col xs={12}>
+                    <Col xs={13}>
                         - Braço Direito
                     </Col>
-                    <Col xs={8} align="middle">
+                    <Col xs={11} align="middle">
                         <Row>
-                            <Col span={8}>
+                            <Col xs={8}>
                                 <Button type="primary" style={{width: '40px'}}>-</Button>
                             </Col>
-                            <Col span={8}>
+                            <Col xs={8}>
                                 <Form.Item style={{marginBottom: 0}}>
                                     {getFieldDecorator('realizadoQuantidade')(
                                         
@@ -116,16 +109,16 @@ class ProducaoLancamento extends Component{
                                     )}
                                 </Form.Item>
                             </Col>
-                            <Col span={8}>
+                            <Col xs={8}>
                                 <Button type="primary" style={{width: '40px'}}>+</Button>
                             </Col>
                         </Row>
                     </Col>
-                    <Col xs={2} align="middle">
-                        10
-                    </Col>
-                    <Col xs={2} align="middle">
-                        8
+                </Row>
+                <Row type="flex" justfify="center" align="middle" style={{marginBottom: 10, backgroundColor: '#f0f2f5'}}>
+                    <Col xs={24} align="end">
+                        <span>Restantes: 10</span>
+                        <span style={{marginLeft: 10}}>Total: 30</span>
                     </Col>
                 </Row>
             </Form>
