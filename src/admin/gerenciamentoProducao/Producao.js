@@ -57,6 +57,7 @@ class Producao extends Component {
                         produtos: producao.produtos
                     })
                 })
+                console.log('tableData', tableData)
                 this.setState({tableData})
             }
             else
@@ -73,6 +74,7 @@ class Producao extends Component {
         this.setState({buttonSalvarProducaoLoading: true})
         axios.post(this.props.backEndPoint + '/createUpdateProducao', request)
         .then(res => {
+            console.log('response', res.data.payload)
             this.showProducaoModal(false)
             this.requestGetProducoes()
             this.setState({buttonSalvarProducaoLoading: false})
@@ -132,6 +134,11 @@ class Producao extends Component {
                 idProducao: record.key,
                 dynamicFieldsRendered: true,
                 produtos: record.produtos
+            })
+        }
+        else{
+            this.props.form.setFieldsValue({
+                ativo: 'Y'
             })
         }
         this.showProducaoModal(true)
@@ -379,6 +386,7 @@ class Producao extends Component {
                         <Button key="back" onClick={() => this.showProducaoModal(false)}><Icon type="close" /> Cancelar</Button>,
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarProducaoLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
+                    width={900}
                 >
                     <Row>
                         <Col span={24} id="colCadastroPCP" style={{position: 'relative'}}>

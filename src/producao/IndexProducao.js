@@ -1,22 +1,25 @@
 import React, { Component } from "react"
-import { Layout, Icon } from "antd"
-import { BrowserRouter as Router, Route } from "react-router-dom"
+import { Layout, Menu, Icon, Row, Col } from "antd"
+import { BrowserRouter as Router, Route, withRouter } from "react-router-dom"
 import { connect } from 'react-redux'
 import moment from 'moment'
-
 import "antd/dist/antd.css"
-import "./static/index.css"
 
-import Home from './Home'
+import PageTitle from "./layout/PageTitle"
 
-const { Header, Sider, Footer } = Layout
-const { Content } = Layout
+
+import ProducaoLancamento from './ProducaoLancamento'
+
+const {
+	Header, Content, Footer, Sider,
+} = Layout;
+
 const routes = [
 	{
 		path: "/producao",
 		exact: true,
 		sidebar: () => <div>Home</div>,
-		main: () => <Home />
+		main: () => <ProducaoLancamento />
 	}
 ];
 
@@ -30,35 +33,74 @@ class IndexProducao extends Component {
 			collapsed: !this.state.collapsed
 		});
 	};
+
+	componentWillMount(){
+		if(this.props.session.administrador !== 'N'){
+            this.props.resetAll()
+            window.location.replace("/")
+        }
+	}
+
 	render() {
 		return (
 			<Router>
-				<Layout style={{ minHeight: "100vh" }}>
-					<Sider trigger={null} collapsible collapsed={this.state.collapsed}>
+				<Layout>
+					<Sider
+						breakpoint="lg"
+						collapsedWidth="0"
+						/*onBreakpoint={(broken) => { console.log(broken); }}
+						onCollapse={(collapsed, type) => { console.log(collapsed, type); }}*/
+					>
 						<div className="logo">Produção</div>
-						<ListMenu />
+						<Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
+							<Menu.Item key="1">
+								<Icon type="user" />
+								<span className="nav-text">nav 1</span>
+							</Menu.Item>
+							<Menu.Item key="2">
+								<Icon type="video-camera" />
+								<span className="nav-text">nav 2</span>
+							</Menu.Item>
+							<Menu.Item key="3">
+								<Icon type="upload" />
+								<span className="nav-text">nav 3</span>
+							</Menu.Item>
+							<Menu.Item key="4">
+								<Icon type="user" />
+								<span className="nav-text">nav 4</span>
+							</Menu.Item>
+						</Menu>
 					</Sider>
 					<Layout>
-						<Header style={{ background: "#fff", padding: 0 }}>
-							<Icon
-								className="trigger"
-								type={this.state.collapsed ? "menu-unfold" : "menu-fold"}
-								onClick={this.toggle}
-							/>
-							<PageTitle pageTitle={this.props.pageTitle} />
+						<Header style={{ background: '#fff', padding: 0 }}>
+							<Row>
+								<Col xs={12}>
+									<PageTitle pageTitle="Marcenaria" />
+								</Col>
+								{/*
+								<Col xs={5}>
+									<h4><Icon type="user" style={{marginRight: '8px'}} />{this.props.session.usuario.nome} / {this.props.session.perfil.nome}</h4> 
+								</Col>
+								*/}
+							</Row>
 						</Header>
-						{
-							routes.map((route, index) => (
-								<Route
-									key={index}
-									path={route.path}
-									exact={route.exact}
-									component={route.main}
-								/>
-							))
-						}
-
-						<Footer style={{ textAlign: "center" }}>Democrata Decor ©{moment().format('YYYY')}</Footer>
+						<Content style={{ margin: '24px 16px 0' }}>
+							<div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
+							{
+								routes.map((route, index) => (
+									<Route
+										key={index}
+										path={route.path}
+										exact={route.exact}
+										component={route.main}
+									/>
+								))
+							}
+							</div>
+						</Content>
+						<Footer style={{ textAlign: 'center' }}>
+							Democrata Decor ©{moment().format('YYYY')}
+						</Footer>
 					</Layout>
 				</Layout>
 			</Router>
@@ -67,9 +109,17 @@ class IndexProducao extends Component {
 }
 
 const MapStateToProps = (state) => {
-  return {
-    pageTitle: state.pageTitle
-  }
+	return {
+		pageTitle: state.pageTitle,
+		session: state.session
+	}
 }
 
-export default connect(MapStateToProps)(IndexProducao);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) },
+        resetAll: () => { dispatch({ type: 'RESET_ALL' }) }
+    }
+}
+
+export default connect(MapStateToProps, mapDispatchToProps)(withRouter(IndexProducao));

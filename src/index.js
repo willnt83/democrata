@@ -11,9 +11,10 @@ import storage from 'redux-persist/lib/storage'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 import { PersistGate } from 'redux-persist/lib/integration/react'
 
-import Home from './producao/Home'
+//import Home from './producao/Home'
 import SignIn from './admin/SignIn'
 import IndexAdmin from './admin/IndexAdmin'
+import IndexProducao from './producao/IndexProducao'
 
 const persistConfig = {
 	key: 'root',
@@ -35,7 +36,7 @@ const routes = [
     {
         path: "/producao",
         exact: true,
-        main: () => <Home />
+        main: () => <IndexProducao />
     },
     {
       path: "/admin",

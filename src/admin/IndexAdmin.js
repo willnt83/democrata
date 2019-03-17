@@ -19,6 +19,7 @@ import SubProdutos from "./cadastros/Subprodutos"
 import Conjuntos from "./cadastros/Conjuntos"
 import LinhaDeProducao from "./cadastros/LinhaDeProducao"
 import Cores from "./cadastros/Cores"
+import DiasNaoUteis from "./cadastros/DiasNaoUteis"
 import Producao from "./gerenciamentoProducao/Producao"
 import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
 
@@ -88,6 +89,11 @@ const routes = [
 		main: () => <Cores />
 	},
 	{
+		path: "/admin/cadastros/dias-nao-uteis",
+		sidebar: () => <div>Cadastro/Dias Não Úteis</div>,
+		main: () => <DiasNaoUteis />
+	},
+	{
 		path: "/admin/producao",
 		exact: true,
 		sidebar: () => <div>Produção</div>,
@@ -118,6 +124,7 @@ class IndexAdmin extends Component {
             window.location.replace("/")
         }
 	}
+
 	render() {
 		return (
 			<Router>

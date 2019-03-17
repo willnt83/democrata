@@ -143,6 +143,7 @@ class AcompanhamentoSetor extends Component {
     }
 
     render(){
+        //console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
         const { getFieldDecorator } = this.props.form
         const rows = this.props.producaoAcompanhamento
         .filter(setor => {

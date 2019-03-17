@@ -303,8 +303,6 @@ class LinhasDeProducao extends Component {
                 </Row>
         ))
 
-
-
         const columns = [{
             title: 'ID',
             dataIndex: 'key',
