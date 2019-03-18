@@ -88,7 +88,7 @@ class SignIn extends Component {
 				<Row>
 					<Col span={24} align="center">
 						<Card
-							style={{ width: 400, minHeight: 461, marginTop: 50 }}
+							style={{ width: 312, minHeight: 461, marginTop: 50 }}
 						>
 							<Row style={{marginTop: 20, paddingBottom: 20}}>
 								<Col span={24} align="center">

@@ -184,18 +184,18 @@ class ProducaoLancamento extends Component{
             .map(producao => {
                 return(
                     <React.Fragment key={producao.id}>
-                        <Row>
-                            <Col xs={24} align="middle">
-                                <h3>{producao.nome}</h3>
+                        <Row style={{backgroundColor: '#1890ff', color: '#fff'}}>
+                            <Col xs={24} align="middle" style={{color: '#fff', fontSize: 16, fontWeight: 600}}>
+                                {producao.nome}
                             </Col>
                         </Row>
                         {
                             producao.produtos.map(produto => {
                                 return(
                                     <React.Fragment key={produto.id}>
-                                        <Row>
-                                            <Col xs={24} align="begining">
-                                                <h4>Sofá Cartagena</h4>
+                                        <Row style={{marginTop: 10, backgroundColor: '#f0f2f5'}}>
+                                            <Col xs={24} align="begining" style={{fontSize: 14, fontWeight: 500}}>
+                                                {produto.nome}
                                             </Col>
                                         </Row>
                                         {
@@ -203,13 +203,13 @@ class ProducaoLancamento extends Component{
                                                 return(
                                                     <React.Fragment key={subproduto.id}>
                                                         <Row type="flex" justfify="center" align="middle" style={{paddingTop: 10}}>
-                                                            <Col xs={13} style={{fontWeight: 500}}>
+                                                            <Col xs={12} style={{fontWeight: 500}}>
                                                                 {subproduto.nome}
                                                             </Col>
-                                                            <Col xs={11} align="middle">
+                                                            <Col xs={12} align="middle">
                                                                 <Row>
                                                                     <Col xs={8}>
-                                                                        <Button className="buttonRed" style={{width: '45px'}} onClick={() => this.handleQuantityChangeClick('sub', 'realizadoQuantidade_'+subproduto.idAcompanhamento)} align="middle"><Icon type="minus" /></Button>
+                                                                        <Button className="buttonRed" style={{width: '44px'}} onClick={() => this.handleQuantityChangeClick('sub', 'realizadoQuantidade_'+subproduto.idAcompanhamento)} align="middle"><Icon type="minus" /></Button>
                                                                     </Col>
                                                                     <Col xs={8}>
                                                                         <Form.Item style={{marginBottom: 0}}>
@@ -223,7 +223,7 @@ class ProducaoLancamento extends Component{
                                                                         </Form.Item>
                                                                     </Col>
                                                                     <Col xs={8}>
-                                                                        <Button type="primary" style={{width: '45px'}} onClick={() => this.handleQuantityChangeClick('add', 'realizadoQuantidade_'+subproduto.idAcompanhamento)}><Icon type="plus" /></Button>
+                                                                        <Button type="primary" style={{width: '44px'}} onClick={() => this.handleQuantityChangeClick('add', 'realizadoQuantidade_'+subproduto.idAcompanhamento)}><Icon type="plus" /></Button>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>

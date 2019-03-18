@@ -54,20 +54,8 @@ class IndexProducao extends Component {
 						<div className="logo">Produção</div>
 						<Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
 							<Menu.Item key="1">
-								<Icon type="user" />
-								<span className="nav-text">nav 1</span>
-							</Menu.Item>
-							<Menu.Item key="2">
-								<Icon type="video-camera" />
-								<span className="nav-text">nav 2</span>
-							</Menu.Item>
-							<Menu.Item key="3">
-								<Icon type="upload" />
-								<span className="nav-text">nav 3</span>
-							</Menu.Item>
-							<Menu.Item key="4">
-								<Icon type="user" />
-								<span className="nav-text">nav 4</span>
+								<Icon type="export" />
+								<span className="nav-text">Sair</span>
 							</Menu.Item>
 						</Menu>
 					</Sider>
@@ -84,8 +72,8 @@ class IndexProducao extends Component {
 								*/}
 							</Row>
 						</Header>
-						<Content style={{ margin: '24px 16px 0' }}>
-							<div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
+						<Content style={{ margin: '24px 16px 0'}}>
+							<div style={{ padding: 24, background: '#fff', minHeight: '100%'}}>
 							{
 								routes.map((route, index) => (
 									<Route
