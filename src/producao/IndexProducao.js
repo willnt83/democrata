@@ -44,7 +44,7 @@ class IndexProducao extends Component {
 	render() {
 		return (
 			<Router>
-				<Layout>
+				<Layout style={{minHeight: '100vh'}}>
 					<Sider
 						breakpoint="lg"
 						collapsedWidth="0"
