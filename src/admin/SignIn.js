@@ -85,14 +85,14 @@ class SignIn extends Component {
 					background: "#fff"
 				}}
 			>
-				<Row>
-					<Col span={24} align="center">
+				<Row type="flex" justify="center" align="middle">
+					<Col span={8} xs={24} align="middle">
 						<Card
-							style={{ width: 312, minHeight: 461, marginTop: 50 }}
+							style={{ width: 312, minHeight: 461 }}
 						>
 							<Row style={{marginTop: 20, paddingBottom: 20}}>
 								<Col span={24} align="center">
-									<h1>DEMOCRATA DECOR</h1>
+									<h2>DEMOCRATA DECOR</h2>
 									<h4>Sistema de Gerenciamento de Linhas de Produção</h4>
 								</Col>
 							</Row>

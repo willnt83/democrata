@@ -58,7 +58,6 @@ class ProducaoLancamento extends Component{
     }
 
     showNotification = (msg, success) => {
-        console.log('message', msg)
         var type = null
         var style = null
         if(success){
@@ -70,7 +69,7 @@ class ProducaoLancamento extends Component{
             style = {color: '#f5222d', fontWeight: '800'}
         }
         const args = {
-            messasge: 'AA',
+            message: msg,
             icon:  <Icon type={type} style={style} />,
             duration: 3
         }
@@ -133,7 +132,6 @@ class ProducaoLancamento extends Component{
     }
 
     handleQuantityChangeClick = (op, id) => {
-        console.log('op', op)
         var value =  this.props.form.getFieldValue(id)
         if(op === 'sub'){
             value--
@@ -174,7 +172,6 @@ class ProducaoLancamento extends Component{
 
     render() {
         const { getFieldDecorator } = this.props.form
-        console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
         var rows = null
         if(this.props.producaoAcompanhamento.length > 0){
             rows = this.props.producaoAcompanhamento[0].producoes
@@ -200,6 +197,9 @@ class ProducaoLancamento extends Component{
                                         </Row>
                                         {
                                             produto.subprodutos.map(subproduto => {
+                                                var restantes = parseInt(subproduto.totalQuantidade) - parseInt(this.props.form.getFieldValue('realizadoQuantidade_'+subproduto.idAcompanhamento))
+                                                var addButtonDisabled = restantes > 0 ? false : true
+                                                var subButtonDisabled = parseInt(this.props.form.getFieldValue('realizadoQuantidade_'+subproduto.idAcompanhamento)) === 0 ? true : false
                                                 return(
                                                     <React.Fragment key={subproduto.id}>
                                                         <Row type="flex" justfify="center" align="middle" style={{paddingTop: 10}}>
@@ -209,12 +209,18 @@ class ProducaoLancamento extends Component{
                                                             <Col xs={12} align="middle">
                                                                 <Row>
                                                                     <Col xs={8}>
-                                                                        <Button className="buttonRed" style={{width: '44px'}} onClick={() => this.handleQuantityChangeClick('sub', 'realizadoQuantidade_'+subproduto.idAcompanhamento)} align="middle"><Icon type="minus" /></Button>
+                                                                        <Button
+                                                                            className="buttonRed"
+                                                                            style={{width: '44px'}}
+                                                                            onClick={() => this.handleQuantityChangeClick('sub', 'realizadoQuantidade_'+subproduto.idAcompanhamento)}
+                                                                            disabled={subButtonDisabled}
+                                                                            >
+                                                                                <Icon type="minus" />
+                                                                            </Button>
                                                                     </Col>
                                                                     <Col xs={8}>
                                                                         <Form.Item style={{marginBottom: 0}}>
                                                                             {getFieldDecorator(`realizadoQuantidade_${subproduto.idAcompanhamento}`)(
-                                                                                
                                                                                 <Input
                                                                                     onChange={this.handleChangeQuantidadeRealizado}
                                                                                     style={{width: '90%', textAlign: 'center'}}
@@ -223,14 +229,21 @@ class ProducaoLancamento extends Component{
                                                                         </Form.Item>
                                                                     </Col>
                                                                     <Col xs={8}>
-                                                                        <Button type="primary" style={{width: '44px'}} onClick={() => this.handleQuantityChangeClick('add', 'realizadoQuantidade_'+subproduto.idAcompanhamento)}><Icon type="plus" /></Button>
+                                                                        <Button
+                                                                            type="primary"
+                                                                            style={{width: '44px'}}
+                                                                            onClick={() => this.handleQuantityChangeClick('add', 'realizadoQuantidade_'+subproduto.idAcompanhamento)}
+                                                                            disabled={addButtonDisabled}
+                                                                        >
+                                                                            <Icon type="plus" />
+                                                                        </Button>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>
                                                         </Row>
                                                         <Row type="flex" justfify="center" align="middle" style={{marginBottom: 10, backgroundColor: '#f0f2f5'}}>
                                                             <Col xs={24} align="end" style={{padding: '0 5px 0 5px', fontWeight: 500}}>
-                                                                <span>Restantes: 10</span>
+                                                                <span>Restantes: {restantes}</span>
                                                                 <span style={{marginLeft: 10}}>Total: {subproduto.totalQuantidade}</span>
                                                             </Col>
                                                         </Row>

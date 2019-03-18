@@ -1,10 +1,10 @@
 import React, { Component } from "react"
-import { Layout, Menu, Icon, Row, Col } from "antd"
+import { Layout, Menu, Icon, Row, Col, Modal, Button } from "antd"
 import { BrowserRouter as Router, Route, withRouter } from "react-router-dom"
 import { connect } from 'react-redux'
 import moment from 'moment'
 import "antd/dist/antd.css"
-
+import axios from "axios"
 import PageTitle from "./layout/PageTitle"
 
 
@@ -25,7 +25,9 @@ const routes = [
 
 class IndexProducao extends Component {
 	state = {
-		collapsed: false
+		collapsed: false,
+		showModalLogout: false,
+        btnConfirmarLoading: false
 	};
 
 	toggle = () => {
@@ -33,6 +35,30 @@ class IndexProducao extends Component {
 			collapsed: !this.state.collapsed
 		});
 	};
+
+	showModalLogout = (bool) => {
+        this.setState({showModalLogout : bool})
+	}
+	
+	handleConfirmLogout = () => {
+        this.setState({btnConfirmarLoading: true})
+        axios.get(this.props.backEndPoint + '/logout')
+        .then(res => {
+            if(res.data.success){
+                this.setState({btnConfirmarLoading: false})
+                this.props.resetAll()
+                this.showModalLogout(false)
+                window.location.replace("/")
+            }
+            else{
+                this.setState({btnConfirmarLoading: false})
+                this.showModalLogout(false)
+            }
+        })
+        .catch(error =>{
+            console.log(error)
+        })
+    }
 
 	componentWillMount(){
 		if(this.props.session.administrador !== 'N'){
@@ -43,55 +69,71 @@ class IndexProducao extends Component {
 
 	render() {
 		return (
-			<Router>
-				<Layout style={{minHeight: '100vh'}}>
-					<Sider
-						breakpoint="lg"
-						collapsedWidth="0"
-						/*onBreakpoint={(broken) => { console.log(broken); }}
-						onCollapse={(collapsed, type) => { console.log(collapsed, type); }}*/
-					>
-						<div className="logo">Produção</div>
-						<Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
-							<Menu.Item key="1">
-								<Icon type="export" />
-								<span className="nav-text">Sair</span>
-							</Menu.Item>
-						</Menu>
-					</Sider>
-					<Layout>
-						<Header style={{ background: '#fff', padding: 0 }}>
-							<Row>
-								<Col xs={12}>
-									<PageTitle pageTitle="Marcenaria" />
-								</Col>
-								{/*
-								<Col xs={5}>
-									<h4><Icon type="user" style={{marginRight: '8px'}} />{this.props.session.usuario.nome} / {this.props.session.perfil.nome}</h4> 
-								</Col>
-								*/}
-							</Row>
-						</Header>
-						<Content style={{ margin: '24px 16px 0'}}>
-							<div style={{ padding: 24, background: '#fff', minHeight: '100%'}}>
-							{
-								routes.map((route, index) => (
-									<Route
-										key={index}
-										path={route.path}
-										exact={route.exact}
-										component={route.main}
-									/>
-								))
-							}
-							</div>
-						</Content>
-						<Footer style={{ textAlign: 'center' }}>
-							Democrata Decor ©{moment().format('YYYY')}
-						</Footer>
+			<React.Fragment>
+				<Router>
+					<Layout style={{minHeight: '100vh'}}>
+						<Sider
+							breakpoint="lg"
+							collapsedWidth="0"
+							/*onBreakpoint={(broken) => { console.log(broken); }}
+							onCollapse={(collapsed, type) => { console.log(collapsed, type); }}*/
+						>
+							<div className="logo">Produção</div>
+							<Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
+								<Menu.Item key="1" onClick={() => this.showModalLogout(true)}>
+									<Icon type="export" />
+									<span className="nav-text">Sair</span>
+								</Menu.Item>
+							</Menu>
+						</Sider>
+						<Layout>
+							<Header style={{ background: '#fff', padding: 0 }}>
+								<Row>
+									<Col xs={12}>
+										<PageTitle pageTitle="Marcenaria" />
+									</Col>
+									{/*
+									<Col xs={5}>
+										<h4><Icon type="user" style={{marginRight: '8px'}} />{this.props.session.usuario.nome} / {this.props.session.perfil.nome}</h4> 
+									</Col>
+									*/}
+								</Row>
+							</Header>
+							<Content style={{ margin: '24px 16px 0'}}>
+								<div style={{ padding: 24, background: '#fff', minHeight: '100%'}}>
+								{
+									routes.map((route, index) => (
+										<Route
+											key={index}
+											path={route.path}
+											exact={route.exact}
+											component={route.main}
+										/>
+									))
+								}
+								</div>
+							</Content>
+							<Footer style={{ textAlign: 'center' }}>
+								Democrata Decor ©{moment().format('YYYY')}
+							</Footer>
+						</Layout>
 					</Layout>
-				</Layout>
-			</Router>
+				</Router>
+				<Modal
+					title="Sair do Sistema"
+					visible={this.state.showModalLogout}
+					onOk={this.handleModalLogoutOk}
+					onCancel={() => this.showModalLogout(false)}
+					footer={[
+						<Button key="back" onClick={() => this.showModalLogout(false)}><Icon type="close" /> Cancelar</Button>,
+						<Button className="buttonGreen" key="primary" type="primary" onClick={this.handleConfirmLogout} loading={this.state.btnConfirmarLoading}>
+							<Icon type="check" /> Confirmar
+						</Button>,
+					]}
+				>
+					<p>Você está prestes a sair do sistema. Todos os dados não salvos serão perdidos!</p>
+				</Modal>
+			</React.Fragment>
 		);
 	}
 }
@@ -99,7 +141,8 @@ class IndexProducao extends Component {
 const MapStateToProps = (state) => {
 	return {
 		pageTitle: state.pageTitle,
-		session: state.session
+		session: state.session,
+		backEndPoint: state.backEndPoint
 	}
 }
 
