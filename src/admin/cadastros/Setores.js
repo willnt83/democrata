@@ -54,7 +54,6 @@ class Setores extends Component {
     }
 
     requestCreateUpdateSetor = (request) => {
-        console.log('requestCreateUpdateSetor request', request)
         this.setState({buttonSalvarSetor: true})
         axios.post(this.props.backEndPoint + '/createUpdateSetor', request)
         .then(res => {
@@ -79,7 +78,6 @@ class Setores extends Component {
     }
 
     loadSetoresModal = (record) => {
-        console.log('loadSetoresModal', record)
         if(typeof(record) !== "undefined") {
             // Edit
             this.props.form.setFieldsValue({
@@ -101,7 +99,6 @@ class Setores extends Component {
         axios
         .get(this.props.backEndPoint + '/deleteSetor?id='+id)
         .then(res => {
-            console.log('deleteUnidade response', res)
             this.requestGetSetores()
         })
         .catch(error => {
@@ -139,7 +136,6 @@ class Setores extends Component {
     }
 
     render(){
-        console.log('this.props',this.props)
         const { getFieldDecorator } = this.props.form
         const columns = [{
             title: 'ID',

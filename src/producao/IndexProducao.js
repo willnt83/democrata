@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { Layout, Menu, Icon, Row, Col, Modal, Button } from "antd"
-import { BrowserRouter as Router, Route, withRouter } from "react-router-dom"
+import { BrowserRouter as Router, Route, withRouter, Link } from "react-router-dom"
 import { connect } from 'react-redux'
 import moment from 'moment'
 import "antd/dist/antd.css"
@@ -13,15 +13,6 @@ import ProducaoLancamento from './ProducaoLancamento'
 const {
 	Header, Content, Footer, Sider,
 } = Layout;
-
-const routes = [
-	{
-		path: "/producao",
-		exact: true,
-		sidebar: () => <div>Home</div>,
-		main: () => <ProducaoLancamento />
-	}
-];
 
 class IndexProducao extends Component {
 	state = {
@@ -64,10 +55,31 @@ class IndexProducao extends Component {
 		if(this.props.session.administrador !== 'N'){
             this.props.resetAll()
             window.location.replace("/")
-        }
+		}
+
+		// Routes
+		/*
+		this.setState({
+			routes: this.props.session.setores.map(setor => {
+				return({
+					path: setor.slug,
+					extact: true,
+					main: () => <ProducaoLancamento idSetor={setor.id} />
+				})
+			})
+		})
+		*/
 	}
 
 	render() {
+		const routes = this.props.session.setores.map(setor => {
+			return({
+				path: setor.slug,
+				extact: true,
+				main: () => <ProducaoLancamento idSetor={setor.id} nomeSetor={setor.nome} />
+			})
+		})
+
 		return (
 			<React.Fragment>
 				<Router>
@@ -79,18 +91,27 @@ class IndexProducao extends Component {
 							onCollapse={(collapsed, type) => { console.log(collapsed, type); }}*/
 						>
 							<div className="logo">Produção</div>
-							<Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
-								<Menu.Item key="1" onClick={() => this.showModalLogout(true)}>
-									<Icon type="export" />
-									<span className="nav-text">Sair</span>
-								</Menu.Item>
+							<Menu theme="dark" mode="inline" defaultSelectedKeys={[this.props.session.setores[0].id]}>
+								{
+									this.props.session.setores.map(setor => {
+										return(
+											<Menu.Item key={setor.id}>
+												<Link to={setor.slug}>
+													<Icon type="right-square" />
+													<span className="nav-text">{setor.nome}</span>
+												</Link>
+											</Menu.Item>
+										)
+									})
+								}
+								
 							</Menu>
 						</Sider>
 						<Layout>
 							<Header style={{ background: '#fff', padding: 0 }}>
 								<Row>
 									<Col xs={12}>
-										<PageTitle pageTitle="Marcenaria" />
+										<PageTitle pageTitle={this.props.pageTitle} />
 									</Col>
 									{/*
 									<Col xs={5}>
@@ -148,7 +169,6 @@ const MapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setPageTitle: (pageTitle) => { dispatch({ type: 'SET_PAGETITLE', pageTitle }) },
         resetAll: () => { dispatch({ type: 'RESET_ALL' }) }
     }
 }

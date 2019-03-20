@@ -34,7 +34,7 @@ class PerfisDeAcesso extends Component {
             placeholder: 'Carregando...',
             disabled: true
         },
-        idSetor: null,
+        //idSetor: null,
         setorFieldRedered: false
     }
 
@@ -128,7 +128,8 @@ class PerfisDeAcesso extends Component {
         if(typeof(record) !== "undefined") {
             // Edit
             if(record.administrativoValue === 'N'){
-                this.setState({administrativo: 'N', setorFieldRedered: true, idSetor: record.setor.id})
+                //this.setState({administrativo: 'N', setorFieldRedered: true, idSetor: record.setor.id})
+                this.setState({administrativo: 'N', setorFieldRedered: true})
             }
 
             this.props.form.setFieldsValue({
@@ -166,13 +167,22 @@ class PerfisDeAcesso extends Component {
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
+                console.log('values', values)
+
                 var id = this.state.perfilId ? this.state.perfilId : null
-                var setor = values.setor ? values.setor : null
+                var setores = null
+                if(values.setores){
+                    setores = values.setores.map(setor => {
+                        return({
+                            idSetor: setor
+                        })
+                    })
+                }
                 var request = {
                     id: id,
                     nome: values.nome,
                     administrativo: values.administrativo,
-                    idSetor: setor,
+                    setores: setores,
                     ativo: values.ativo
                 }
                 this.requestCreateUpdatePerfil(request)
@@ -197,7 +207,7 @@ class PerfisDeAcesso extends Component {
 
     componentWillUpdate(){
         if(this.state.setorFieldRedered){
-            this.props.form.setFieldsValue({setor: this.state.idSetor})
+            //this.props.form.setFieldsValue({setor: this.state.idSetor})
             this.setState({setorFieldRedered: false})
         }
 
@@ -261,8 +271,8 @@ class PerfisDeAcesso extends Component {
         var setorField = null
         if(this.state.administrativo === 'N'){
             setorField = 
-                <Form.Item label="Setor">
-                    {this.props.form.getFieldDecorator('setor', {
+                <Form.Item label="Setores">
+                    {this.props.form.getFieldDecorator('setores', {
                         rules: [
                             {
                                 required: true, message: 'Por favor selecione',
@@ -270,6 +280,7 @@ class PerfisDeAcesso extends Component {
                         ]
                     })(
                         <Select
+                            mode="multiple"
                             style={{ width: '100%' }}
                             placeholder={this.state.setoresSelectStatus.placeholder}
                             disabled={this.state.setoresSelectStatus.disabled}

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Input, notification, Icon, DatePicker, Button } from 'antd'
+import { Row, Col, Form, Input, notification, Icon, DatePicker, Button, Affix } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import ptBr from 'antd/lib/locale-provider/pt_BR'
@@ -45,7 +45,7 @@ class ProducaoLancamento extends Component{
         .post(this.props.backEndPoint + '/updateRealizadoQuantidade', request)
         .then(res => {
             if(res.data.success){
-                this.requestGetProducaoAcompanhamento(this.props.session.perfil.idSetor)
+                this.requestGetProducaoAcompanhamento(this.props.idSetor)
                 this.showNotification(res.data.msg, true)
             }
             else{
@@ -119,6 +119,26 @@ class ProducaoLancamento extends Component{
         this.setState({dataProducao: value.format('YYYY-MM-DD'), tryToSetValues: true})
     }
 
+    handleFormSubmit = () => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if (!err){
+                delete values.dataProducao
+                var request = Object.keys(values).map(key => {
+                    var id = key.replace('realizadoQuantidade_', '')
+                    return({
+                        idAcompanhamento: parseInt(id),
+                        realizadoQuantidade: parseInt(values[key])
+                    })
+                })
+                this.requestUpdateRealizadoQuantidade(request)
+            }
+            else{
+                console.log('erro no formulário')
+            }
+        })
+    }
+
+    /*
     handleChangeQuantidadeRealizado = (element) => {
         if(element.target.value !== ''){
             var idAcompanhamento = element.target.id.replace('realizadoQuantidade_', '')
@@ -130,6 +150,8 @@ class ProducaoLancamento extends Component{
             this.requestUpdateRealizadoQuantidade(request)
         }
     }
+    */
+
 
     handleQuantityChangeClick = (op, id) => {
         var value =  this.props.form.getFieldValue(id)
@@ -143,17 +165,21 @@ class ProducaoLancamento extends Component{
         var obj  = JSON.parse(strObj)
         this.props.form.setFieldsValue(obj)
 
+        /*
+
         var idAcompanhamento = id.replace('realizadoQuantidade_', '')
         var request = {
             idAcompanhamento: parseInt(idAcompanhamento),
             realizadoQuantidade: parseInt(value)
         }
         this.requestUpdateRealizadoQuantidade(request)
+        */
     }
 
+
     componentWillMount(){
-        this.props.setPageTitle('Marcenaria')
-        this.requestGetProducaoAcompanhamento(this.props.session.perfil.idSetor)
+        this.props.setPageTitle(this.props.nomeSetor)
+        this.requestGetProducaoAcompanhamento(this.props.idSetor)
     }
 
     componentDidMount(){
@@ -190,9 +216,9 @@ class ProducaoLancamento extends Component{
                             producao.produtos.map(produto => {
                                 return(
                                     <React.Fragment key={produto.id}>
-                                        <Row style={{marginTop: 10, backgroundColor: '#f0f2f5'}}>
-                                            <Col xs={24} align="begining" style={{fontSize: 14, fontWeight: 500}}>
-                                                {produto.nome}
+                                        <Row style={{marginTop: 10, backgroundColor: '#9af990'}}>
+                                            <Col xs={24} align="begining" style={{paddingLeft: 5, fontSize: 15, fontWeight: 500}}>
+                                                {produto.nome} ({produto.cor.nome})
                                             </Col>
                                         </Row>
                                         {
@@ -222,7 +248,6 @@ class ProducaoLancamento extends Component{
                                                                         <Form.Item style={{marginBottom: 0}}>
                                                                             {getFieldDecorator(`realizadoQuantidade_${subproduto.idAcompanhamento}`)(
                                                                                 <Input
-                                                                                    onChange={this.handleChangeQuantidadeRealizado}
                                                                                     style={{width: '90%', textAlign: 'center'}}
                                                                                 />
                                                                             )}
@@ -262,24 +287,33 @@ class ProducaoLancamento extends Component{
 
         return (
             <Form layout="vertical">
-                <Row>
-                    <Col xs={24} id="colData">
-                        <Form.Item
-                            label="Data"
-                        >
-                            {getFieldDecorator('dataProducao')(
-                                <DatePicker
-                                    locale={ptBr}
-                                    format="DD/MM/YYYY"
-                                    placeholder="Selecione a data"
-                                    style={ {width: '100%'} }
-                                    getCalendarContainer={() => document.getElementById('colData')}
-                                    onChange={this.handleChangeDataProducao}
-                                />
-                            )}
-                        </Form.Item>
-                    </Col>
-                </Row>
+                <Affix offsetTop={0}>
+                    <Row style={{backgroundColor: '#fff', paddingTop: 20}}>
+                        <Col xs={24}>
+                            <Row style={{marginBottom: 10}}>
+                                <Col xs={24} id="colData">
+                                    <Form.Item style={{marginBottom: 0, paddingBottom: 0}}>
+                                        {getFieldDecorator('dataProducao')(
+                                            <DatePicker
+                                                locale={ptBr}
+                                                format="DD/MM/YYYY"
+                                                placeholder="Selecione a data"
+                                                style={ {width: '100%'} }
+                                                getCalendarContainer={() => document.getElementById('colData')}
+                                                onChange={this.handleChangeDataProducao}
+                                            />
+                                        )}
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col xs={24} align="middle" style={{marginBottom: 10}}>
+                                    <Button key="submit" className="buttonGreen" onClick={() => this.handleFormSubmit()}>Salvar</Button>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Affix>
                 {rows}
             </Form>
         )

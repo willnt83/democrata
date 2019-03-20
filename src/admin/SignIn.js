@@ -29,6 +29,16 @@ class SignIn extends Component {
         notification.open(args)
 	}
 
+	convertToSlug = (text) => {
+		const a = 'àáäâãèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;'
+		const b = 'aaaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------'
+		const p = new RegExp(a.split('').join('|'), 'g')
+		return text.toString().toLowerCase().trim()
+		.replace(p, c => b.charAt(a.indexOf(c)))
+		.replace(/&/g, '-and-')
+		.replace(/[\s\W-]+/g, '-')
+	}
+
 	handleLoginSubmit = (event) => {
 		event.preventDefault();
 		this.props.form.validateFieldsAndScroll((err, values) => {
@@ -40,6 +50,17 @@ class SignIn extends Component {
 				})
 				.then(res => {
 					if(res.data.success){
+						var setores = null
+						if(res.data.payload.setores.length > 0){
+							setores = res.data.payload.setores.map(setor => {
+								var slug = '/producao/'+this.convertToSlug(setor.nome)
+								return({
+									...setor,
+									slug
+								})
+							})
+						}
+
 						var session = {
 							idSession: res.headers['token'],
 							usuario: {
@@ -47,18 +68,23 @@ class SignIn extends Component {
 								nome: res.data.payload.nome
 							},
 							perfil: res.data.payload.perfil,
+							setores: setores,
 							administrador: res.data.payload.administrativo
 						}
+
 						this.props.setSession(session)
 						this.setState({entrarButtonLoading: false})
 
 						axios.defaults.headers = {
 							'Authorization': res.headers['token']
 						}
+
 						if(res.data.payload.administrativo === 'Y')
 							this.props.history.push('/admin')
-						else
-							this.props.history.push('/producao')
+						else{
+							this.props.history.push(session.setores[0].slug)
+						}
+
 					}
 					else{
 						this.showNotification(res.data.msg, false)

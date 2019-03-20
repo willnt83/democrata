@@ -22,6 +22,8 @@ import Cores from "./cadastros/Cores"
 import DiasNaoUteis from "./cadastros/DiasNaoUteis"
 import Producao from "./gerenciamentoProducao/Producao"
 import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
+import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
+import RelatorioProducoes from "./relatorios/RelatorioProducoes"
 
 
 const { Header, Sider, Footer } = Layout
@@ -105,6 +107,20 @@ const routes = [
 		sidebar: () => <div>Produção/Acompanhamento</div>,
 		main: () => <Acompanhamento />
 	}
+	,
+	{
+		path: "/admin/relatorios/produtos-cadastrados",
+		exact: true,
+		sidebar: () => <div>Relatórios/Produtos Cadastrados</div>,
+		main: () => <RelatorioProdutosCadastrados />
+	}
+	,
+	{
+		path: "/admin/relatorios/producoes",
+		exact: true,
+		sidebar: () => <div>Relatórios/Produções</div>,
+		main: () => <RelatorioProducoes />
+	}
 ];
 
 class IndexAdmin extends Component {
@@ -120,9 +136,9 @@ class IndexAdmin extends Component {
 
 	componentWillMount(){
 		if(this.props.session.administrador !== 'Y'){
-            this.props.resetAll()
-            window.location.replace("/")
-        }
+			this.props.resetAll()
+			window.location.replace("/")
+		}
 	}
 
 	render() {

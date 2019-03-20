@@ -1,15 +1,21 @@
 const initState = {
     //backEndPoint: 'http://localhost',
     backEndPoint: 'https://testedemocrata.tk',
+    pageTitle: null,
     session: {
         idSession: null,
         usuario: {
             id: null,
-            nome: null,
+            nome: null
         },
         perfil: {
             id: null,
+            nome: null
+        },
+        setores: {
+            id: null,
             nome: null,
+            ordem: null
         },
         administrador: null
     },
@@ -28,16 +34,21 @@ const RootReducer = (state = initState, action) => {
         return {
             //backEndPoint: 'http://localhost',
             backEndPoint: 'https://testedemocrata.tk',
+            pageTitle: null,
             session: {
                 idSession: null,
                 usuario: {
                     id: null,
-                    nome: null,
+                    nome: null
                 },
                 perfil: {
                     id: null,
+                    nome: null
+                },
+                setores: {
+                    id: null,
                     nome: null,
-                    idSetor: null
+                    ordem: null
                 },
                 administrador: null
             },

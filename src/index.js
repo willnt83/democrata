@@ -35,7 +35,7 @@ const routes = [
     },
     {
         path: "/producao",
-        exact: true,
+        exact: false,
         main: () => <IndexProducao />
     },
     {
