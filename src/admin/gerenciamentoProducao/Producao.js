@@ -98,7 +98,7 @@ class Producao extends Component {
                     produtosOptions: res.data.payload.map(produto => {
                         return({
                             value: produto.id,
-                            description: produto.nome
+                            description: produto.nome + ' ('+produto.cor+')'
                         })
                     }),
                     produtosSelectStatus: {
