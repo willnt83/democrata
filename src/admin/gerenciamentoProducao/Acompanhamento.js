@@ -23,7 +23,7 @@ class Acompanhamento extends Component {
 
     state = {
         tabs: [],
-        tabSetorId: "1"
+        tabSetorId: null
     }
 
     requestGetProducaoAcompanhamento = (id) => {
@@ -39,7 +39,8 @@ class Acompanhamento extends Component {
                             key: setor.id,
                             description: setor.nome
                         })
-                    })
+                    }),
+                    tabSetorId: res.data.payload[0].id
                 })
                 this.props.setProducaoAcompanhamento(res.data.payload)
             }
@@ -73,7 +74,7 @@ class Acompanhamento extends Component {
                     position: 'relative'
                 }}
             >
-                <Tabs defaultActiveKey="1" onChange={this.handleTabChange}>
+                <Tabs onChange={this.handleTabChange}>
                     {
                         this.state.tabs.map(setor => {
                             return(

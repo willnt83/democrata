@@ -143,15 +143,20 @@ class AcompanhamentoSetor extends Component {
     }
 
     render(){
-        //console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
+        console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
         const { getFieldDecorator } = this.props.form
         const rows = this.props.producaoAcompanhamento
         .filter(setor => {
+            console.log('parseInt(this.props.idSetor)', parseInt(this.props.idSetor))
+            console.log('setor.id', setor.id)
             return (parseInt(this.props.idSetor) === setor.id)
         })
         .map(setor => {
+            console.log('setor', setor)
             return(
                 setor.producoes.filter(producao => {
+                    console.log('producao.dataInicial', producao.dataInicial)
+                    console.log('this.state.dataAcompanhamento', this.state.dataAcompanhamento)
                     return(producao.dataInicial === this.state.dataAcompanhamento)
                 })
                 .map(producao => {
