@@ -265,11 +265,13 @@ class Producao extends Component {
                             }],
                         })(
                             <Select
+                                showSearch
                                 style={{ width: '100%' }}
                                 placeholder={this.state.produtosSelectStatus.placeholder}
                                 disabled={this.state.produtosSelectStatus.disabled}
                                 getPopupContainer={() => document.getElementById('colCadastroPCP')}
                                 allowClear={true}
+                                filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
                                 {
                                     this.state.produtosOptions.map((option) => {
