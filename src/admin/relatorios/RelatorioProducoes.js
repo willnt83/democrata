@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Layout, Icon, Button, Row, Col, notification } from 'antd'
 import { connect } from 'react-redux'
-//import axios from "axios"
+import axios from "axios"
 
 const { Content } = Layout
 
@@ -9,7 +9,7 @@ const { Content } = Layout
 class RelatorioProducoes extends Component {
     constructor(props) {
         super()
-        props.setPageTitle('Relatório - Produtos Cadastrados')
+        props.setPageTitle('Relatório - Produções')
     }
 
     state = {
@@ -18,11 +18,10 @@ class RelatorioProducoes extends Component {
     }
 
     generateReport = () => {
-        /*
         this.setState({buttonLoading: true})
         console.log('generateReport')
         axios
-        .get(this.props.backEndPoint + '/reportProdutosCadastrados')
+        .get(this.props.backEndPoint + '/reportProducoes')
         .then(res => {
             if(res.data.success){
                 this.setState({reportUrl: res.data.payload.url, buttonLoading: false})
@@ -33,7 +32,6 @@ class RelatorioProducoes extends Component {
             console.log(error)
             this.setState({buttonLoading: false})
         })
-        */
     }
 
     resetButton = () => {

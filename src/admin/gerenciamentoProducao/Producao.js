@@ -57,7 +57,6 @@ class Producao extends Component {
                         produtos: producao.produtos
                     })
                 })
-                console.log('tableData', tableData)
                 this.setState({tableData})
             }
             else
@@ -74,7 +73,6 @@ class Producao extends Component {
         this.setState({buttonSalvarProducaoLoading: true})
         axios.post(this.props.backEndPoint + '/createUpdateProducao', request)
         .then(res => {
-            console.log('response', res.data.payload)
             this.showProducaoModal(false)
             this.requestGetProducoes()
             this.setState({buttonSalvarProducaoLoading: false})
