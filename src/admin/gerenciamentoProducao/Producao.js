@@ -42,21 +42,24 @@ class Producao extends Component {
         axios
         .get(this.props.backEndPoint + '/getProducoes')
         .then(res => {
-            if(res.data.payload){
-                var tableData = res.data.payload.map(producao => {
-                    var ativo = producao.ativo === 'Y' ? 'Sim' : 'Não'
-                    var dataInicialObj = moment(producao.dataInicial, 'YYYY-MM-DD')
-                    var dataInicial = dataInicialObj.format('DD/MM/YYYY')
-                    return({
-                        key: producao.id,
-                        nome: producao.nome,
-                        dataInicialValue: dataInicialObj,
-                        dataInicialDescription: dataInicial,
-                        ativoValue: producao.ativo,
-                        ativoDescription: ativo,
-                        produtos: producao.produtos
+            if(res.data.success){
+                var tableData = null
+                if(res.data.payload.length > 0){
+                    tableData = res.data.payload.map(producao => {
+                        var ativo = producao.ativo === 'Y' ? 'Sim' : 'Não'
+                        var dataInicialObj = moment(producao.dataInicial, 'YYYY-MM-DD')
+                        var dataInicial = dataInicialObj.format('DD/MM/YYYY')
+                        return({
+                            key: producao.id,
+                            nome: producao.nome,
+                            dataInicialValue: dataInicialObj,
+                            dataInicialDescription: dataInicial,
+                            ativoValue: producao.ativo,
+                            ativoDescription: ativo,
+                            produtos: producao.produtos
+                        })
                     })
-                })
+                }
                 this.setState({tableData})
             }
             else
@@ -83,8 +86,24 @@ class Producao extends Component {
         })
     }
 
-    handleDeletePcp = () => {
+    requestDeleteProducao = (request) => {
+        this.setState({tableLoading: true})
+        axios.post(this.props.backEndPoint + '/deleteProducao', request)
+        .then(res => {
+            this.requestGetProducoes()
+            this.setState({tableLoading: false})
+        })
+        .catch(error =>{
+            console.log(error)
+            this.setState({tableLoading: false})
+        })
+    }
 
+    handleDeletePcp = (id) => {
+        var request = {
+            id
+        }
+        this.requestDeleteProducao(request)
     }
 
     loadProdutosOptions = () => {
@@ -143,6 +162,11 @@ class Producao extends Component {
     }
 
     showProducaoModal = (bool) => {
+        // Se estiver fechando
+        if(!bool){
+            this.props.form.resetFields()
+            this.setState({idProducao: null})
+        }
         this.setState({showProducaoModal: bool})
     }
 

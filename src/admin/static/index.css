@@ -76,6 +76,8 @@
     font-weight: 800
 }
 
-.rowAcompanhamento:first-child{
-    margin-top: 12px
+.producaoSubprodutos .ant-row-flex:not(:last-child), .producaoProducoes{
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-color: #e8e8e8
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Divider, Form, Input, Select, Icon, notification } from 'antd'
+import { Row, Col, Form, Input, Select, Icon, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -143,71 +143,66 @@ class AcompanhamentoSetor extends Component {
     }
 
     render(){
-        console.log('this.props.producaoAcompanhamento', this.props.producaoAcompanhamento)
         const { getFieldDecorator } = this.props.form
         const rows = this.props.producaoAcompanhamento
         .filter(setor => {
-            console.log('parseInt(this.props.idSetor)', parseInt(this.props.idSetor))
-            console.log('setor.id', setor.id)
             return (parseInt(this.props.idSetor) === setor.id)
         })
         .map(setor => {
-            console.log('setor', setor)
             return(
                 setor.producoes.filter(producao => {
-                    console.log('producao.dataInicial', producao.dataInicial)
-                    console.log('this.state.dataAcompanhamento', this.state.dataAcompanhamento)
                     return(producao.dataInicial === this.state.dataAcompanhamento)
                 })
                 .map(producao => {
                     return(
                         <React.Fragment key={producao.id}>
-                            <Row type="flex" style={{padding: '0 10px 0 10px', alignItems: 'center'}}>
+                            <Row type="flex" className="producaoProducoes" style={{padding: '0 10px 0 10px', alignItems: 'center'}}>
                                 <Col span={6} style={{paddingLeft: 10}}>
                                     <h4>{producao.nome}</h4>
                                 </Col>
-                                <Col span={18}>
+                                <Col span={18} className="producaoSubprodutos">
                                 {
                                 producao.produtos.map(produto => {
                                     return(
-                                        <Row key={produto.id} type="flex" style={{padding: '0 10px 0 10px', alignItems: 'center'}}>
-                                            <Col span={8} style={{paddingLeft: 10}}>
-                                                <h4>{produto.nome} ({produto.cor.nome})</h4>
-                                            </Col>
-                                            <Col span={16} align="begining">
-                                                {
-                                                    produto.subprodutos.map((subproduto, index) => {
-                                                        return(
-                                                            <Row key={subproduto.id} type="flex" style={{alignItems: 'center'}}>
-                                                                <Col span={12} style={{borderWidth: 1}}>
-                                                                    <h4> - {subproduto.nome}</h4>
-                                                                </Col>
-                                                                <Col span={12}>
-                                                                    <Row type="flex" style={{alignItems: 'center'}}>
-                                                                        <Col span={12} align="middle">
-                                                                            <Form.Item key={subproduto.id} style={{width: '24%', marginBottom: 0}}>
-                                                                                {getFieldDecorator(`realizadoQuantidade_${subproduto.idAcompanhamento}`)(
-                                                                                    <Input onBlur={this.handleQuantidadeRealizadoBlur} />
-                                                                                )}
-                                                                            </Form.Item>
-                                                                        </Col>
-                                                                        <Col span={12} align="middle">
-                                                                            <h4>{subproduto.totalQuantidade}</h4>
-                                                                        </Col>
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        )
-                                                    })
-                                                }
-                                            </Col>
-                                        </Row>
+                                        <React.Fragment key={produto.id}>
+                                            <Row type="flex" style={{padding: '0 10px 0 10px', alignItems: 'center'}}>
+                                                <Col span={8}>
+                                                    <h4>{produto.nome} ({produto.cor.nome})</h4>
+                                                </Col>
+                                                <Col span={16} align="begining">
+                                                    {
+                                                        produto.subprodutos.map((subproduto, index) => {
+                                                            return(
+                                                                <Row key={subproduto.id} type="flex" style={{alignItems: 'center'}}>
+                                                                    <Col span={12} style={{borderWidth: 1}}>
+                                                                        <h4> - {subproduto.nome}</h4>
+                                                                    </Col>
+                                                                    <Col span={12}>
+                                                                        <Row type="flex" style={{alignItems: 'center'}}>
+                                                                            <Col span={12} align="middle">
+                                                                                <Form.Item key={subproduto.id} style={{width: '24%', marginBottom: 0}}>
+                                                                                    {getFieldDecorator(`realizadoQuantidade_${subproduto.idAcompanhamento}`)(
+                                                                                        <Input onBlur={this.handleQuantidadeRealizadoBlur} />
+                                                                                    )}
+                                                                                </Form.Item>
+                                                                            </Col>
+                                                                            <Col span={12} align="middle">
+                                                                                <h4>{subproduto.totalQuantidade}</h4>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+                                                            )
+                                                        })
+                                                    }
+                                                </Col>
+                                            </Row>
+                                        </React.Fragment>
                                     )
                                 })
                                 }
                                 </Col>
                             </Row>
-                            <Divider style={{margin: '12px 0'}} />
                         </React.Fragment>
                     )
                 })

@@ -27,7 +27,7 @@ class Acompanhamento extends Component {
     }
 
     requestGetProducaoAcompanhamento = (id) => {
-        var filter = id !== null ? '?id_producao='+id : ''
+        var filter = (id !== null && typeof(id) !== 'undefined') ? '?id_producao='+id : ''
         axios
         .get(this.props.backEndPoint + '/getProducaoAcompanhamento'+filter)
         .then(res => {
