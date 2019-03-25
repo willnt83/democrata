@@ -181,7 +181,7 @@ class AcompanhamentoSetor extends Component {
                                                                     <Col span={12}>
                                                                         <Row type="flex" style={{alignItems: 'center'}}>
                                                                             <Col span={12} align="middle">
-                                                                                <Form.Item key={subproduto.id} style={{width: '24%', marginBottom: 0}}>
+                                                                                <Form.Item key={subproduto.id} style={{width: '50px', marginBottom: 0}}>
                                                                                     {getFieldDecorator(`realizadoQuantidade_${subproduto.idAcompanhamento}`)(
                                                                                         <Input onBlur={this.handleQuantidadeRealizadoBlur} />
                                                                                     )}
