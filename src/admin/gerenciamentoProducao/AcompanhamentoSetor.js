@@ -56,10 +56,11 @@ class AcompanhamentoSetor extends Component {
     handleQuantidadeRealizadoBlur = (element) => {
         var idAcompanhamento = element.target.id.replace('realizadoQuantidade_', '')
 
-        var request = {
+        var request = []
+        request.push({
             idAcompanhamento: parseInt(idAcompanhamento),
             realizadoQuantidade: parseInt(element.target.value)
-        }
+        })
 
         this.requestUpdateRealizadoQuantidade(request)
     }
