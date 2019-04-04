@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, DatePicker, notification } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, DatePicker } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
@@ -142,25 +142,6 @@ class DiasNaoUteis extends Component {
                 console.log('erro no formulário')
             }
         })
-    }
-
-    showNotification = (msg, success) => {
-        var type = null
-        var style = null
-        if(success){
-            type = 'check-circle'
-            style = {color: '#4ac955', fontWeight: '800'}
-        }
-        else {
-            type = 'exclamation-circle'
-            style = {color: '#f5222d', fontWeight: '800'}
-        }
-        const args = {
-            message: msg,
-            icon:  <Icon type={type} style={style} />,
-            duration: 3
-        }
-        notification.open(args)
     }
 
     compareByAlph = (a, b) => {

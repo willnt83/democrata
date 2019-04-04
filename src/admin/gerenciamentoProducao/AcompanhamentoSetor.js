@@ -174,14 +174,14 @@ class AcompanhamentoSetor extends Component {
                                                     {
                                                         produto.subprodutos.map((subproduto, index) => {
                                                             return(
-                                                                <Row key={subproduto.id} type="flex" style={{alignItems: 'center'}}>
+                                                                <Row key={index+'_'+subproduto.id} type="flex" style={{alignItems: 'center'}}>
                                                                     <Col span={12} style={{borderWidth: 1}}>
                                                                         <h4> - {subproduto.nome}</h4>
                                                                     </Col>
                                                                     <Col span={12}>
                                                                         <Row type="flex" style={{alignItems: 'center'}}>
                                                                             <Col span={12} align="middle">
-                                                                                <Form.Item key={subproduto.id} style={{width: '50px', marginBottom: 0}}>
+                                                                                <Form.Item style={{width: '50px', marginBottom: 0}}>
                                                                                     {getFieldDecorator(`realizadoQuantidade_${subproduto.idAcompanhamento}`)(
                                                                                         <Input onBlur={this.handleQuantidadeRealizadoBlur} />
                                                                                     )}

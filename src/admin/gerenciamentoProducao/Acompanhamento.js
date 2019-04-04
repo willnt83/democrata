@@ -23,7 +23,8 @@ class Acompanhamento extends Component {
 
     state = {
         tabs: [],
-        tabSetorId: null
+        tabSetorId: null,
+        firstLoad: true
     }
 
     requestGetProducaoAcompanhamento = (id) => {
@@ -39,10 +40,15 @@ class Acompanhamento extends Component {
                             key: setor.id,
                             description: setor.nome
                         })
-                    }),
-                    tabSetorId: res.data.payload[0].id
+                    })
                 })
                 this.props.setProducaoAcompanhamento(res.data.payload)
+                if(this.state.firstLoad){
+                    this.setState({
+                        tabSetorId: res.data.payload[0].id,
+                        firstLoad: false
+                    })
+                }
             }
             else
                 console.log('Nenhum registro encontrado')
@@ -54,6 +60,8 @@ class Acompanhamento extends Component {
     }
 
     handleTabChange = (key) => {
+        //var prodId = !this.props.producaoMainData ? null : this.props.producaoMainData.key
+        //this.requestGetProducaoAcompanhamento(prodId)
         this.setState({tabSetorId: key})
     }
 
