@@ -109,45 +109,51 @@ class ListMenu extends Component{
                             </Link>
                         </Menu.Item>
                         <Menu.Item key="11">
+                            <Link to="/admin/cadastros/funcionarios">
+                                <Icon type="right-square" />
+                                <span>Funcionários</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item key="12">
                             <Link to="/admin/cadastros/dias-nao-uteis">
                                 <Icon type="right-square" />
                                 <span>Dias não Úteis</span>
                             </Link>
                         </Menu.Item>
                     </SubMenu>
-                    <Menu.Item key="12">
+                    <Menu.Item key="13">
                         <Link to="/admin/producao">
                             <Icon type="area-chart" />
                             <span>Produção</span>
                         </Link>
                     </Menu.Item>
-                    <Menu.Item key="13">
+                    <Menu.Item key="14">
                         <Link to="/admin/estoque">
                             <Icon type="gold" />
                             <span>Estoque</span>
                         </Link>
                     </Menu.Item>
                     <SubMenu key="sub2" title={<span><Icon type="bar-chart" /><span>Relatórios</span></span>}>
-                        <Menu.Item key="14">
+                        <Menu.Item key="15">
                             <Link to="/admin/relatorios/produtos-cadastrados">
                                 <Icon type="right-square" />
                                 <span>Produtos Cadastrados</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="15">
+                        <Menu.Item key="16">
                             <Link to="/admin/relatorios/producoes">
                                 <Icon type="right-square" />
                                 <span>Produções</span>
                             </Link>
                         </Menu.Item>
                     </SubMenu>
-                    <Menu.Item key="16">
+                    <Menu.Item key="17">
                         <Link to="/admin/configuracoes">
                             <Icon type="setting" />
                             <span>Configurações</span>
                         </Link>
                     </Menu.Item>
-                    <Menu.Item key="17" onClick={() => this.logout()}>
+                    <Menu.Item key="18" onClick={() => this.logout()}>
                         <Icon type="export" />
                         <span>Sair</span>
                     </Menu.Item>

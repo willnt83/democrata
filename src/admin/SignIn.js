@@ -49,6 +49,7 @@ class SignIn extends Component {
 					senha: values.senha
 				})
 				.then(res => {
+					console.log('response: ', res)
 					if(res.data.success){
 						var setores = null
 						if(res.data.payload.setores.length > 0){

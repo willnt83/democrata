@@ -34,8 +34,9 @@ class PerfisDeAcesso extends Component {
             placeholder: 'Carregando...',
             disabled: true
         },
-        //idSetor: null,
-        setorFieldRedered: false
+        setorFieldRedered: false,
+        setoresOptionsLoaded: false,
+        selectedSetores: []
     }
 
     requestGetPerfis = () => {
@@ -52,7 +53,7 @@ class PerfisDeAcesso extends Component {
                         nome: perfil.nome,
                         administrativoValue: perfil.administrativo,
                         administrativoDescription: administrativo,
-                        setor: perfil.setor,
+                        setores: perfil.setores,
                         ativoValue: perfil.ativo,
                         ativoDescription: ativo
                     })
@@ -105,7 +106,7 @@ class PerfisDeAcesso extends Component {
             }
             else
                 console.log('Nenhum registro de setor encontrado')
-            this.setState({tableLoading: false})
+            this.setState({tableLoading: false, setoresOptionsLoaded: true})
         })
         .catch(error => {
             console.log(error)
@@ -119,7 +120,6 @@ class PerfisDeAcesso extends Component {
             this.props.form.resetFields()
             this.setState({perfilId: null, administrativo: null})
         }
-
         this.setState({showPerfisModal})
     }
 
@@ -128,16 +128,26 @@ class PerfisDeAcesso extends Component {
         if(typeof(record) !== "undefined") {
             // Edit
             if(record.administrativoValue === 'N'){
-                //this.setState({administrativo: 'N', setorFieldRedered: true, idSetor: record.setor.id})
                 this.setState({administrativo: 'N', setorFieldRedered: true})
             }
 
             this.props.form.setFieldsValue({
                 nome: record.nome,
                 administrativo: record.administrativoValue,
-                ativo: record.ativoValue
+                ativo: record.ativoValue,
             })
-            this.setState({perfilId: record.key})
+            if(record.setores){
+                var selectedSetores = record.setores.map(setor => {
+                    return(
+                        setor.id
+                    )
+                })
+                this.setState({
+                    perfilId: record.key,
+                    selectedSetores
+                })
+            }
+            
         }
         else{
             this.props.form.setFieldsValue({
@@ -156,7 +166,6 @@ class PerfisDeAcesso extends Component {
         axios
         .get(this.props.backEndPoint + '/deletePerfil?id='+id)
         .then(res => {
-            console.log('deleteUnidade response', res)
             this.requestGetPerfis()
         })
         .catch(error => {
@@ -167,8 +176,6 @@ class PerfisDeAcesso extends Component {
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
-                console.log('values', values)
-
                 var id = this.state.perfilId ? this.state.perfilId : null
                 var setores = null
                 if(values.setores){
@@ -205,12 +212,18 @@ class PerfisDeAcesso extends Component {
         this.requestGetPerfis()
     }
 
-    componentWillUpdate(){
+    componentWillUpdate(nextProps, nextState){
         if(this.state.setorFieldRedered){
             //this.props.form.setFieldsValue({setor: this.state.idSetor})
             this.setState({setorFieldRedered: false})
         }
-
+        if(this.state.setoresOptionsLoaded === false && nextState.setoresOptionsLoaded === true){
+            this.props.form.setFieldsValue({
+                setores: nextState.selectedSetores
+            })
+            // Resetando flag
+            this.setState({setoresOptionsLoaded: false})
+        }
 
     }
 

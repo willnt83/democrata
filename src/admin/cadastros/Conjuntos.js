@@ -152,7 +152,6 @@ class Conjuntos extends Component {
     }
 
     loadConjuntosModal = (record) => {
-        console.log('record', record)
         this.loadSetoresOptions()
         this.loadSubprodutosOptions()
         if(typeof(record) !== "undefined") {
@@ -191,13 +190,17 @@ class Conjuntos extends Component {
             var subprodutosQtde = this.state.subprodutos.map(subproduto => {
                 return(subproduto.quantidade)
             })
+            var subprodutosPontos = this.state.subprodutos.map(subproduto => {
+                return(subproduto.pontos)
+            })
 
             // Atualizando id, que é a variável que controla o add e remove de campos
             id = (this.state.subprodutos.length)
 
             this.props.form.setFieldsValue({
                 subprodutos,
-                subprodutosQtde
+                subprodutosQtde,
+                subprodutosPontos
             })
 
             this.setState({dynamicFieldsRendered: false})
@@ -260,7 +263,8 @@ class Conjuntos extends Component {
                     .map((subproduto, index) => {
                         return ({
                             id: subproduto,
-                            quantidade: parseInt(values.subprodutosQtde[index])
+                            quantidade: parseInt(values.subprodutosQtde[index]),
+                            pontos: parseInt(values.subprodutosPontos[index])
                         })
                     })
                     .filter(subproduto => {
@@ -275,7 +279,6 @@ class Conjuntos extends Component {
                     setor: values.setor,
                     subprodutos: subprodutos
                 }
-                console.log('request', request)
                 this.requestCreateUpdateConjunto(request)
             }
             else{
@@ -294,7 +297,7 @@ class Conjuntos extends Component {
         const keys = getFieldValue('keys')
         const composicaoItems = keys.map((k, index) => (
             <Row key={k} gutter={5}>
-                <Col span={18} id="subprodutos" style={{position: 'relative'}}>
+                <Col span={14} id="subprodutos" style={{position: 'relative'}}>
                     <Form.Item>
                         {getFieldDecorator(`subprodutos[${k}]`, {
                             rules: [{
@@ -317,7 +320,7 @@ class Conjuntos extends Component {
                         )}
                     </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col span={4}>
                     <Form.Item>
                         {getFieldDecorator(`subprodutosQtde[${k}]`, {
                             rules: [{
@@ -325,8 +328,19 @@ class Conjuntos extends Component {
                             }],
                         })(
                             <Input
-                                style={{ width: '75%', marginRight: 8 }}
+                                style={{ width: '100%' }}
                                 placeholder="Qtd"
+                            />
+                        )}
+                    </Form.Item>
+                </Col>
+                <Col span={6}>
+                    <Form.Item>
+                        {getFieldDecorator(`subprodutosPontos[${k}]`)(
+                            <Input
+                                style={{ width: '75%', marginRight: 8 }}
+                                placeholder="Pontos"
+                                title="Quantidade de pontos por unidade produzida"
                             />
                         )}
                         {keys.length > 1 ? (
@@ -494,7 +508,7 @@ class Conjuntos extends Component {
                                 {composicaoItems}
                                 <Row>
                                     <Col span={24}>
-                                        <Button key="primary" title="Novo subproduto" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
+                                        <Button key="primary" title="Novo conjunto" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
                                     </Col>
                                 </Row>
                             </Form>

@@ -13,6 +13,7 @@ import ListMenu from "./layout/ListMenu"
 import Unidades from "./cadastros/Unidades"
 import Usuarios from "./cadastros/Usuarios"
 import PerfisDeAcesso from "./cadastros/PerfisDeAcesso"
+import Funcionarios from "./cadastros/Funcionarios"
 import Setores from "./cadastros/Setores"
 import Produtos from "./cadastros/Produtos"
 import SubProdutos from "./cadastros/Subprodutos"
@@ -96,6 +97,12 @@ const routes = [
 		main: () => <DiasNaoUteis />
 	},
 	{
+		path: "/admin/cadastros/funcionarios",
+		exact: true,
+		sidebar: () => <div>Cadastro/Funcionários</div>,
+		main: () => <Funcionarios />
+	},
+	{
 		path: "/admin/producao",
 		exact: true,
 		sidebar: () => <div>Produção</div>,
@@ -106,15 +113,13 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Produção/Acompanhamento</div>,
 		main: () => <Acompanhamento />
-	}
-	,
+	},
 	{
 		path: "/admin/relatorios/produtos-cadastrados",
 		exact: true,
 		sidebar: () => <div>Relatórios/Produtos Cadastrados</div>,
 		main: () => <RelatorioProdutosCadastrados />
-	}
-	,
+	},
 	{
 		path: "/admin/relatorios/producoes",
 		exact: true,
