@@ -5,7 +5,6 @@ import { Layout, Tabs } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
-
 import AcompanhamentoSetor from './AcompanhamentoSetor'
 //import ptBr from 'antd/lib/locale-provider/pt_BR'
 import moment from 'moment'
@@ -60,8 +59,6 @@ class Acompanhamento extends Component {
     }
 
     handleTabChange = (key) => {
-        //var prodId = !this.props.producaoMainData ? null : this.props.producaoMainData.key
-        //this.requestGetProducaoAcompanhamento(prodId)
         this.setState({tabSetorId: key})
     }
 
@@ -91,7 +88,6 @@ class Acompanhamento extends Component {
                                 </Tabs.TabPane>
                             )
                         })
-                        
                     }
                 </Tabs>
             </Content>

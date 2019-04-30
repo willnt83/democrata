@@ -247,6 +247,22 @@ class Producao extends Component {
         this.props.history.push('/admin/producao/acompanhamento')
     }
 
+    gerarCodigoDeBarras = (id) => {
+        console.log('-gerarCodigoDeBarras-')
+        this.setState({tableLoading: true})
+        axios
+        .get(this.props.backEndPoint + '/gerarCodigosDeBarras?id_producao='+id)
+        .then(res => {
+            console.log('response', res)
+            window.open(this.props.backEndPoint + '/' + res.data.payload.url, '_blank');
+            this.setState({tableLoading: false})
+        })
+        .catch(error => {
+            console.log(error)
+            this.setState({tableLoading: false})
+        })
+    }
+
     componentWillMount(){
         this.requestGetProducoes()
     }
@@ -368,7 +384,8 @@ class Producao extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="eye" style={{cursor: 'pointer'}} title="Acompanhar produção" onClick={() => this.goToAcompanharProducao(record)} />
+                        <Icon type="barcode" style={{cursor: 'pointer'}} title="Gerar código de barras" onClick={() => this.gerarCodigoDeBarras(record.key)} />
+                        <Icon type="eye" style={{cursor: 'pointer', marginLeft: 20}} title="Acompanhar produção" onClick={() => this.goToAcompanharProducao(record)} />
                         <Icon type="edit" style={{cursor: 'pointer', marginLeft: 20}} title="Editar" onClick={() => this.loadProducaoModal(record)} />
                         <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeletePcp(record.key)}>
                             <a href="/admin/producao" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>

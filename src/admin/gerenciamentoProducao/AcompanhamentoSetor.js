@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Input, Select, Icon, notification } from 'antd'
+import { Row, Col, Form, Input, Select, Icon, notification, Button } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
 import moment from 'moment'
+import LancamentoProducao from './LancamentoProducao'
 
 class AcompanhamentoSetor extends Component {
     state = {
@@ -11,7 +12,9 @@ class AcompanhamentoSetor extends Component {
         dataAcompanhamento: moment().format('YYYY-MM-DD'),
         //dataAcompanhamento: '2019-03-14',
         tryToSetValues: true,
-        firstRender: true
+        firstRender: true,
+        showModalLancamentoProducao: false,
+        funcionariosOptions: []
     }
 
     requestUpdateRealizadoQuantidade = (request) => {
@@ -29,6 +32,26 @@ class AcompanhamentoSetor extends Component {
         })
         .catch(error => {
             console.log(error)
+        })
+    }
+
+    requestGetFuncionarios = () => {
+        axios
+        .get(this.props.backEndPoint + '/getFuncionarios')
+        .then(res => {
+            console.log('response', res.data)
+            this.setState({
+                funcionariosOptions: res.data.payload.map(funcionario => {
+                    return({
+                        value: funcionario.id,
+                        description: funcionario.nome
+                    })
+                })
+            })
+            this.showModalLancamentoProducaoF(true)
+        })
+        .catch(error => {
+            console.log('error', error)
         })
     }
 
@@ -106,6 +129,14 @@ class AcompanhamentoSetor extends Component {
         strObj += '}'
         var obj  = JSON.parse(strObj)
         this.props.form.setFieldsValue(obj)
+    }
+
+    loadModalLancamentoProducao = () => {
+        this.requestGetFuncionarios()
+    }
+
+    showModalLancamentoProducaoF = (bool) => {
+        this.setState({showModalLancamentoProducao: bool})
     }
 
     showNotification = (msg, success) => {
@@ -210,57 +241,72 @@ class AcompanhamentoSetor extends Component {
             )
         })
         return(
-            <Form layout="inline">
-                <Row>
-                    <Col span={24}>
-                        <h3>Produção {this.props.nomeSetor}</h3>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col span={24}>
-                        <Form.Item label="Data do acompanhamento" title="Data de acompanhamento">
-                            {getFieldDecorator('dataAcompanhamento', {
-                                initialValue: moment().format('YYYY-MM-DD')
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    onChange={this.handleChangeDataAcompanhamento}
-                                    getPopupContainer={() => document.getElementById('contentAcompanhamento')}
-                                >
-                                    {
-                                        this.state.dataAcompanhamentoOptions.map((item) => {
-                                            return (<Select.Option key={item.value} value={item.value}>{item.description}</Select.Option>)
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                    </Col>
-                </Row>
+            <React.Fragment>
+                <Form layout="inline">
+                    <Row>
+                        <Col span={24}>
+                            <h3>Produção {this.props.nomeSetor}</h3>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={12}>
+                            <Form.Item label="Data do acompanhamento" title="Data de acompanhamento">
+                                {getFieldDecorator('dataAcompanhamento', {
+                                    initialValue: moment().format('YYYY-MM-DD')
+                                })(
+                                    <Select
+                                        style={{ width: '100%' }}
+                                        onChange={this.handleChangeDataAcompanhamento}
+                                        getPopupContainer={() => document.getElementById('contentAcompanhamento')}
+                                    >
+                                        {
+                                            this.state.dataAcompanhamentoOptions.map((item) => {
+                                                return (<Select.Option key={item.value} value={item.value}>{item.description}</Select.Option>)
+                                            })
+                                        }
+                                    </Select>
+                                )}
+                            </Form.Item>
+                        </Col>
+                        <Col span={12} align="end">
+                            {
+                                this.props.producaoMainData ?
+                                <Button type="primary" onClick={this.loadModalLancamentoProducao}><Icon type="barcode" /> Lançamento de Produção</Button>
+                                : null
+                            }
+                            
+                        </Col>
+                    </Row>
 
-                <Row type="flex" style={{backgroundColor: '#cbd8ed', padding: '0 10px 0 10px', marginBottom: 12, alignItems: 'center'}} gutter={8}>
-                    <Col span={6}>
-                        <h3>Produções</h3>
-                    </Col>
-                    <Col span={6}>
-                        <h3>Produtos</h3>
-                    </Col>
-                    <Col span={6}>
-                        <h3>Conjuntos</h3>
-                    </Col>
-                    <Col span={6} align="middle">
-                        <Row>
-                            <Col span={12} align="middle">
-                                <h3>Realizado</h3>
-                            </Col>
-                            <Col span={12} align="middle">
-                                <h3>Total</h3>
-                            </Col>
-                        </Row>
-                    </Col>
-                </Row>
-                {rows}
-            </Form>
+                    <Row type="flex" style={{backgroundColor: '#cbd8ed', padding: '0 10px 0 10px', marginBottom: 12, alignItems: 'center'}} gutter={8}>
+                        <Col span={6}>
+                            <h3>Produções</h3>
+                        </Col>
+                        <Col span={6}>
+                            <h3>Produtos</h3>
+                        </Col>
+                        <Col span={6}>
+                            <h3>Conjuntos</h3>
+                        </Col>
+                        <Col span={6} align="middle">
+                            <Row>
+                                <Col span={12} align="middle">
+                                    <h3>Realizado</h3>
+                                </Col>
+                                <Col span={12} align="middle">
+                                    <h3>Total</h3>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                    {rows}
+                </Form>
+                <LancamentoProducao
+                    funcionariosOptions={this.state.funcionariosOptions}
+                    showModalLancamentoProducao={this.state.showModalLancamentoProducao}
+                    showModalLancamentoProducaoF={this.showModalLancamentoProducaoF}
+                />
+            </React.Fragment>
         )
     }
 }
