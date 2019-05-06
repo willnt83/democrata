@@ -1,12 +1,9 @@
 import React, { Component } from 'react'
-//import { Layout, Tabs, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, DatePicker, Divider } from 'antd'
 import { Layout, Tabs } from 'antd'
-//import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
 import AcompanhamentoSetor from './AcompanhamentoSetor'
-//import ptBr from 'antd/lib/locale-provider/pt_BR'
 import moment from 'moment'
 import 'moment/locale/pt-br'
 moment.locale('pt-br')
