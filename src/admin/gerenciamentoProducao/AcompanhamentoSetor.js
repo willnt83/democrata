@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
 import moment from 'moment'
-import LancamentoProducao from './LancamentoProducao'
 
 class AcompanhamentoSetor extends Component {
     state = {
@@ -12,9 +11,7 @@ class AcompanhamentoSetor extends Component {
         dataAcompanhamento: moment().format('YYYY-MM-DD'),
         //dataAcompanhamento: '2019-03-14',
         tryToSetValues: true,
-        firstRender: true,
-        showModalLancamentoProducao: false,
-        funcionariosOptions: []
+        firstRender: true
     }
 
     requestUpdateRealizadoQuantidade = (request) => {
@@ -32,26 +29,6 @@ class AcompanhamentoSetor extends Component {
         })
         .catch(error => {
             console.log(error)
-        })
-    }
-
-    requestGetFuncionarios = () => {
-        axios
-        .get(this.props.backEndPoint + '/getFuncionarios')
-        .then(res => {
-            console.log('response', res.data)
-            this.setState({
-                funcionariosOptions: res.data.payload.map(funcionario => {
-                    return({
-                        value: funcionario.id,
-                        description: funcionario.nome
-                    })
-                })
-            })
-            this.showModalLancamentoProducaoF(true)
-        })
-        .catch(error => {
-            console.log('error', error)
         })
     }
 
@@ -129,14 +106,6 @@ class AcompanhamentoSetor extends Component {
         strObj += '}'
         var obj  = JSON.parse(strObj)
         this.props.form.setFieldsValue(obj)
-    }
-
-    loadModalLancamentoProducao = () => {
-        this.requestGetFuncionarios()
-    }
-
-    showModalLancamentoProducaoF = (bool) => {
-        this.setState({showModalLancamentoProducao: bool})
     }
 
     showNotification = (msg, success) => {
@@ -268,14 +237,6 @@ class AcompanhamentoSetor extends Component {
                                 )}
                             </Form.Item>
                         </Col>
-                        <Col span={12} align="end">
-                            {
-                                this.props.producaoMainData ?
-                                <Button type="primary" onClick={this.loadModalLancamentoProducao}><Icon type="barcode" /> Lançamento de Produção</Button>
-                                : null
-                            }
-                            
-                        </Col>
                     </Row>
 
                     <Row type="flex" style={{backgroundColor: '#cbd8ed', padding: '0 10px 0 10px', marginBottom: 12, alignItems: 'center'}} gutter={8}>
@@ -301,11 +262,6 @@ class AcompanhamentoSetor extends Component {
                     </Row>
                     {rows}
                 </Form>
-                <LancamentoProducao
-                    funcionariosOptions={this.state.funcionariosOptions}
-                    showModalLancamentoProducao={this.state.showModalLancamentoProducao}
-                    showModalLancamentoProducaoF={this.showModalLancamentoProducaoF}
-                />
             </React.Fragment>
         )
     }

@@ -1,13 +1,15 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, DatePicker, Divider } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, DatePicker, Divider, notification } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
 import ptBr from 'antd/lib/locale-provider/pt_BR'
 import moment from 'moment'
+import LancamentoProducao from './LancamentoProducao'
 import 'moment/locale/pt-br'
 moment.locale('pt-br')
+
 
 const { Content } = Layout
 let id = 0
@@ -34,7 +36,28 @@ class Producao extends Component {
         idProducao: null,
         buttonSalvarProducaoLoading: false,
         dynamicFieldsRendered: false,
-        produtos: []
+        produtos: [],
+        showModalLancamentoProducao: false,
+        funcionariosOptions: []
+    }
+
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 1
+        }
+        notification.open(args)
     }
 
     requestGetProducoes = () => {
@@ -263,6 +286,34 @@ class Producao extends Component {
         })
     }
 
+    loadModalLancamentoProducao = () => {
+        this.requestGetFuncionarios()
+    }
+
+    requestGetFuncionarios = () => {
+        axios
+        .get(this.props.backEndPoint + '/getFuncionarios')
+        .then(res => {
+            console.log('response', res.data)
+            this.setState({
+                funcionariosOptions: res.data.payload.map(funcionario => {
+                    return({
+                        value: funcionario.id,
+                        description: funcionario.nome
+                    })
+                })
+            })
+            this.showModalLancamentoProducaoF(true)
+        })
+        .catch(error => {
+            console.log('error', error)
+        })
+    }
+
+    showModalLancamentoProducaoF = (bool) => {
+        this.setState({showModalLancamentoProducao: bool})
+    }
+
     componentWillMount(){
         this.requestGetProducoes()
     }
@@ -407,6 +458,7 @@ class Producao extends Component {
 
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
+                        <Button className="buttonOrange" onClick={this.loadModalLancamentoProducao} style={{marginRight: 10}}><Icon type="barcode" /> Lançamento Código de Barras</Button>
                         <Button className="buttonBlue" onClick={() => this.goToAcompanharProducao()} style={{marginRight: 10}}><Icon type="eye" /> Visão Geral</Button>
                         <Tooltip title="Criar novo PCP" placement="right">
                             <Button className="buttonGreen" onClick={() => this.loadProducaoModal()}><Icon type="plus" /> Novo PCP</Button>
@@ -497,6 +549,11 @@ class Producao extends Component {
                         </Col>
                     </Row>
                 </Modal>
+                <LancamentoProducao
+                    funcionariosOptions={this.state.funcionariosOptions}
+                    showModalLancamentoProducao={this.state.showModalLancamentoProducao}
+                    showModalLancamentoProducaoF={this.showModalLancamentoProducaoF}
+                />
           </Content>
         )
     }
