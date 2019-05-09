@@ -7,6 +7,8 @@ import { withRouter } from "react-router-dom"
 import ptBr from 'antd/lib/locale-provider/pt_BR'
 import moment from 'moment'
 import LancamentoProducao from './LancamentoProducao'
+import ConferenciaProducao from './ConferenciaProducao'
+import EstornoProducao from './EstornoProducao'
 import 'moment/locale/pt-br'
 moment.locale('pt-br')
 
@@ -38,7 +40,8 @@ class Producao extends Component {
         dynamicFieldsRendered: false,
         produtos: [],
         showModalLancamentoProducao: false,
-        funcionariosOptions: []
+        showModalConferenciaProducao: false,
+        showModalEstornoProducao: false
     }
 
     showNotification = (msg, success) => {
@@ -286,32 +289,16 @@ class Producao extends Component {
         })
     }
 
-    loadModalLancamentoProducao = () => {
-        this.requestGetFuncionarios()
-    }
-
-    requestGetFuncionarios = () => {
-        axios
-        .get(this.props.backEndPoint + '/getFuncionarios')
-        .then(res => {
-            console.log('response', res.data)
-            this.setState({
-                funcionariosOptions: res.data.payload.map(funcionario => {
-                    return({
-                        value: funcionario.id,
-                        description: funcionario.nome
-                    })
-                })
-            })
-            this.showModalLancamentoProducaoF(true)
-        })
-        .catch(error => {
-            console.log('error', error)
-        })
-    }
-
     showModalLancamentoProducaoF = (bool) => {
         this.setState({showModalLancamentoProducao: bool})
+    }
+
+    showModalConferenciaProducaoF = (bool) => {
+        this.setState({showModalConferenciaProducao: bool})
+    }
+
+    showModalEstornoProducaoF = (bool) => {
+        this.setState({showModalEstornoProducao: bool})
     }
 
     componentWillMount(){
@@ -457,8 +444,12 @@ class Producao extends Component {
             >
 
                 <Row style={{ marginBottom: 16 }}>
-                    <Col span={24} align="end">
-                        <Button className="buttonOrange" onClick={this.loadModalLancamentoProducao} style={{marginRight: 10}}><Icon type="barcode" /> Lançamento Código de Barras</Button>
+                    <Col span={14}>
+                        <Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /> Lançamento Código de Barras</Button>
+                        <Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /> Conferência</Button>
+                        <Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /> Estorno</Button>
+                    </Col>
+                    <Col span={10} align="end">
                         <Button className="buttonBlue" onClick={() => this.goToAcompanharProducao()} style={{marginRight: 10}}><Icon type="eye" /> Visão Geral</Button>
                         <Tooltip title="Criar novo PCP" placement="right">
                             <Button className="buttonGreen" onClick={() => this.loadProducaoModal()}><Icon type="plus" /> Novo PCP</Button>
@@ -550,9 +541,19 @@ class Producao extends Component {
                     </Row>
                 </Modal>
                 <LancamentoProducao
-                    funcionariosOptions={this.state.funcionariosOptions}
                     showModalLancamentoProducao={this.state.showModalLancamentoProducao}
                     showModalLancamentoProducaoF={this.showModalLancamentoProducaoF}
+                    showNotification={this.showNotification}
+                />
+                <ConferenciaProducao
+                    showModalConferenciaProducao={this.state.showModalConferenciaProducao}
+                    showModalConferenciaProducaoF={this.showModalConferenciaProducaoF}
+                    showNotification={this.showNotification}
+                />
+                <EstornoProducao
+                    showModalEstornoProducao={this.state.showModalEstornoProducao}
+                    showModalEstornoProducaoF={this.showModalEstornoProducaoF}
+                    showNotification={this.showNotification}
                 />
           </Content>
         )

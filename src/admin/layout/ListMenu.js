@@ -99,7 +99,7 @@ class ListMenu extends Component{
                         <Menu.Item key="9">
                             <Link to="/admin/cadastros/usuarios">
                                 <Icon type="right-square" />
-                                <span>Usuarios</span>
+                                <span>Usuários</span>
                             </Link>
                         </Menu.Item>
                         <Menu.Item key="10">

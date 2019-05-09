@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Modal, Select, Icon, notification, Button, Divider } from 'antd'
+import { Row, Col, Form, Modal, Select, Icon, Button, Divider, Table } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -28,31 +28,14 @@ class LancamentoProducao extends Component{
             nomeMesSelecionado: null,
             idFuncionario: null,
             nomeFuncionario: null,
-            barcodes: []
+            tableData: [],
+            funcionariosOptions: [],
+            barcodeReader: false
         }
-        this.handleScan = this.handleScan.bind(this)
+        this.handleScanLancamento = this.handleScanLancamento.bind(this)
     }
 
-    showNotification = (msg, success) => {
-        var type = null
-        var style = null
-        if(success){
-            type = 'check-circle'
-            style = {color: '#4ac955', fontWeight: '800'}
-        }
-        else {
-            type = 'exclamation-circle'
-            style = {color: '#f5222d', fontWeight: '800'}
-        }
-        const args = {
-            message: msg,
-            icon:  <Icon type={type} style={style} />,
-            duration: 1
-        }
-        notification.open(args)
-    }
-
-    handleScan(data){
+    handleScanLancamento(data){
         if(this.state.idFuncionario !== null){
             var request = {
                 idFuncionario: this.state.idFuncionario,
@@ -61,7 +44,7 @@ class LancamentoProducao extends Component{
             this.requestLancamentoProducao(request)
         }
         else{
-            console.log('Selecione um funcionário!')
+            this.props.showNotification('Selecione um funcionário', false)
         }
     }
 
@@ -69,16 +52,30 @@ class LancamentoProducao extends Component{
         console.error(err)
     }
 
+    requestGetFuncionarios = () => {
+        axios
+        .get(this.props.backEndPoint + '/getFuncionarios')
+        .then(res => {
+            this.setState({
+                funcionariosOptions: res.data.payload.map(funcionario => {
+                    return({
+                        value: funcionario.id,
+                        description: funcionario.nome
+                    })
+                })
+            })
+        })
+        .catch(error => {
+            console.log('error', error)
+        })
+    }
+
     getCodigosDeBarrasLancados = (idFuncionario, dtInicial, dtFinal) => {
         axios
         .get(this.props.backEndPoint + '/getCodigosDeBarrasLancados?idFuncionario='+idFuncionario+'&dataInicial='+dtInicial+'&dataFinal='+dtFinal)
         .then(res => {
             this.setState({
-                barcodes: res.data.payload.map(barcode => {
-                    return(
-                        barcode
-                    )
-                })
+                tableData: res.data.payload
             })
            
         })
@@ -92,13 +89,12 @@ class LancamentoProducao extends Component{
         .post(this.props.backEndPoint + '/lancamentoCodigoDeBarras', request)
         .then(res => {
             if(res.data.success){
-                this.showNotification(res.data.msg, res.data.success)
-                this.setState({
-                    barcodes: [...this.state.barcodes, request.barcode]
-                })
+                this.props.showNotification(res.data.msg, res.data.success)
+                var range = this.getMonthDateRange(2019, this.state.mesSelecionado)
+                this.getCodigosDeBarrasLancados(this.state.idFuncionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
             }
             else{
-                this.showNotification(res.data.msg, res.data.success)
+                this.props.showNotification(res.data.msg, res.data.success)
             }
         })
         .catch(error => {
@@ -116,19 +112,8 @@ class LancamentoProducao extends Component{
 
     getMonthDateRange = (year, month) => {
         var moment = require('moment');
-    
-        // month in moment is 0 based, so 9 is actually october, subtract 1 to compensate
-        // array is 'year', 'month', 'day', etc
         var startDate = moment([year, month - 1]);
-    
-        // Clone the value before .endOf()
         var endDate = moment(startDate).endOf('month');
-    
-        // just for demonstration:
-        console.log(startDate.toDate());
-        console.log(endDate.toDate());
-    
-        // make sure to call toDate() for plain JavaScript date type
         return { start: startDate, end: endDate };
     }
 
@@ -150,30 +135,92 @@ class LancamentoProducao extends Component{
 
     alterarFuncionario = () => {
         this.setState({
+            mesSelecionado: null,
+            nomeMesSelecionado: null,
             idFuncionario: null,
             nomeFuncionario: null,
-            barcodes: []
+            tableData: []
         })
+    }
+
+    closeModal = () => {
+        this.setState({
+            barcodeReader: false,
+            mesSelecionado: null,
+            nomeMesSelecionado: null,
+            idFuncionario: null,
+            nomeFuncionario: null,
+            tableData: []
+        })
+        this.props.showModalLancamentoProducaoF(false)
+    }
+
+    componentWillReceiveProps(nextProps){
+        if(!this.props.showModalLancamentoProducao && nextProps.showModalLancamentoProducao){
+            this.requestGetFuncionarios()
+            this.setState({barcodeReader: true})
+        }
     }
 
     render(){
         const { getFieldDecorator } = this.props.form
+
+        const columns = [{
+            title: 'ID',
+            dataIndex: 'id',
+            sorter: (a, b) => a.key - b.key,
+        },
+        {
+            title: 'Produção',
+            dataIndex: 'producao.nome',
+            sorter: (a, b) => this.compareByAlph(a.producao.nome, b.producao.nome)
+        },
+        {
+            title: 'Produto',
+            dataIndex: 'produto.nome',
+            sorter: (a, b) => this.compareByAlph(a.produto.nome, b.produto.nome)
+        },
+        {
+            title: 'Cor',
+            dataIndex: 'produto.cor',
+            sorter: (a, b) => this.compareByAlph(a.produto.cor, b.produto.cor)
+        },
+        {
+            title: 'Conjunto',
+            dataIndex: 'conjunto.nome',
+            sorter: (a, b) => this.compareByAlph(a.conjunto.nome, b.conjunto.nome)
+        },
+        {
+            title: 'Setor',
+            dataIndex: 'setor.nome',
+            sorter: (a, b) => this.compareByAlph(a.setor.nome, b.setor.nome)
+        },
+        {
+            title: 'Subproduto',
+            dataIndex: 'subproduto.nome',
+            sorter: (a, b) => this.compareByAlph(a.subproduto.nome, b.subproduto.nome)
+        }]
+
         return(
             <Modal
                 title="Lançamento de Produção"
                 visible={this.props.showModalLancamentoProducao}
-                onCancel={() => this.props.showModalLancamentoProducaoF(false)}
+                onCancel={this.closeModal}
                 footer={[
-                    <Button type="primary" key="back" onClick={() => this.props.showModalLancamentoProducaoF(false)}><Icon type="close" /> Fechar</Button>,
+                    <Button type="primary" key="back" onClick={this.closeModal}> Fechar</Button>,
                 ]}
-                width={900}
+                width={1200}
             >
                 <Row>
                     <Col span={24} id="colLancamentoProducao" style={{position: 'relative'}}>
-                        <BarcodeReader
-                            onError={this.handleError}
-                            onScan={this.handleScan}
-                        />
+                        {
+                            this.state.barcodeReader ?
+                            <BarcodeReader
+                                onError={this.handleError}
+                                onScan={this.handleScanLancamento}
+                            />
+                            :null
+                        }
                         {
                             this.state.idFuncionario === null ?
                             <Form layout="vertical">
@@ -220,7 +267,7 @@ class LancamentoProducao extends Component{
                                                     onChange={this.funcionarioSelecionado}
                                                 >
                                                     {
-                                                        this.props.funcionariosOptions.map((option) => {
+                                                        this.state.funcionariosOptions.map((option) => {
                                                             return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
                                                         })
                                                     }
@@ -248,13 +295,14 @@ class LancamentoProducao extends Component{
                         }
                         <Divider />
                         {
-                            this.state.barcodes.map(barcode => {
-                                return(
-                                    <Row key={barcode}>
-                                        <Col span={24} align="left" className="bold">{barcode}</Col>
-                                    </Row>
-                                )
-                            })
+                            this.state.tableData.length > 0 ?
+                            <Table
+                                columns={columns}
+                                dataSource={this.state.tableData}
+                                rowKey='id'
+                                pagination={false}
+                            />
+                            : null
                         }
                     </Col>
                 </Row>
