@@ -10,6 +10,7 @@ class EstornoProducao extends Component{
         super(props)
         this.state = {
             idProducao: null,
+            nomeProducao: null,
             producoesOptions: [],
             tableData: [],
             barcodeReader: false
@@ -18,9 +19,9 @@ class EstornoProducao extends Component{
     }
 
     handleScanEstorno(data){
-        if(this.state.idFuncionario !== null){
+        if(this.state.idProducao !== null){
             var request = {
-                idFuncionario: this.state.idFuncionario,
+                idProducao: this.state.idProducao,
                 barcode: data
             }
             this.requestEstornoProducao(request)
@@ -84,7 +85,10 @@ class EstornoProducao extends Component{
     }
 
     producaoChange = (value, e) => {
-        this.setState({nomeProducao: e.props.children})
+        console.log('-producaoChange-')
+        this.setState({
+            nomeProducao: e.props.children
+        })
     }
 
     producaoSelecionada = () => {
@@ -125,6 +129,7 @@ class EstornoProducao extends Component{
     }
 
     render(){
+        console.log('this.state.tableData', this.state.tableData)
         const { getFieldDecorator } = this.props.form
 
         const columns = [{
