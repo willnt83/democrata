@@ -45,6 +45,7 @@ class Conjuntos extends Component {
         .get(this.props.backEndPoint + '/getConjuntos')
         .then(res => {
             if(res.data.payload){
+                console.log('res.data.payload', res.data.payload)
                 var tableData = res.data.payload.map(conjunto => {
                     var ativo = conjunto.ativo === 'Y' ? 'Sim' : 'Não'
                     return({
@@ -194,6 +195,8 @@ class Conjuntos extends Component {
                 return(subproduto.pontos)
             })
 
+            console.log('subprodutosPontos', subprodutosPontos)
+
             // Atualizando id, que é a variável que controla o add e remove de campos
             id = (this.state.subprodutos.length)
 
@@ -264,7 +267,7 @@ class Conjuntos extends Component {
                         return ({
                             id: subproduto,
                             quantidade: parseInt(values.subprodutosQtde[index]),
-                            pontos: parseInt(values.subprodutosPontos[index])
+                            pontos: parseFloat(values.subprodutosPontos[index])
                         })
                     })
                     .filter(subproduto => {
