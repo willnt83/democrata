@@ -5,31 +5,26 @@ import axios from "axios"
 import { withRouter } from "react-router-dom"
 import BarcodeReader from 'react-barcode-reader'
 
-class ConferenciaProducao extends Component{
+class EstornoProducao extends Component{
     constructor(props){
         super(props)
         this.state = {
-            mostrar: false,
-            producoesOptions: [],
-            setoresOptions: [],
-            subprodutosOptions: [],
             idProducao: null,
-            idSetor: null,
-            idSubproduto: null,
             nomeProducao: null,
+            producoesOptions: [],
             tableData: [],
             barcodeReader: false
         }
-        this.handleScanConferencia = this.handleScanConferencia.bind(this)
+        this.handleScanEstorno = this.handleScanEstorno.bind(this)
     }
 
-    handleScanConferencia(data){
-        if(this.state.idFuncionario !== null){
+    handleScanEstorno(data){
+        if(this.state.idProducao !== null){
             var request = {
                 idProducao: this.state.idProducao,
                 barcode: data
             }
-            this.requestConferenciaProducao(request)
+            this.requestEstornoProducao(request)
         }
         else{
             this.props.showNotification('Selecione uma produção', false)
@@ -58,28 +53,11 @@ class ConferenciaProducao extends Component{
         })
     }
 
-    requestGetSetoresTitulo = () => {
+    requestGetCodigosDeBarrasEstornados = (idProducao) => {
         axios
-        .get(this.props.backEndPoint + '/getSetoresTitulo')
+        .get(this.props.backEndPoint + '/getCodigosDeBarrasEstornados?idProducao='+idProducao)
         .then(res => {
-            this.setState({
-                setoresOptions: res.data.payload.map(setor => {
-                    return({
-                        value: setor.id,
-                        description: setor.id+' - '+setor.nome
-                    })
-                })
-            })
-        })
-        .catch(error => {
-            console.log(error)
-        })
-    }
-
-    requestGetCodigosDeBarrasProducao = (idProducao, idSetor, idSubproduto) => {
-        axios
-        .get(this.props.backEndPoint + '/getCodigosDeBarrasProducao?idProducao='+idProducao+'&idSetor='+idSetor+'&idSubproduto='+idSubproduto)
-        .then(res => {
+            console.log('response', res.data.payload)
             this.setState({
                 tableData: res.data.payload
             })
@@ -89,21 +67,13 @@ class ConferenciaProducao extends Component{
         })
     }
 
-    requestConferenciaProducao = (request) => {
+    requestEstornoProducao = (request) => {
         axios
-        .post(this.props.backEndPoint + '/conferenciaCodigoDeBarras', request)
+        .post(this.props.backEndPoint + '/estornoCodigoDeBarras', request)
         .then(res => {
             if(res.data.success){
-                var tableData = this.state.tableData
-                var i = null
-                tableData.forEach((row, index) => {
-                    if(parseInt(row.id) === parseInt(res.data.payload.id))
-                        i = index
-                })
-                tableData[i].codigoDeBarras.conferido = 'Y'
-                this.setState({tableData})
-
                 this.props.showNotification(res.data.msg, res.data.success)
+                this.requestGetCodigosDeBarrasEstornados(this.state.idProducao)
             }
             else{
                 this.props.showNotification(res.data.msg, res.data.success)
@@ -115,41 +85,17 @@ class ConferenciaProducao extends Component{
     }
 
     producaoChange = (value, e) => {
+        console.log('-producaoChange-')
         this.setState({
-            idProducao: value,
             nomeProducao: e.props.children
         })
     }
 
-    setorChange = (value) => {
-        console.log('setor', value)
-        this.setState({
-            idSetor: value
-        })
-
-        axios
-        .get(this.props.backEndPoint + '/getSubprodutosPorProducaoSetor?idProducao='+this.state.idProducao+'&idSetor='+value)
-        .then(res => {
-            console.log('res.data.payload', res.data.payload)
-            this.setState({
-                subprodutosOptions: res.data.payload.map(subproduto => {
-                    return({
-                        value: subproduto.id,
-                        description: subproduto.nome
-                    })
-                })
-            })
-        })
-        .catch(error => {
-            console.log(error)
-        })
-    }
-
-    selecionada = () => {
+    producaoSelecionada = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if(!err){
-                this.setState({mostrar: true})
-                this.requestGetCodigosDeBarrasProducao(values.producao, values.setor, values.subproduto)
+                this.setState({idProducao: values.producao})
+                this.requestGetCodigosDeBarrasEstornados(values.producao)
             }
             else{
                 console.log('erro no formulário')
@@ -159,7 +105,6 @@ class ConferenciaProducao extends Component{
 
     alterarProducao = () => {
         this.setState({
-            mostrar: false,
             idProducao: null,
             nomeProducao: null,
             tableData: []
@@ -168,24 +113,23 @@ class ConferenciaProducao extends Component{
 
     closeModal = () => {
         this.setState({
-            mostrar: false,
             barcodeReader: false,
             idProducao: null,
             nomeProducao: null,
             tableData: []
         })
-        this.props.showModalConferenciaProducaoF(false)
+        this.props.showModalEstornoProducaoF(false)
     }
 
     componentWillReceiveProps(nextProps){
-        if(!this.props.showModalConferenciaProducao && nextProps.showModalConferenciaProducao){
+        if(!this.props.showModalEstornoProducao && nextProps.showModalEstornoProducao){
             this.requestGetProducoesTitulo()
-            this.requestGetSetoresTitulo()
             this.setState({barcodeReader: true})
         }
     }
 
     render(){
+        console.log('this.state.tableData', this.state.tableData)
         const { getFieldDecorator } = this.props.form
 
         const columns = [{
@@ -224,36 +168,15 @@ class ConferenciaProducao extends Component{
             sorter: (a, b) => this.compareByAlph(a.subproduto.nome, b.subproduto.nome)
         },
         {
-            title: 'Lançado',
-            dataIndex: 'lancado',
-            align: 'center',
-            render: (text, record) => {
-                return(
-                    record.codigoDeBarras.lancado === 'Y' ?
-                    <Icon type="check" style={{color: '#13a54b'}} />
-                    :
-                    <Icon type="close" style={{color: '#ea2c2c'}} />
-                )
-            }
-        },
-        {
-            title: 'Conferido',
-            dataIndex: 'conferido',
-            align: 'center',
-            render: (text, record) => {
-                return(
-                    record.codigoDeBarras.conferido === 'Y' ?
-                    <Icon type="check" style={{color: '#13a54b'}} />
-                    :
-                    <Icon type="close" style={{color: '#ea2c2c'}} />
-                )
-            }
+            title: 'Funcionário',
+            dataIndex: 'funcionario.nome',
+            sorter: (a, b) => this.compareByAlph(a.funcionario.nome, b.funcionario.nome)
         }]
 
         return(
             <Modal
-                title="Lançamento de Produção"
-                visible={this.props.showModalConferenciaProducao}
+                title="Estorno de Produção"
+                visible={this.props.showModalEstornoProducao}
                 onCancel={this.closeModal}
                 footer={[
                     <Button type="primary" key="back" onClick={this.closeModal}><Icon type="close" /> Fechar</Button>,
@@ -261,17 +184,17 @@ class ConferenciaProducao extends Component{
                 width={1200}
             >
                 <Row>
-                    <Col span={24} id="colConferenciaProducao" style={{position: 'relative'}}>
+                    <Col span={24} id="colEstornoProducao" style={{position: 'relative'}}>
                         {
                             this.state.barcodeReader ?
                             <BarcodeReader
                                 onError={this.handleError}
-                                onScan={this.handleScanConferencia}
+                                onScan={this.handleScanEstorno}
                             />
                             :null
                         }
                         {
-                            !this.state.mostrar ?
+                            this.state.idProducao === null ?
                             <Form layout="vertical">
                                 <Row gutter={10}>
                                     <Col span={6}>
@@ -286,7 +209,7 @@ class ConferenciaProducao extends Component{
                                                 <Select
                                                     style={{ width: '100%' }}
                                                     placeholder="Selecione"
-                                                    getPopupContainer={() => document.getElementById('colConferenciaProducao')}
+                                                    getPopupContainer={() => document.getElementById('colEstornoProducao')}
                                                     allowClear={true}
                                                     onChange={this.producaoChange}
                                                 >
@@ -298,56 +221,11 @@ class ConferenciaProducao extends Component{
                                                 </Select>
                                             )}
                                         </Form.Item>
-                                        <Form.Item label="Setor">
-                                            {getFieldDecorator('setor', {
-                                                rules: [
-                                                    {
-                                                        required: true, message: 'Por favor selecione o setor',
-                                                    }
-                                                ]
-                                            })(
-                                                <Select
-                                                    style={{ width: '100%' }}
-                                                    placeholder="Selecione"
-                                                    getPopupContainer={() => document.getElementById('colConferenciaProducao')}
-                                                    allowClear={true}
-                                                    onChange={this.setorChange}
-                                                >
-                                                    {
-                                                        this.state.setoresOptions.map((option) => {
-                                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                        })
-                                                    }
-                                                </Select>
-                                            )}
-                                        </Form.Item>
-                                        <Form.Item label="Subproduto">
-                                            {getFieldDecorator('subproduto', {
-                                                rules: [
-                                                    {
-                                                        required: true, message: 'Por favor selecione o subproduto',
-                                                    }
-                                                ]
-                                            })(
-                                                <Select
-                                                    style={{ width: '100%' }}
-                                                    placeholder="Selecione"
-                                                    getPopupContainer={() => document.getElementById('colConferenciaProducao')}
-                                                    allowClear={true}
-                                                >
-                                                    {
-                                                        this.state.subprodutosOptions.map((option) => {
-                                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                        })
-                                                    }
-                                                </Select>
-                                            )}
-                                        </Form.Item>
                                     </Col>
                                 </Row>
                                 <Row>
                                     <Col span={6}>
-                                        <Button className="buttonGreen" key="submit" onClick={() => this.selecionada()}><Icon type="check" /> Selecionar</Button>
+                                        <Button className="buttonGreen" key="submit" onClick={() => this.producaoSelecionada()}><Icon type="check" /> Selecionar</Button>
                                     </Col>
                                 </Row>
                             </Form>
@@ -389,4 +267,4 @@ const mapDispatchToProps = (dispatch) => {
     return {}
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(withRouter(ConferenciaProducao)))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(withRouter(EstornoProducao)))

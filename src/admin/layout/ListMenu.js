@@ -146,14 +146,20 @@ class ListMenu extends Component{
                                 <span>Produções</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item key="17">
+                            <Link to="/admin/relatorios/pontuacoes-por-funcionarios">
+                                <Icon type="right-square" />
+                                <span>Pontuações por Funcionários</span>
+                            </Link>
+                        </Menu.Item>
                     </SubMenu>
-                    <Menu.Item key="17">
+                    <Menu.Item key="18">
                         <Link to="/admin/configuracoes">
                             <Icon type="setting" />
                             <span>Configurações</span>
                         </Link>
                     </Menu.Item>
-                    <Menu.Item key="18" onClick={() => this.logout()}>
+                    <Menu.Item key="19" onClick={() => this.logout()}>
                         <Icon type="export" />
                         <span>Sair</span>
                     </Menu.Item>

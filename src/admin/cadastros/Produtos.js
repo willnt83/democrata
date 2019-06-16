@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, Divider } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, Divider, notification } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
@@ -43,6 +43,25 @@ class Produtos extends Component {
         conjuntosOptions: []
     }
 
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 3
+        }
+        notification.open(args)
+    }
+
     requestGetProdutosFull = () => {
         this.setState({tableLoading: true})
         axios
@@ -54,6 +73,7 @@ class Produtos extends Component {
                     return({
                         key: produto.id,
                         nome: produto.nome,
+                        codigo: produto.codigo,
                         ativoDescription: ativo,
                         ativoValue: produto.ativo,
                         cor: produto.cor,
@@ -81,11 +101,9 @@ class Produtos extends Component {
             if(res.data.success){
                 this.showProdutosModal(false)
                 this.requestGetProdutosFull()
-                this.setState({buttonSalvarProduto: false})
             }
-            else
-                console.log('Não foi possível cadastrar / atualizar o produto')
-            
+            this.showNotification(res.data.msg, res.data.success)
+            this.setState({buttonSalvarProduto: false})
         })
         .catch(error =>{
             console.log(error)
@@ -234,6 +252,7 @@ class Produtos extends Component {
             // Edit
             this.props.form.setFieldsValue({
                 nome: record.nome,
+                codigo: record.codigo,
                 ativo: record.ativoValue,
                 cor: record.cor.id,
                 linhaDeProducao: record.linhaDeProducao.id,
@@ -259,7 +278,6 @@ class Produtos extends Component {
                 ativo: 'Y'
             })
         }
-
         this.showProdutosModal(true)
     }
     
@@ -282,6 +300,7 @@ class Produtos extends Component {
                 var request = {
                     id: id,
                     nome: values.nome,
+                    codigo: values.codigo,
                     cor: values.cor,
                     ativo: values.ativo,
                     idLinhaDeProducao: values.linhaDeProducao,
@@ -509,6 +528,20 @@ class Produtos extends Component {
                                         <Input
                                             id="nome"
                                             placeholder="Digite o nome do produto"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Código">
+                                    {getFieldDecorator('codigo', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o código do produto',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="codigo"
+                                            placeholder="Digite o código do produto"
                                         />
                                     )}
                                 </Form.Item>

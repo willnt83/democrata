@@ -25,6 +25,7 @@ import Producao from "./gerenciamentoProducao/Producao"
 import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
 import RelatorioProducoes from "./relatorios/RelatorioProducoes"
+import RelatorioFuncionariosPontuacoes from "./relatorios/RelatorioFuncionariosPontuacoes"
 
 
 const { Header, Sider, Footer } = Layout
@@ -125,6 +126,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Relatórios/Produções</div>,
 		main: () => <RelatorioProducoes />
+	},
+	{
+		path: "/admin/relatorios/pontuacoes-por-funcionarios",
+		exact: true,
+		sidebar: () => <div>Relatórios/Pontuações por Funcionários</div>,
+		main: () => <RelatorioFuncionariosPontuacoes />
 	}
 ];
 

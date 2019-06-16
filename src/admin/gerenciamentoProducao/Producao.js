@@ -273,13 +273,26 @@ class Producao extends Component {
         this.props.history.push('/admin/producao/acompanhamento')
     }
 
+    gerarCodigoDeBarrasCSV = (id) => {
+        this.setState({tableLoading: true})
+        axios
+        .get(this.props.backEndPoint + '/gerarCodigosDeBarrasCSV?id_producao='+id)
+        .then(res => {
+            console.log('abrir', this.props.backEndPoint + '/' + res.data.payload.url)
+            window.open(this.props.backEndPoint + '/' + res.data.payload.url, '_blank');
+            this.setState({tableLoading: false})
+        })
+        .catch(error => {
+            console.log(error)
+            this.setState({tableLoading: false})
+        })
+    }
+
     gerarCodigoDeBarras = (id) => {
-        console.log('-gerarCodigoDeBarras-')
         this.setState({tableLoading: true})
         axios
         .get(this.props.backEndPoint + '/gerarCodigosDeBarras?id_producao='+id)
         .then(res => {
-            console.log('response', res)
             window.open(this.props.backEndPoint + '/' + res.data.payload.url, '_blank');
             this.setState({tableLoading: false})
         })
@@ -418,11 +431,12 @@ class Producao extends Component {
             colSpan: 2,
             dataIndex: 'operacao',
             align: 'center',
-            width: 150,
+            width: 200,
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="barcode" style={{cursor: 'pointer'}} title="Gerar código de barras" onClick={() => this.gerarCodigoDeBarras(record.key)} />
+                        <Icon type="file-excel" style={{cursor: 'pointer'}} title="Gerar código de barras em CSV" onClick={() => this.gerarCodigoDeBarrasCSV(record.key)} />
+                        <Icon type="barcode" style={{cursor: 'pointer', marginLeft: 20}} title="Gerar código de barras em PDF" onClick={() => this.gerarCodigoDeBarras(record.key)} />
                         <Icon type="eye" style={{cursor: 'pointer', marginLeft: 20}} title="Acompanhar produção" onClick={() => this.goToAcompanharProducao(record)} />
                         <Icon type="edit" style={{cursor: 'pointer', marginLeft: 20}} title="Editar" onClick={() => this.loadProducaoModal(record)} />
                         <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeletePcp(record.key)}>

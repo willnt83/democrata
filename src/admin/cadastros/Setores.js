@@ -28,7 +28,7 @@ class Setores extends Component {
     requestGetSetores = () => {
         this.setState({tableLoading: true})
         axios
-        .get(this.props.backEndPoint + '/getSetores')
+        .get(this.props.backEndPoint + '/getSetores?param1=09320')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(setor => {

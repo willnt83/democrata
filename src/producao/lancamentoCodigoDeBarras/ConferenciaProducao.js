@@ -274,7 +274,7 @@ class ConferenciaProducao extends Component{
                             !this.state.mostrar ?
                             <Form layout="vertical">
                                 <Row gutter={10}>
-                                    <Col span={6}>
+                                    <Col span={24}>
                                         <Form.Item label="Produção">
                                             {getFieldDecorator('producao', {
                                                 rules: [

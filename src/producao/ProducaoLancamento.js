@@ -288,8 +288,9 @@ class ProducaoLancamento extends Component{
         return (
             <Form layout="vertical">
                 <Affix offsetTop={0}>
-                    <Row style={{backgroundColor: '#fff', paddingTop: 20}}>
+                    <Row style={{backgroundColor: '#fff'}}>
                         <Col xs={24}>
+                            <h3>Lançamento Manual</h3>
                             <Row style={{marginBottom: 10}}>
                                 <Col xs={24} id="colData">
                                     <Form.Item style={{marginBottom: 0, paddingBottom: 0}}>

@@ -6,6 +6,9 @@ import moment from 'moment'
 import "antd/dist/antd.css"
 import axios from "axios"
 import PageTitle from "./layout/PageTitle"
+import LancamentoProducao from './lancamentoCodigoDeBarras/LancamentoProducao'
+import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
+import EstornoProducao from './lancamentoCodigoDeBarras/EstornoProducao'
 
 
 import ProducaoLancamento from './ProducaoLancamento'
@@ -18,7 +21,10 @@ class IndexProducao extends Component {
 	state = {
 		collapsed: false,
 		showModalLogout: false,
-        btnConfirmarLoading: false
+		btnConfirmarLoading: false,
+		showModalLancamentoProducao: false,
+		showModalConferenciaProducao: false,
+		showModalEstornoProducao: false
 	};
 
 	toggle = () => {
@@ -49,6 +55,18 @@ class IndexProducao extends Component {
         .catch(error =>{
             console.log(error)
         })
+	}
+	
+	showModalLancamentoProducaoF = (bool) => {
+        this.setState({showModalLancamentoProducao: bool})
+	}
+	
+	showModalConferenciaProducaoF = (bool) => {
+        this.setState({showModalConferenciaProducao: bool})
+    }
+
+    showModalEstornoProducaoF = (bool) => {
+        this.setState({showModalEstornoProducao: bool})
     }
 
 	componentWillMount(){
@@ -56,19 +74,6 @@ class IndexProducao extends Component {
             this.props.resetAll()
             window.location.replace("/")
 		}
-
-		// Routes
-		/*
-		this.setState({
-			routes: this.props.session.setores.map(setor => {
-				return({
-					path: setor.slug,
-					extact: true,
-					main: () => <ProducaoLancamento idSetor={setor.id} />
-				})
-			})
-		})
-		*/
 	}
 
 	render() {
@@ -120,6 +125,19 @@ class IndexProducao extends Component {
 									*/}
 								</Row>
 							</Header>
+							<Content style={{ margin: '24px 16px 0', flex: 'initial'}}>
+								<div style={{ padding: 24, background: '#fff'}}>
+									<h3>Lançamento por Código de Barras</h3>
+									<Row>
+										<Col xs={24}>
+											<Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
+											<Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>
+											<Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /></Button>
+										</Col>
+									</Row>
+								</div>
+							</Content>
+							
 							<Content style={{ margin: '24px 16px 0'}}>
 								<div style={{ padding: 24, background: '#fff', minHeight: '100%'}}>
 								{
@@ -154,6 +172,21 @@ class IndexProducao extends Component {
 				>
 					<p>Você está prestes a sair do sistema. Todos os dados não salvos serão perdidos!</p>
 				</Modal>
+				<LancamentoProducao
+                    showModalLancamentoProducao={this.state.showModalLancamentoProducao}
+                    showModalLancamentoProducaoF={this.showModalLancamentoProducaoF}
+                    showNotification={this.showNotification}
+                />
+                <ConferenciaProducao
+                    showModalConferenciaProducao={this.state.showModalConferenciaProducao}
+                    showModalConferenciaProducaoF={this.showModalConferenciaProducaoF}
+                    showNotification={this.showNotification}
+                />
+                <EstornoProducao
+                    showModalEstornoProducao={this.state.showModalEstornoProducao}
+                    showModalEstornoProducaoF={this.showModalEstornoProducaoF}
+                    showNotification={this.showNotification}
+                />
 			</React.Fragment>
 		);
 	}
