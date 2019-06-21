@@ -18,6 +18,8 @@ import Setores from "./cadastros/Setores"
 import Produtos from "./cadastros/Produtos"
 import SubProdutos from "./cadastros/Subprodutos"
 import Conjuntos from "./cadastros/Conjuntos"
+import Insumos	 from "./cadastros/Insumos"
+import UnidadesMedidas	 from "./cadastros/UnidadesMedidas"
 import LinhaDeProducao from "./cadastros/LinhaDeProducao"
 import Cores from "./cadastros/Cores"
 import DiasNaoUteis from "./cadastros/DiasNaoUteis"
@@ -103,6 +105,18 @@ const routes = [
 		sidebar: () => <div>Cadastro/Funcionários</div>,
 		main: () => <Funcionarios />
 	},
+	{
+		path: "/admin/cadastros/insumos",
+		exact: true,
+		sidebar: () => <div>Cadastro/Insumos</div>,
+		main: () => <Insumos />
+	},
+	{
+		path: "/admin/cadastros/unidadesmedidas",
+		exact: true,
+		sidebar: () => <div>Cadastro/Unidades de Medidas</div>,
+		main: () => <UnidadesMedidas />
+	},			
 	{
 		path: "/admin/producao",
 		exact: true,

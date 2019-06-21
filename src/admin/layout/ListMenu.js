@@ -78,88 +78,100 @@ class ListMenu extends Component{
                             </Link>
                         </Menu.Item>
                         <Menu.Item key="6">
+                            <Link to="/admin/cadastros/insumos">
+                                <Icon type="right-square" />
+                                <span>Insumos</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item key="7">
+                            <Link to="/admin/cadastros/unidadesmedidas">
+                                <Icon type="right-square" />
+                                <span>Unidades de Medidas</span>
+                            </Link>
+                        </Menu.Item>                        
+                        <Menu.Item key="8">
                             <Link to="/admin/cadastros/linha-de-producao">
                                 <Icon type="right-square" />
                                 <span>Linha de Produção</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="7">
+                        <Menu.Item key="9">
                             <Link to="/admin/cadastros/cores">
                                 <Icon type="right-square" />
                                 <span>Cores</span>
                             </Link>
                         </Menu.Item>
 
-                        <Menu.Item key="8">
+                        <Menu.Item key="10">
                             <Link to="/admin/cadastros/unidades">
                                 <Icon type="right-square" />
                                 <span>Unidades</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="9">
+                        <Menu.Item key="11">
                             <Link to="/admin/cadastros/usuarios">
                                 <Icon type="right-square" />
                                 <span>Usuários</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="10">
+                        <Menu.Item key="12">
                             <Link to="/admin/cadastros/perfis-de-acesso">
                                 <Icon type="right-square" />
                                 <span>Perfis de Acesso</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="11">
+                        <Menu.Item key="13">
                             <Link to="/admin/cadastros/funcionarios">
                                 <Icon type="right-square" />
                                 <span>Funcionários</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="12">
+                        <Menu.Item key="14">
                             <Link to="/admin/cadastros/dias-nao-uteis">
                                 <Icon type="right-square" />
                                 <span>Dias não Úteis</span>
                             </Link>
                         </Menu.Item>
                     </SubMenu>
-                    <Menu.Item key="13">
+                    <Menu.Item key="15">
                         <Link to="/admin/producao">
                             <Icon type="area-chart" />
                             <span>Produção</span>
                         </Link>
                     </Menu.Item>
-                    <Menu.Item key="14">
+                    <Menu.Item key="16">
                         <Link to="/admin/estoque">
                             <Icon type="gold" />
                             <span>Estoque</span>
                         </Link>
                     </Menu.Item>
                     <SubMenu key="sub2" title={<span><Icon type="bar-chart" /><span>Relatórios</span></span>}>
-                        <Menu.Item key="15">
+                        <Menu.Item key="17">
                             <Link to="/admin/relatorios/produtos-cadastrados">
                                 <Icon type="right-square" />
                                 <span>Produtos Cadastrados</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="16">
+                        <Menu.Item key="18">
                             <Link to="/admin/relatorios/producoes">
                                 <Icon type="right-square" />
                                 <span>Produções</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="17">
+                        <Menu.Item key="19">
                             <Link to="/admin/relatorios/pontuacoes-por-funcionarios">
                                 <Icon type="right-square" />
                                 <span>Pontuações por Funcionários</span>
                             </Link>
                         </Menu.Item>
                     </SubMenu>
-                    <Menu.Item key="18">
+                    <Menu.Item key="20">
                         <Link to="/admin/configuracoes">
                             <Icon type="setting" />
                             <span>Configurações</span>
                         </Link>
                     </Menu.Item>
-                    <Menu.Item key="19" onClick={() => this.logout()}>
+                    <Menu.Item key="21" onClick={() => this.logout()}>
                         <Icon type="export" />
                         <span>Sair</span>
                     </Menu.Item>
