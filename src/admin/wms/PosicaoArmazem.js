@@ -192,7 +192,7 @@ class PosicaoArmazem extends Component {
             sorter: (a, b) => a.key - b.key,
         }, {
             title: 'Posição',
-            dataIndex: 'posição',
+            dataIndex: 'posicao',
             sorter: (a, b) => this.compareByAlph(a.description, b.description)
         }, {
             title: 'Almoxarifado',

@@ -148,7 +148,7 @@ class ListMenu extends Component{
                         <Menu.Item key="62">
                             <Link to="/admin/wms/posicaoarmazem">
                                 <Icon type="right-square" />
-                                <span>PosicaoArmazem</span>
+                                <span>Pos. do Armazém</span>
                             </Link>
                         </Menu.Item>                        
                     </SubMenu>                   
