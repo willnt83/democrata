@@ -76,19 +76,7 @@ class ListMenu extends Component{
                                 <Icon type="right-square" />
                                 <span>Conjuntos</span>
                             </Link>
-                        </Menu.Item>
-                        <Menu.Item key="6">
-                            <Link to="/admin/cadastros/insumos">
-                                <Icon type="right-square" />
-                                <span>Insumos</span>
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item key="7">
-                            <Link to="/admin/cadastros/unidadesmedidas">
-                                <Icon type="right-square" />
-                                <span>Unidades de Medidas</span>
-                            </Link>
-                        </Menu.Item>                        
+                        </Menu.Item>                      
                         <Menu.Item key="8">
                             <Link to="/admin/cadastros/linha-de-producao">
                                 <Icon type="right-square" />
@@ -101,7 +89,6 @@ class ListMenu extends Component{
                                 <span>Cores</span>
                             </Link>
                         </Menu.Item>
-
                         <Menu.Item key="10">
                             <Link to="/admin/cadastros/unidades">
                                 <Icon type="right-square" />
@@ -139,13 +126,39 @@ class ListMenu extends Component{
                             <span>Produção</span>
                         </Link>
                     </Menu.Item>
+                    <SubMenu key="sub2" title={<span><Icon type="solution" /><span>WMS</span></span>}>
+                        <Menu.Item key="6">
+                            <Link to="/admin/wms/unidadesmedida">
+                                <Icon type="right-square" />
+                                <span>Unid. de Medida</span>
+                            </Link>
+                        </Menu.Item> 
+                        <Menu.Item key="61">
+                            <Link to="/admin/wms/almoxarifados">
+                                <Icon type="right-square" />
+                                <span>Almoxarifados</span>
+                            </Link>
+                        </Menu.Item>                                                
+                        <Menu.Item key="7">
+                            <Link to="/admin/wms/insumos">
+                                <Icon type="right-square" />
+                                <span>Insumos</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item key="62">
+                            <Link to="/admin/wms/posicaoarmazem">
+                                <Icon type="right-square" />
+                                <span>PosicaoArmazem</span>
+                            </Link>
+                        </Menu.Item>                        
+                    </SubMenu>                   
                     <Menu.Item key="16">
                         <Link to="/admin/estoque">
                             <Icon type="gold" />
                             <span>Estoque</span>
                         </Link>
                     </Menu.Item>
-                    <SubMenu key="sub2" title={<span><Icon type="bar-chart" /><span>Relatórios</span></span>}>
+                    <SubMenu key="sub3" title={<span><Icon type="bar-chart" /><span>Relatórios</span></span>}>
                         <Menu.Item key="17">
                             <Link to="/admin/relatorios/produtos-cadastrados">
                                 <Icon type="right-square" />

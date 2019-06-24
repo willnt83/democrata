@@ -23,11 +23,17 @@ class Insumos extends Component {
         showInsumosModal: false,
         tableLoading: false,
         buttonSalvarInsumo: false,
-        unidadeMedidasOptions: [],
-        unidadeMedidasSelectStatus: {
+        unidadeOptions: [],
+        unidadeMedidaOptions: [],
+        unidadeSelectStatus: {
             placeholder: 'Carregando...',
-            disabled: false
-        }
+            disabled: true
+        },
+        unidadeMedidaSelectStatus: {
+            placeholder: 'Carregando...',
+            disabled: true
+        },
+        dynamicFieldsRendered: false
     }
 
     requestGetInsumos = () => {
@@ -41,10 +47,13 @@ class Insumos extends Component {
                     return({
                         key: insumo.id,
                         nome: insumo.nome,
+                        categoria: insumo.categoria,
                         ativoValue: insumo.ativo,
                         ativoDescription: ativo,
-                        unidadeMedidasValue: insumo.idUnidadeMedidas,
-                        unidadeMedidasDescription: insumo.nomeUnidadeMedidas
+                        unidadeValue: insumo.idUnidade,
+                        unidadeDescription: insumo.nomeUnidade,                        
+                        unidadeMedidaValue: insumo.idUnidadeMedida,
+                        unidadeMedidaDescription: insumo.nomeUnidadeMedida
                     })
                 })
                 this.setState({tableData})
@@ -52,6 +61,64 @@ class Insumos extends Component {
             else{
                 console.log('Nenhum registro encontrado')
             }
+            this.setState({tableLoading: false})
+        })
+        .catch(error => {
+            console.log(error)
+            this.setState({tableLoading: false})
+        })
+    }
+
+    loadUnidadesOptions = () => {
+        this.setState({tableLoading: true})
+        axios
+        .get(this.props.backEndPoint + '/getUnidades?ativo=Y')
+        .then(res => {
+            if(res.data.payload){
+                this.setState({
+                    unidadeOptions: res.data.payload.map(unidade => {
+                        return({
+                            value: unidade.id,
+                            description: unidade.nome
+                        })
+                    }),
+                    unidadeSelectStatus: {
+                        placeholder: 'Selecione a Unidade',
+                        disabled: false
+                    }
+                })
+            }
+            else
+                console.log('Nenhum registro de unidade encontrada')
+            this.setState({tableLoading: false})
+        })
+        .catch(error => {
+            console.log(error)
+            this.setState({tableLoading: false})
+        })
+    }
+
+    loadUnidadesMedidaOptions = () => {
+        this.setState({tableLoading: true})
+        axios
+        .get(this.props.backEndPoint + '/getUnidadesMedida?ativo=Y')
+        .then(res => {
+            if(res.data.payload){
+                this.setState({
+                    unidadeMedidaOptions: res.data.payload.map(unidademedida => {
+                        return({
+                            value: unidademedida.id,
+                            description: unidademedida.nome
+                        })
+                    }),
+                    unidadeMedidaSelectStatus: {
+                        placeholder: 'Selecione a Unidade de Medida',
+                        disabled: false
+                    }
+                })
+            }
+            else
+                console.log('Nenhum registro de unidade de medida encontrada')
             this.setState({tableLoading: false})
         })
         .catch(error => {
@@ -84,16 +151,22 @@ class Insumos extends Component {
     }
 
     loadInsumosModal = (record) => {
-        this.loadUnidadesMedidasOptions()
+        this.loadUnidadesOptions()
+        this.loadUnidadesMedidaOptions()
         if(typeof(record) !== "undefined") {
             // Edit
             this.props.form.setFieldsValue({
                 nome: record.nome,
                 ativo: record.ativoValue,
-                unidademedidas: record.unidadeMedidasDescription
+                categoria: record.categoria,
+                unidade: record.unidadeValue,
+                unidademedida: record.unidadeMedidaValue
             })
 
-            this.setState({insumosId: record.key})
+            this.setState({
+                insumosId: record.key,
+                dynamicFieldsRendered: true
+            })
         }
         else{
             this.props.form.setFieldsValue({
@@ -101,6 +174,12 @@ class Insumos extends Component {
             })
         }
         this.showInsumosModal(true)
+    }
+
+    componentWillUpdate(){
+        if(this.state.dynamicFieldsRendered){
+            this.setState({dynamicFieldsRendered: false})
+        }
     }
 
     handleDeleteInsumo = (id) => {
@@ -115,6 +194,14 @@ class Insumos extends Component {
         })
     }
 
+    compareByAlph = (a, b) => {
+        if (a > b)
+            return -1
+        if (a < b)
+            return 1
+        return 0
+    }
+
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
@@ -123,7 +210,9 @@ class Insumos extends Component {
                     id: id,
                     nome: values.nome,
                     ativo: values.ativo,
-                    unidademedidas: values.unidademedidas,
+                    categoria: values.categoria,
+                    unidade: values.unidade,
+                    unidademedida: values.unidademedida,
                 }
                 this.requestCreateUpdateInsumo(request)
             }
@@ -131,43 +220,6 @@ class Insumos extends Component {
                 console.log('erro no formulário')
             }
         })
-    }
-
-    loadUnidadesMedidasOptions = () => {
-        this.setState({tableLoading: true})
-        axios
-        .get(this.props.backEndPoint + '/getUnidadesMedidas?ativo=Y')
-        .then(res => {
-            if(res.data.payload){
-                this.setState({
-                    unidadeMedidasOptions: res.data.payload.map(unidademedidas => {
-                        return({
-                            value: unidademedidas.id,
-                            description: unidademedidas.nome
-                        })
-                    }),
-                    unidadeMedidasSelectStatus: {
-                        placeholder: 'Selecione a Unidade de Medidas',
-                        disabled: false
-                    }
-                })
-            }
-            else
-                console.log('Nenhum registro de unidade de medidas encontrado')
-            this.setState({tableLoading: false})
-        })
-        .catch(error => {
-            console.log(error)
-            this.setState({tableLoading: false})
-        })
-    }
-
-    compareByAlph = (a, b) => {
-        if (a > b)
-            return -1
-        if (a < b)
-            return 1
-        return 0
     }
 
     componentWillMount(){
@@ -185,10 +237,19 @@ class Insumos extends Component {
             dataIndex: 'nome',
             sorter: (a, b) => this.compareByAlph(a.description, b.description)
         }, {
-            title: 'Unidade de Medidas',
-            dataIndex: 'unidadeMedidasDescription',
+            title: 'Categoria',
+            dataIndex: 'categoria',
+            sorter: (a, b) => this.compareByAlph(a.description, b.description)
+        }, {
+            title: 'Unidade de Medida',
+            dataIndex: 'unidadeMedidaDescription',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.unidadeMedidasDescription, b.unidadeMedidasDescription)
+            sorter: (a, b) => this.compareByAlph(a.unidadeMedidaDescription, b.unidadeMedidaDescription)
+        }, {
+            title: 'Unidade',
+            dataIndex: 'unidadeDescription',
+            align: 'center',
+            sorter: (a, b) => this.compareByAlph(a.unidadeDescription, b.unidadeDescription)
         }, {
             title: 'Ativo',
             dataIndex: 'ativoDescription',
@@ -272,6 +333,68 @@ class Insumos extends Component {
                                         />
                                     )}
                                 </Form.Item>
+                                <Form.Item
+                                    label="Categoria"
+                                >
+                                    {getFieldDecorator('categoria', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a categoria do insumo',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="categoria"
+                                            placeholder="Digite a categoria do insumo"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Unidade">
+                                    {getFieldDecorator('unidade', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione a unidade',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder={this.state.unidadeSelectStatus.placeholder}
+                                            disabled={this.state.unidadeSelectStatus.disabled}
+                                            getPopupContainer={() => document.getElementById('colCadastroDeInsumos')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                this.state.unidadeOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>                                
+                                <Form.Item label="Unidade de Medida">
+                                    {getFieldDecorator('unidademedida', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor selecione a unidade de medida',
+                                            }
+                                        ]
+                                    })(
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder={this.state.unidadeMedidaSelectStatus.placeholder}
+                                            disabled={this.state.unidadeMedidaSelectStatus.disabled}
+                                            getPopupContainer={() => document.getElementById('colCadastroDeInsumos')}
+                                            allowClear={true}
+                                        >
+                                            {
+                                                this.state.unidadeMedidaOptions.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
+                                    )}
+                                </Form.Item>
                                 <Form.Item label="Ativo">
                                     {getFieldDecorator('ativo', {
                                         rules: [
@@ -293,30 +416,7 @@ class Insumos extends Component {
                                             }
                                         </Select>
                                     )}
-                                </Form.Item>
-                                <Form.Item label="UnidadeMedidas">
-                                    {getFieldDecorator('unidademedidas', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor selecione a unidade de medidas',
-                                            }
-                                        ]
-                                    })(
-                                        <Select
-                                            style={{ width: '100%' }}
-                                            placeholder={this.state.unidadeMedidasSelectStatus.placeholder}
-                                            disabled={this.state.unidadeMedidasSelectStatus.disabled}
-                                            getPopupContainer={() => document.getElementById('colCadastroDeInsumos')}
-                                            allowClear={true}
-                                        >
-                                            {
-                                                this.state.unidadeMedidasOptions.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
-                                    )}
-                                </Form.Item>                                
+                                </Form.Item>                                                                
                             </Form>
                         </Col>
                     </Row>

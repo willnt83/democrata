@@ -11,33 +11,33 @@ const ativoOptions = [
     {value: 'N', description: 'Não'}
 ]
 
-class UnidadesMedidas extends Component {
+class Almoxarifados extends Component {
     constructor(props) {
         super()
-        props.setPageTitle('Unidades de Medidas')
+        props.setPageTitle('Almoxarifados')
     }
 
     state = {
-        unidadesMedidasId: null,
+        almoxarifadoId: null,
         tableData: [],
-        showUnidadesMedidasModal: false,
+        showAlmoxarifadosModal: false,
         tableLoading: false,
-        buttonSalvarUnidadeMedidas: false
+        buttonSalvarAlmoxarifado: false
     }
 
-    requestGetUnidadesMedidas = () => {
+    requestGetAlmoxarifados = () => {
         this.setState({tableLoading: true})
         axios
-        .get(this.props.backEndPoint + '/getUnidadesMedidas')
+        .get(this.props.backEndPoint + '/getAlmoxarifados')
         .then(res => {
             if(res.data.payload){
-                var tableData = res.data.payload.map(unidadeMedidas => {
-                    var ativo = unidadeMedidas.ativo === 'Y' ? 'Sim' : 'Não'
+                var tableData = res.data.payload.map(almoxarifado => {
+                    var ativo = almoxarifado.ativo === 'Y' ? 'Sim' : 'Não'
                     return({
-                        key: unidadeMedidas.id,
-                        nome: unidadeMedidas.nome,
+                        key: almoxarifado.id,
+                        nome: almoxarifado.nome,
                         ativo: ativo,
-                        ativoValue: unidadeMedidas.ativo
+                        ativoValue: almoxarifado.ativo
                     })
                 })
                 this.setState({tableData})
@@ -53,30 +53,30 @@ class UnidadesMedidas extends Component {
         })
     }
 
-    requestCreateUpdateUnidadeMedidas = (request) => {
-        this.setState({buttonSalvarUnidadeMedidas: true})
-        axios.post(this.props.backEndPoint + '/createUpdateUnidadeMedidas', request)
+    requestCreateUpdateAlmoxarifado = (request) => {
+        this.setState({buttonSalvarAlmoxarifado: true})
+        axios.post(this.props.backEndPoint + '/createUpdateAlmoxarifado', request)
         .then(res => {
-            this.showUnidadesMedidasModal(false)
-            this.requestGetUnidadesMedidas()
-            this.setState({buttonSalvarUnidadeMedidas: false})
+            this.showAlmoxarifadosModal(false)
+            this.requestGetAlmoxarifados()
+            this.setState({buttonSalvarAlmoxarifado: false})
         })
         .catch(error =>{
             console.log(error)
-            this.setState({buttonSalvarUnidadeMedidas: false})
+            this.setState({buttonSalvarAlmoxarifado: false})
         })
     }
 
-    showUnidadesMedidasModal = (showUnidadesMedidasModal) => {
+    showAlmoxarifadosModal = (showAlmoxarifadosModal) => {
         // Se estiver fechando
-        if(!showUnidadesMedidasModal){
+        if(!showAlmoxarifadosModal){
             this.props.form.resetFields()
-            this.setState({unidadesMedidasId: null})
+            this.setState({almoxarifadoId: null})
         }
-        this.setState({showUnidadesMedidasModal})
+        this.setState({showAlmoxarifadosModal})
     }
 
-    loadUnidadesMedidasModal = (record) => {
+    loadAlmoxarifadosModal = (record) => {
         if(typeof(record) !== "undefined") {
             // Edit
             this.props.form.setFieldsValue({
@@ -84,22 +84,22 @@ class UnidadesMedidas extends Component {
                 ativo: record.ativoValue
             })
 
-            this.setState({unidadesMedidasId: record.key})
+            this.setState({almoxarifadoId: record.key})
         }
         else{
             this.props.form.setFieldsValue({
                 ativo: 'Y'
             })
         }
-        this.showUnidadesMedidasModal(true)
+        this.showAlmoxarifadosModal(true)
     }
 
-    handleDeleteUnidadeMedidas = (id) => {
+    handleDeleteAlmoxarifado = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get(this.props.backEndPoint + '/deleteUnidadeMedidas?id='+id)
+        .get(this.props.backEndPoint + '/deleteAlmoxarifado?id='+id)
         .then(res => {
-            this.requestGetUnidadesMedidas()
+            this.requestGetAlmoxarifados()
         })
         .catch(error => {
             console.log(error)
@@ -109,13 +109,13 @@ class UnidadesMedidas extends Component {
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
-                var id = this.state.unidadesMedidasId ? this.state.unidadesMedidasId : null
+                var id = this.state.almoxarifadoId ? this.state.almoxarifadoId : null
                 var request = {
                     id: id,
                     nome: values.nome,
                     ativo: values.ativo
                 }
-                this.requestCreateUpdateUnidadeMedidas(request)
+                this.requestCreateUpdateAlmoxarifado(request)
             }
             else{
                 console.log('erro no formulário')
@@ -132,7 +132,7 @@ class UnidadesMedidas extends Component {
     }
 
     componentWillMount(){
-        this.requestGetUnidadesMedidas()
+        this.requestGetAlmoxarifados()
     }
 
     render(){
@@ -168,9 +168,9 @@ class UnidadesMedidas extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadUnidadesMedidasModal(record)} />
-                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteUnidadeMedidas(record.key)}>
-                            <a href="/admin/cadastros/unidadesmedidas" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
+                        <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadAlmoxarifadosModal(record)} />
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteAlmoxarifado(record.key)}>
+                            <a href="/admin/cadastros/almoxarifados" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
                         </Popconfirm>
                     </React.Fragment>
                 )
@@ -189,8 +189,8 @@ class UnidadesMedidas extends Component {
 
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
-                        <Tooltip title="Cadastrar Nova Unidade de Medidas" placement="right">
-                            <Button className="buttonGreen" onClick={() => this.loadUnidadesMedidasModal()}><Icon type="plus" /> Nova Unidade de Medidas</Button>
+                        <Tooltip title="Cadastrar Novo Almoxarifado" placement="right">
+                            <Button className="buttonGreen" onClick={() => this.loadAlmoxarifadosModal()}><Icon type="plus" /> Novo Almoxarifado</Button>
                         </Tooltip>
                     </Col>
                 </Row>
@@ -201,16 +201,16 @@ class UnidadesMedidas extends Component {
                     loading={this.state.tableLoading}
                 />
                 <Modal
-                    title="Cadastro de Unidades de Medidas"
-                    visible={this.state.showUnidadesMedidasModal}
-                    onCancel={() => this.showUnidadesMedidasModal(false)}
+                    title="Cadastro de Almoxarifados"
+                    visible={this.state.showAlmoxarifadosModal}
+                    onCancel={() => this.showAlmoxarifadosModal(false)}
                     footer={[
-                        <Button key="back" onClick={() => this.showUnidadesMedidasModal(false)}><Icon type="close" /> Cancelar</Button>,
-                        <Button key="submit" type="primary" loading={this.state.buttonSalvarUnidadeMedidas} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
+                        <Button key="back" onClick={() => this.showAlmoxarifadosModal(false)}><Icon type="close" /> Cancelar</Button>,
+                        <Button key="submit" type="primary" loading={this.state.buttonSalvarAlmoxarifado} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
                     <Row>
-                        <Col span={24} id="colCadastroDeUnidadesMedidas" style={{position: 'relative'}}>
+                        <Col span={24} id="colCadastroDeAlmoxarifados" style={{position: 'relative'}}>
                             <Form layout="vertical">
                                 <Form.Item
                                     label="Nome"
@@ -218,13 +218,13 @@ class UnidadesMedidas extends Component {
                                     {getFieldDecorator('nome', {
                                         rules: [
                                             {
-                                                required: true, message: 'Por favor informe o nome do unidadeMedidas',
+                                                required: true, message: 'Por favor informe o nome do almoxarifado',
                                             }
                                         ]
                                     })(
                                         <Input
                                             id="nome"
-                                            placeholder="Digite o nome do unidadeMedidas"
+                                            placeholder="Digite o nome do almoxarifado"
                                         />
                                     )}
                                 </Form.Item>
@@ -239,7 +239,7 @@ class UnidadesMedidas extends Component {
                                         <Select
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
-                                            getPopupContainer={() => document.getElementById('colCadastroDeUnidadesMedidas')}
+                                            getPopupContainer={() => document.getElementById('colCadastroDeAlmoxarifados')}
                                             allowClear={true}
                                         >
                                             {
@@ -271,4 +271,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(UnidadesMedidas))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(Almoxarifados))

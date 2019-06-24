@@ -18,17 +18,21 @@ import Setores from "./cadastros/Setores"
 import Produtos from "./cadastros/Produtos"
 import SubProdutos from "./cadastros/Subprodutos"
 import Conjuntos from "./cadastros/Conjuntos"
-import Insumos	 from "./cadastros/Insumos"
-import UnidadesMedidas	 from "./cadastros/UnidadesMedidas"
 import LinhaDeProducao from "./cadastros/LinhaDeProducao"
 import Cores from "./cadastros/Cores"
 import DiasNaoUteis from "./cadastros/DiasNaoUteis"
+
 import Producao from "./gerenciamentoProducao/Producao"
 import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
+
+import Insumos	 from "./wms/Insumos"
+import UnidadesMedida	 from "./wms/UnidadesMedida"
+import Almoxarifados from "./wms/Almoxarifados"
+import PosicaoArmazem from "./wms/PosicaoArmazem"
+
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
 import RelatorioProducoes from "./relatorios/RelatorioProducoes"
 import RelatorioFuncionariosPontuacoes from "./relatorios/RelatorioFuncionariosPontuacoes"
-
 
 const { Header, Sider, Footer } = Layout
 const { Content } = Layout
@@ -104,19 +108,7 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Cadastro/Funcionários</div>,
 		main: () => <Funcionarios />
-	},
-	{
-		path: "/admin/cadastros/insumos",
-		exact: true,
-		sidebar: () => <div>Cadastro/Insumos</div>,
-		main: () => <Insumos />
-	},
-	{
-		path: "/admin/cadastros/unidadesmedidas",
-		exact: true,
-		sidebar: () => <div>Cadastro/Unidades de Medidas</div>,
-		main: () => <UnidadesMedidas />
-	},			
+	},		
 	{
 		path: "/admin/producao",
 		exact: true,
@@ -129,6 +121,30 @@ const routes = [
 		sidebar: () => <div>Produção/Acompanhamento</div>,
 		main: () => <Acompanhamento />
 	},
+	{
+		path: "/admin/wms/unidadesmedida",
+		exact: true,
+		sidebar: () => <div>Cadastro/Unidades de Medida</div>,
+		main: () => <UnidadesMedida />
+	},
+	{
+		path: "/admin/wms/almoxarifados",
+		exact: true,
+		sidebar: () => <div>Cadastro/Almoxarifados</div>,
+		main: () => <Almoxarifados />
+	},
+	{
+		path: "/admin/wms/insumos",
+		exact: true,
+		sidebar: () => <div>Cadastro/Insumos</div>,
+		main: () => <Insumos />
+	},
+	{
+		path: "/admin/wms/posicaoarmazem",
+		exact: true,
+		sidebar: () => <div>Cadastro/Posição Armazém</div>,
+		main: () => <PosicaoArmazem />
+	},		
 	{
 		path: "/admin/relatorios/produtos-cadastrados",
 		exact: true,
