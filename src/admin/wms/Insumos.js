@@ -47,6 +47,7 @@ class Insumos extends Component {
                     return({
                         key: insumo.id,
                         nome: insumo.nome,
+                        ins: insumo.ins,
                         categoria: insumo.categoria,
                         ativoValue: insumo.ativo,
                         ativoDescription: ativo,
@@ -157,6 +158,7 @@ class Insumos extends Component {
             // Edit
             this.props.form.setFieldsValue({
                 nome: record.nome,
+                ins: record.ins,
                 ativo: record.ativoValue,
                 categoria: record.categoria,
                 unidade: record.unidadeValue,
@@ -209,6 +211,7 @@ class Insumos extends Component {
                 var request = {
                     id: id,
                     nome: values.nome,
+                    ins: values.ins,
                     ativo: values.ativo,
                     categoria: values.categoria,
                     unidade: values.unidade,
@@ -236,6 +239,10 @@ class Insumos extends Component {
             title: 'Descrição',
             dataIndex: 'nome',
             sorter: (a, b) => this.compareByAlph(a.description, b.description)
+        }, {
+            title: 'INS',
+            dataIndex: 'ins',
+            sorter: (a, b) => this.compareByAlph(a.ins, b.ins)
         }, {
             title: 'Categoria',
             dataIndex: 'categoria',
@@ -333,6 +340,23 @@ class Insumos extends Component {
                                         />
                                     )}
                                 </Form.Item>
+                                <Form.Item
+                                    label="INS"
+                                >
+                                    {getFieldDecorator('ins', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a INS do insumo',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="ins"
+                                            maxlength="25"
+                                            placeholder="Digite a INS do insumo"
+                                        />
+                                    )}
+                                </Form.Item>                                
                                 <Form.Item
                                     label="Categoria"
                                 >
