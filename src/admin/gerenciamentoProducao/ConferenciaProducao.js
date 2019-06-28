@@ -252,7 +252,7 @@ class ConferenciaProducao extends Component{
 
         return(
             <Modal
-                title="Lançamento de Produção"
+                title="Conferência de Produção"
                 visible={this.props.showModalConferenciaProducao}
                 onCancel={this.closeModal}
                 footer={[

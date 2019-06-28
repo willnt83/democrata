@@ -29,10 +29,12 @@ import Insumos	 from "./wms/Insumos"
 import UnidadesMedida	 from "./wms/UnidadesMedida"
 import Almoxarifados from "./wms/Almoxarifados"
 import PosicaoArmazem from "./wms/PosicaoArmazem"
+import Armazem from "./wms/Armazem"
 
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
 import RelatorioProducoes from "./relatorios/RelatorioProducoes"
 import RelatorioFuncionariosPontuacoes from "./relatorios/RelatorioFuncionariosPontuacoes"
+import RelatorioGeralProducao from "./relatorios/RelatorioGeralProducao"
 
 const { Header, Sider, Footer } = Layout
 const { Content } = Layout
@@ -144,7 +146,13 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Cadastro/Posição Armazém</div>,
 		main: () => <PosicaoArmazem />
-	},		
+	},
+	{
+		path: "/admin/wms/armazem",
+		exact: true,
+		sidebar: () => <div>Armazém</div>,
+		main: () => <Armazem />
+	},
 	{
 		path: "/admin/relatorios/produtos-cadastrados",
 		exact: true,
@@ -162,6 +170,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Relatórios/Pontuações por Funcionários</div>,
 		main: () => <RelatorioFuncionariosPontuacoes />
+	},
+	{
+		path: "/admin/relatorios/geral-de-lancamento-de-producao",
+		exact: true,
+		sidebar: () => <div>Relatórios/Geral de Lançamento de Produção</div>,
+		main: () => <RelatorioGeralProducao />
 	}
 ];
 
