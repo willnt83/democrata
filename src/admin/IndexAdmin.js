@@ -29,6 +29,7 @@ import Insumos	 from "./wms/Insumos"
 import UnidadesMedida	 from "./wms/UnidadesMedida"
 import Almoxarifados from "./wms/Almoxarifados"
 import PosicaoArmazem from "./wms/PosicaoArmazem"
+import PedidosCompra from "./wms/PedidosCompra"
 
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
 import RelatorioProducoes from "./relatorios/RelatorioProducoes"
@@ -124,26 +125,32 @@ const routes = [
 	{
 		path: "/admin/wms/unidadesmedida",
 		exact: true,
-		sidebar: () => <div>Cadastro/Unidades de Medida</div>,
+		sidebar: () => <div>WMS/Unidades de Medida</div>,
 		main: () => <UnidadesMedida />
 	},
 	{
 		path: "/admin/wms/almoxarifados",
 		exact: true,
-		sidebar: () => <div>Cadastro/Almoxarifados</div>,
+		sidebar: () => <div>WMS/Almoxarifados</div>,
 		main: () => <Almoxarifados />
 	},
 	{
 		path: "/admin/wms/insumos",
 		exact: true,
-		sidebar: () => <div>Cadastro/Insumos</div>,
+		sidebar: () => <div>WMS/Insumos</div>,
 		main: () => <Insumos />
 	},
 	{
 		path: "/admin/wms/posicaoarmazem",
 		exact: true,
-		sidebar: () => <div>Cadastro/Posição Armazém</div>,
+		sidebar: () => <div>WMS/Posição Armazém</div>,
 		main: () => <PosicaoArmazem />
+	},
+	{
+		path: "/admin/wms/pedidoscompra",
+		exact: true,
+		sidebar: () => <div>WMS/Pedidos de Compra</div>,
+		main: () => <PedidosCompra />
 	},		
 	{
 		path: "/admin/relatorios/produtos-cadastrados",

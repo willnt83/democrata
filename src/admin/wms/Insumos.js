@@ -352,7 +352,7 @@ class Insumos extends Component {
                                     })(
                                         <Input
                                             id="ins"
-                                            maxlength="25"
+                                            maxLength="25"
                                             placeholder="Digite a INS do insumo"
                                         />
                                     )}

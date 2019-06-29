@@ -195,8 +195,6 @@ class Conjuntos extends Component {
                 return(subproduto.pontos)
             })
 
-            console.log('subprodutosPontos', subprodutosPontos)
-
             // Atualizando id, que é a variável que controla o add e remove de campos
             id = (this.state.subprodutos.length)
 

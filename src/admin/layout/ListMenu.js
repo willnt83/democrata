@@ -150,7 +150,13 @@ class ListMenu extends Component{
                                 <Icon type="right-square" />
                                 <span>Pos. do Armazém</span>
                             </Link>
-                        </Menu.Item>                        
+                        </Menu.Item>
+                        <Menu.Item key="63">
+                            <Link to="/admin/wms/pedidoscompra">
+                                <Icon type="form" />
+                                <span>Ped. de Compra</span>
+                            </Link>
+                        </Menu.Item>                                               
                     </SubMenu>                   
                     <Menu.Item key="16">
                         <Link to="/admin/estoque">
