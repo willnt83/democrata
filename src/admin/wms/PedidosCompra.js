@@ -189,6 +189,7 @@ class PedidosCompra extends Component {
                         hora_pedido: moment(pedidocompra[0].hora_pedido, 'HH:mm:ss'),
                         chave_nf: pedidocompra[0].chave_nf,
                         data_prevista: moment(pedidocompra[0].data_prevista, 'YYYY-MM-DD'),
+                        statusPedido: pedidocompra[0].status,
                         keys
                     })
         
@@ -210,7 +211,8 @@ class PedidosCompra extends Component {
         else{
             this.props.form.setFieldsValue({
                 data_pedido: moment(this.returnNowDate(), 'YYYY-MM-DD'),
-                hora_pedido: moment(this.returnNowHour(), 'HH:mm:ss')
+                hora_pedido: moment(this.returnNowHour(), 'HH:mm:ss'),
+                statusPedido: 'A'
             })
             this.addComposicaoRow()
         }
@@ -548,7 +550,27 @@ class PedidosCompra extends Component {
                                     )}
                                 </Form.Item>
                             </Col>
-                            <Col span={10} id="colDataEntrega" style={{position: 'relative'}}>
+                            <Col span={10} id="colChaveNF" style={{position: 'relative'}}>                            
+                                <Form.Item
+                                    label="Chave da Nota Fiscal"
+                                >
+                                    {getFieldDecorator('chave_nf', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a chave da nota fiscal',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="chave_nf"
+                                            placeholder="Digite a chave da nota fiscal"
+                                        />
+                                    )}
+                                </Form.Item>                              
+                            </Col>
+                        </Row>
+                        <Row gutter={2}>
+                            <Col span={9} id="colDataEntrega" style={{position: 'relative'}}>
                                 <Form.Item
                                     label="Data Prevista de Entrega"
                                 >
@@ -568,27 +590,32 @@ class PedidosCompra extends Component {
                                         />
                                     )}
                                 </Form.Item>
-                            </Col>
-                        </Row>
-                        <Row gutter={2}>   
-                            <Col span={14} id="colChaveNF" style={{position: 'relative'}}>                            
+                            </Col>                             
+                            <Col span={5} id="colStatus" style={{position: 'relative'}}>
                                 <Form.Item
-                                    label="Chave da Nota Fiscal"
+                                    label="Status"
                                 >
-                                    {getFieldDecorator('chave_nf', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe a chave da nota fiscal',
-                                            }
-                                        ]
+                                    {getFieldDecorator('statusPedido', {
+                                        rules: [{
+                                            required: true, message: "Informe o fornecedor"
+                                        }],
                                     })(
-                                        <Input
-                                            id="chave_nf"
-                                            placeholder="Digite a chave da nota fiscal"
-                                        />
+                                        <Select
+                                            style={{ width: '100%' }}
+                                            placeholder="Selecione"
+                                            getPopupContainer={() => document.getElementById('colStatus')}
+                                            allowClear={true}
+                                            disabled
+                                        >
+                                            {
+                                                statusPedidoOption.map((option) => {
+                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                })
+                                            }
+                                        </Select>
                                     )}
-                                </Form.Item>                              
-                            </Col>                                                      
+                                </Form.Item>
+                            </Col>                                         
                             <Col span={5} id="colDataPedido" style={{position: 'relative'}}>
                                 <Form.Item
                                     label="Data do Pedido"
