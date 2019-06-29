@@ -160,7 +160,7 @@ class Conjuntos extends Component {
             var keys = record.subprodutos.map((subproduto, index) => {
                 return(index)
             })
-
+            
             this.props.form.setFieldsValue({
                 nome: record.nome,
                 ativo: record.ativoValue,

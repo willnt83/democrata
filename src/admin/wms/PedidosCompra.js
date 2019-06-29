@@ -68,7 +68,7 @@ class PedidosCompra extends Component {
                         fornecedorValue: pedidocompra.idFornecedor,
                         fornecedorDescription: pedidocompra.nomeFornecedor,
                         statusValue: pedidocompra.status,
-                        statusDescripton: this.returnStatusDescription(pedidocompra.status,statusPedidoOption),                        
+                        statusDescription: this.returnStatusDescription(pedidocompra.status,statusPedidoOption),                        
                         insumos: pedidocompra.insumos
                     })
                 })
@@ -148,7 +148,7 @@ class PedidosCompra extends Component {
 
     requestCreateUpdatePedidoCompra = (request) => {
         this.setState({buttonSalvarPedidoCompra: true})
-        axios.post(this.props.backEndPoint + '/createUpdateConjunto', request)
+        axios.post(this.props.backEndPoint + '/createUpdatePedidoCompra', request)
         .then(res => {
             this.showPedidosCompraModal(false)
             this.requestGetPedidosCompra()
@@ -171,28 +171,46 @@ class PedidosCompra extends Component {
 
     loadPedidoCompraModal = (record) => {
         this.loadInsumosOptions()        
-        this.loadFornecedoresOptions()        
+        this.loadFornecedoresOptions()      
         if(typeof(record) !== "undefined") {
-            // Edit
-            // var keys = record.subprodutos.map((subproduto, index) => {
-            //     return(index)
-            // })
+            this.state.pedidoCompraId = record.key
+            axios
+            .get(this.props.backEndPoint + '/getPedidosCompraInsumos?id='+record.key)
+            .then(res => {
+                var pedidocompra = res.data.payload;
+                if(pedidocompra && pedidocompra.length > 0){
+                    var keys = pedidocompra[0].insumos.map((insumo, index) => {
+                        return(index)
+                    })
 
-            this.props.form.setFieldsValue({
-                fornecedor: record.fornecedorValue,
-                ativo: record.ativoValue,
-                setor: record.setorValue
+                    this.props.form.setFieldsValue({
+                        fornecedor: pedidocompra[0].idFornecedor,
+                        data_pedido: moment(pedidocompra[0].data_pedido, 'YYYY-MM-DD'),
+                        hora_pedido: moment(pedidocompra[0].hora_pedido, 'HH:mm:ss'),
+                        chave_nf: pedidocompra[0].chave_nf,
+                        data_prevista: moment(pedidocompra[0].data_prevista, 'YYYY-MM-DD'),
+                        keys
+                    })
+        
+                    this.setState({
+                        pedidoCompraId: pedidocompra[0].id,
+                        dynamicFieldsRendered: true,
+                        insumos: pedidocompra[0].insumos
+                    })
+                }
+                else
+                    console.log('Nenhum registro encontrado')
+                this.setState({tableLoading: false})
             })
-
-            this.setState({
-                pedidoCompraId: record.key,
-                dynamicFieldsRendered: true,
-                // subprodutos: record.subprodutos
+            .catch(error => {
+                console.log(error)
+                this.setState({tableLoading: false})
             })
         }
         else{
             this.props.form.setFieldsValue({
-                data_pedido: moment(this.returnNowDate(), 'YYYY-MM-DD')
+                data_pedido: moment(this.returnNowDate(), 'YYYY-MM-DD'),
+                hora_pedido: moment(this.returnNowHour(), 'HH:mm:ss')
             })
             this.addComposicaoRow()
         }
@@ -201,26 +219,22 @@ class PedidosCompra extends Component {
 
     componentWillUpdate(){
         if(this.state.dynamicFieldsRendered){
+            var insumos = []
+            var quantidades = []
 
-            var subprodutos = this.state.subprodutos.map(subproduto => {
-                return(subproduto.id)
+            this.state.insumos.map(insumo => {
+                insumos.push(insumo.id)
+                quantidades.push(insumo.quantidade)
+                this.state.insValues.push(insumo.ins)
+                this.state.unidademedidaValues.push(insumo.unidademedida)
             })
-            var subprodutosQtde = this.state.subprodutos.map(subproduto => {
-                return(subproduto.quantidade)
-            })
-            var subprodutosPontos = this.state.subprodutos.map(subproduto => {
-                return(subproduto.pontos)
-            })
-
-            console.log('subprodutosPontos', subprodutosPontos)
 
             // Atualizando id, que é a variável que controla o add e remove de campos
-            id = (this.state.subprodutos.length)
+            id = (this.state.insumos.length)
 
             this.props.form.setFieldsValue({
-                subprodutos,
-                subprodutosQtde,
-                subprodutosPontos
+                insumos,
+                quantidades
             })
 
             this.setState({dynamicFieldsRendered: false})
@@ -245,13 +259,20 @@ class PedidosCompra extends Component {
     }
 
     returnStatusDescription = (status, object) => {
-        var statusReturn = '';
         if(object){
-            statusReturn = object.map(status => {
-                if(status.value === status) return status.description
+            return object.map(objStatus => {
+                if(objStatus.value === status) {
+                    return objStatus.description
+                }
             });
         }
-        return statusReturn;
+        return ''
+    }
+
+    screenTitleDescription = () => {
+        var titleDesciption = 'Cadastro de Pedido de Compra'
+        if(this.state.pedidoCompraId) titleDesciption += ' #'+this.state.pedidoCompraId
+        return titleDesciption;
     }
 
     compareByAlph = (a, b) => {
@@ -266,6 +287,11 @@ class PedidosCompra extends Component {
         var date = new Date();
         return date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()
     }
+
+    returnNowHour = () => {
+        var date = new Date();
+        return date.getHours()+':'+date.getMinutes()+':'+date.getSeconds();
+    } 
 
     addComposicaoRow = () => {
         const { form } = this.props
@@ -299,33 +325,36 @@ class PedidosCompra extends Component {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
                 var id = this.state.pedidoCompraId ? this.state.pedidoCompraId : null
+                console.log(values);
 
-                var subprodutos = null
-                if(values.subprodutos){
-                    subprodutos = values.subprodutos
-                    .map((subproduto, index) => {
+                var insumos = null
+                if(values.insumos){
+                    insumos = values.insumos
+                    .map((insumo, index) => {
                         return ({
-                            id: subproduto,
-                            quantidade: parseInt(values.subprodutosQtde[index]),
-                            pontos: parseFloat(values.subprodutosPontos[index])
+                            idInsumo: insumo,
+                            quantidade: parseInt(values.quantidades[index])
                         })
                     })
-                    .filter(subproduto => {
-                        return subproduto !== null
+                    .filter(insumo => {
+                        return insumo !== null
                     })
                 }
 
                 var request = {
                     id: id,
-                    nome: values.nome,
-                    ativo: values.ativo,
-                    setor: values.setor,
-                    subprodutos: subprodutos
+                    data_pedido: values.data_pedido,
+                    hora_pedido: values.hora_pedido,
+                    data_prevista: values.data_prevista,
+                    chave_nf: values.chave_nf,
+                    idFornecedor: values.fornecedor,
+                    insumos: insumos
                 }
-                this.requestCreateUpdateConjunto(request)
+                this.requestCreateUpdatePedidoCompra(request)
             }
             else{
                 console.log('erro no formulário')
+                console.log(err);
             }
         })
     }
@@ -483,7 +512,7 @@ class PedidosCompra extends Component {
                     loading={this.state.tableLoading}
                 />
                 <Modal
-                    title="Cadastro de Pedido de Compra"
+                    title={this.screenTitleDescription()}
                     visible={this.state.showPedidosCompraModal}
                     onCancel={() => this.showPedidosCompraModal(false)}
                     footer={[
@@ -523,7 +552,7 @@ class PedidosCompra extends Component {
                                 <Form.Item
                                     label="Data Prevista de Entrega"
                                 >
-                                    {getFieldDecorator('data_entrega', {
+                                    {getFieldDecorator('data_prevista', {
                                         rules: [
                                             {
                                                 required: true, message: 'Por favor informe a data prevista de entrega',
@@ -584,19 +613,19 @@ class PedidosCompra extends Component {
                             </Col>
                             <Col span={5} id="colHoraPredido" style={{position: 'relative'}}>
                                 <Form.Item
-                                    label="Data do Pedido"
+                                    label="Hora do Pedido"
                                 >
                                     {getFieldDecorator('hora_pedido', {
                                         rules: [
                                             {
-                                                required: true, message: 'Por favor informe a data do pedido',
+                                                required: true, message: 'Por favor informe a hora do pedido',
                                             }
                                         ]
                                     })(
                                         <TimePicker
                                             locale={ptBr}
-                                            format="DD/MM/YYYY"
-                                            placeholder="Selecione a data"
+                                            format="HH:mm:ss"
+                                            placeholder="Selecione a hora"
                                             style={ {width: '100%'} }
                                             getCalendarContainer={() => document.getElementById('colHoraPredido')}
                                             disabled
