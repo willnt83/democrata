@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Modal, Select, Icon, Button, Divider, Table } from 'antd'
+import { Row, Col, Form, Modal, Select, Icon, Button, Divider, Table, Input } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -30,7 +30,8 @@ class LancamentoProducao extends Component{
             nomeFuncionario: null,
             tableData: [],
             funcionariosOptions: [],
-            barcodeReader: false
+            barcodeReader: false,
+            lancamentoManual: false
         }
         this.handleScanLancamento = this.handleScanLancamento.bind(this)
     }
@@ -92,6 +93,11 @@ class LancamentoProducao extends Component{
                 this.props.showNotification(res.data.msg, res.data.success)
                 var range = this.getMonthDateRange(2019, this.state.mesSelecionado)
                 this.getCodigosDeBarrasLancados(this.state.idFuncionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
+                if(this.state.lancamentoManual){
+                    this.props.form.setFieldsValue({
+                        codigoDeBarras: ''
+                    })
+                }
             }
             else{
                 this.props.showNotification(res.data.msg, res.data.success)
@@ -150,9 +156,27 @@ class LancamentoProducao extends Component{
             nomeMesSelecionado: null,
             idFuncionario: null,
             nomeFuncionario: null,
-            tableData: []
+            tableData: [],
+            lancamentoManual: false
         })
         this.props.showModalLancamentoProducaoF(false)
+    }
+
+    habilitarLancamentoManual = () => {
+        var bool = this.state.lancamentoManual ? false : true
+        this.setState({lancamentoManual: bool})
+    }
+
+    lancamentoManual = () => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if(!err){
+                var request = {
+                    idFuncionario: this.state.idFuncionario,
+                    barcode: values.codigoDeBarras
+                }
+                this.requestLancamentoProducao(request)
+            }
+        })
     }
 
     componentWillReceiveProps(nextProps){
@@ -206,6 +230,7 @@ class LancamentoProducao extends Component{
                 title="Lançamento de Produção"
                 visible={this.props.showModalLancamentoProducao}
                 onCancel={this.closeModal}
+                maskClosable={false}
                 footer={[
                     <Button type="primary" key="back" onClick={this.closeModal}> Fechar</Button>,
                 ]}
@@ -291,6 +316,35 @@ class LancamentoProducao extends Component{
                                     <span className="bold">Funcionário: {this.state.nomeFuncionario}</span>
                                     <span className="bold" onClick={this.alterarFuncionario} style={{marginLeft: 10, cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Alterar</span>
                                 </Col>
+                                <Col span={24}>
+                                    <span className="bold" onClick={this.habilitarLancamentoManual} style={{cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Lançamento Manual</span>
+                                </Col>
+                                {
+                                    this.state.lancamentoManual ?
+                                    <Col span={24} style={{marginTop: 20}}>
+                                        <Form layout="vertical">
+                                            <Form.Item
+                                                label="Código de Barras"
+                                            >
+                                                {getFieldDecorator('codigoDeBarras', {
+                                                    rules: [
+                                                        {
+                                                            required: true, message: 'Por favor informe o código de barras',
+                                                        }
+                                                    ]
+                                                })(
+                                                    <Input
+                                                        id="nome"
+                                                        placeholder="Digite o código de barras"
+                                                    />
+                                                )}
+                                            </Form.Item>
+                                            <Button key="submit" type="primary" onClick={this.lancamentoManual}><Icon type="save" /> Lançar</Button>
+                                        </Form>
+                                    </Col>
+
+                                    : null
+                                }
                             </Row>
                         }
                         <Divider />

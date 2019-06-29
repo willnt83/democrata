@@ -156,7 +156,13 @@ class ListMenu extends Component{
                                 <Icon type="form" />
                                 <span>Ped. de Compra</span>
                             </Link>
-                        </Menu.Item>                                               
+                        </Menu.Item>
+                        <Menu.Item key="64">
+                            <Link to="/admin/wms/armazem">
+                                <Icon type="right-square" />
+                                <span>Armazém</span>
+                            </Link>
+                        </Menu.Item>                        
                     </SubMenu>                   
                     <Menu.Item key="16">
                         <Link to="/admin/estoque">
@@ -181,6 +187,12 @@ class ListMenu extends Component{
                             <Link to="/admin/relatorios/pontuacoes-por-funcionarios">
                                 <Icon type="right-square" />
                                 <span>Pontuações por Funcionários</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item key="191">
+                            <Link to="/admin/relatorios/geral-de-lancamento-de-producao">
+                                <Icon type="right-square" />
+                                <span>Geral de Lançamento de Produção</span>
                             </Link>
                         </Menu.Item>
                     </SubMenu>
