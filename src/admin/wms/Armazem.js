@@ -1,9 +1,6 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, Tabs } from 'antd'
-import { Tooltip } from '@material-ui/core/'
+import { Layout, Row, Col, Form, Tabs } from 'antd'
 import { connect } from 'react-redux'
-import axios from "axios"
-
 import ArmazemArmazenagem from "./ArmazemArmazenagem"
 
 
@@ -33,7 +30,6 @@ class Armazem extends Component {
                     minHeight: 280
                 }}
             >
-
                 <Row>
                     <Col span={24}>
                         <Tabs defaultActiveKey="1" onChange={this.tabChange}>
