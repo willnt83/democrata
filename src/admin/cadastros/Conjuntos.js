@@ -3,9 +3,7 @@ import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, 
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
-
 const { Content } = Layout
-
 let id = 0
 
 const ativoOptions = [
@@ -45,7 +43,6 @@ class Conjuntos extends Component {
         .get(this.props.backEndPoint + '/getConjuntos')
         .then(res => {
             if(res.data.payload){
-                console.log('res.data.payload', res.data.payload)
                 var tableData = res.data.payload.map(conjunto => {
                     var ativo = conjunto.ativo === 'Y' ? 'Sim' : 'Não'
                     return({
@@ -356,8 +353,6 @@ class Conjuntos extends Component {
                 </Col>
             </Row>
         ))
-
-
 
         const columns = [{
             title: 'ID',
