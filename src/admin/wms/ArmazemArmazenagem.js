@@ -10,7 +10,10 @@ class ArmazemArmazenagem extends Component {
         tableData: [],
         showArmazenagemModal: false,
         almoxarifadosOptions: [],
-        posicoesAlmoxarifadosOptions: []
+        posicoesAlmoxarifadosOptions: [],
+        idPedidoInsumo: null,
+        nomeInsumo: null,
+        quantidadeInsumo: null
     }
 
     compareByAlph = (a, b) => {
@@ -76,9 +79,7 @@ class ArmazemArmazenagem extends Component {
         .then(res => {
             if(res.data.payload){
                 var posicoesAlmoxarifadosOptions = this.state.posicoesAlmoxarifadosOptions;
-                console.log('posicoesAlmoxarifadosOptions antes', posicoesAlmoxarifadosOptions)
                 posicoesAlmoxarifadosOptions[k] = res.data.payload
-                console.log('posicoesAlmoxarifadosOptions depois', posicoesAlmoxarifadosOptions)
                 this.setState({posicoesAlmoxarifadosOptions})
             }
             else{
@@ -90,16 +91,39 @@ class ArmazemArmazenagem extends Component {
         })
     }
 
+    createUpdateInsumosArmazenagem = (request) => {
+        axios.post(this.props.backEndPoint + '/createUpdateInsumosArmazenagem', request)
+        .then(res => {
+            console.log('res', res)
+        })
+        .catch(error =>{
+            console.log(error)
+        })
+    }
+
     loadArmazenagemModal = (record) => {
+        this.setState({idPedidoInsumo: record.id, nomeInsumo: record.nomeInsumo, quantidadeInsumo: record.quantidadeConferida})
         this.getAlmoxarifados()
         this.showArmazenagemModal(true)
     }
 
     showArmazenagemModal = (showArmazenagemModal) => {
         this.setState({showArmazenagemModal})
+        // Fechando modal
+        if(!showArmazenagemModal){
+            //Reset modal
+            this.props.form.resetFields()
+            this.setState({
+                almoxarifadosOptions: [],
+                posicoesAlmoxarifadosOptions: [],
+                idPedidoInsumo: null,
+                nomeInsumo: null,
+                quantidadeInsumo: null
+            })
+        }
     }
 
-    changeAlmoxarifado = (value, event, k) => {
+    changeAlmoxarifado = (value, k) => {
         this.props.form.setFieldsValue({'posicao[k]': null})
         if(value) this.getPosicoesArmazem(value, k)
     }
@@ -108,6 +132,18 @@ class ArmazemArmazenagem extends Component {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
                 console.log('values', values)
+                var rows = values.almoxarifado.map((row, i) => {
+                    return({
+                        idAlmoxarifado: values.almoxarifado[i],
+                        idPosicao: values.posicao[i],
+                        quantidade: parseInt(values.quantidade[i])
+                    })
+                })
+                var request = {
+                    idPedidoInsumo: this.state.idPedidoInsumo,
+                    lancamentos: rows
+                }
+                this.createUpdateInsumosArmazenagem(request)
             }
             else{
                 console.log('erro no formulário')
@@ -142,7 +178,6 @@ class ArmazemArmazenagem extends Component {
     }
 
     render(){
-        console.log('this.state.posicoesAlmoxarifadosOptions', this.state.posicoesAlmoxarifadosOptions)
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
@@ -159,7 +194,7 @@ class ArmazemArmazenagem extends Component {
                                 style={{ width: '100%' }}
                                 getPopupContainer={() => document.getElementById('colArmazenagem')}
                                 allowClear={true}
-                                onChange={(value, event) => this.changeAlmoxarifado(value, event, k)}
+                                onChange={(value) => this.changeAlmoxarifado(value, k)}
                             >
                                 {
                                     this.state.almoxarifadosOptions.map((option) => {
@@ -295,6 +330,11 @@ class ArmazemArmazenagem extends Component {
                     <Row>
                         <Col span={24} id="colArmazenagem" style={{position: 'relative'}}>
                             <Form layout="vertical">
+                                <Row className="bold" style={{marginBottom: 10}}>
+                                    <Col span={24}>
+                                        Insumo: {this.state.nomeInsumo} | Quantidade total: {this.state.quantidadeInsumo}
+                                    </Col>
+                                </Row>
                                 {
                                     porcionamentos.length > 0 ?
                                     <Row className="bold" style={{marginBottom: 10}}>
