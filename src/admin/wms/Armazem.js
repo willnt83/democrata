@@ -32,7 +32,7 @@ class Armazem extends Component {
             >
                 <Row>
                     <Col span={24}>
-                        <Tabs defaultActiveKey="1" onChange={this.tabChange}>
+                        <Tabs defaultActiveKey="2" onChange={this.tabChange}>
                             <TabPane tab="Entrada" key="1">
                                 Entrada
                             </TabPane>
