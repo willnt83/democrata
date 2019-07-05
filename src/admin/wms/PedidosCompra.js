@@ -13,11 +13,6 @@ const { Content } = Layout
 
 let id = 0
 
-const statusPedidoOption = [
-    {value: 'S', description: 'Solicitado'},
-    {value: 'A', description: 'Em Andamento'},
-    {value: 'F', description: 'Finalizado'}
-]
 const statusInsumoOption = [
     {value: 'S', description: 'Solicitado'},
     {value: 'E', description: 'Entregue'},
@@ -39,6 +34,7 @@ class PedidosCompra extends Component {
         insumosOptions: [],
         insValues: [],
         unidademedidaValues: [],
+        qtdeConferidaValues: [],
         fornecedoresOptions: [],       
         insumosSelectStatus: {
             placeholder: 'Carregando...',
@@ -67,8 +63,6 @@ class PedidosCompra extends Component {
                         data_prevista: pedidocompra.data_prevista,
                         fornecedorValue: pedidocompra.idFornecedor,
                         fornecedorDescription: pedidocompra.nomeFornecedor,
-                        statusValue: pedidocompra.status,
-                        statusDescription: this.returnStatusDescription(pedidocompra.status,statusPedidoOption),                        
                         insumos: pedidocompra.insumos
                     })
                 })
@@ -173,7 +167,7 @@ class PedidosCompra extends Component {
         this.loadInsumosOptions()        
         this.loadFornecedoresOptions()      
         if(typeof(record) !== "undefined") {
-            this.state.pedidoCompraId = record.key
+            this.setState({pedidoCompraId: record.key})
             axios
             .get(this.props.backEndPoint + '/getPedidosCompraInsumos?id='+record.key)
             .then(res => {
@@ -189,7 +183,6 @@ class PedidosCompra extends Component {
                         hora_pedido: moment(pedidocompra[0].hora_pedido, 'HH:mm:ss'),
                         chave_nf: pedidocompra[0].chave_nf,
                         data_prevista: moment(pedidocompra[0].data_prevista, 'YYYY-MM-DD'),
-                        statusPedido: pedidocompra[0].status,
                         keys
                     })
         
@@ -211,8 +204,7 @@ class PedidosCompra extends Component {
         else{
             this.props.form.setFieldsValue({
                 data_pedido: moment(this.returnNowDate(), 'YYYY-MM-DD'),
-                hora_pedido: moment(this.returnNowHour(), 'HH:mm:ss'),
-                statusPedido: 'A'
+                hora_pedido: moment(this.returnNowHour(), 'HH:mm:ss')
             })
             this.addComposicaoRow()
         }
@@ -223,12 +215,15 @@ class PedidosCompra extends Component {
         if(this.state.dynamicFieldsRendered){
             var insumos = []
             var quantidades = []
+            var statusInsumos = []
 
             this.state.insumos.map(insumo => {
                 insumos.push(insumo.id)
                 quantidades.push(insumo.quantidade)
+                statusInsumos.push(insumo.statusInsumo)
                 this.state.insValues.push(insumo.ins)
                 this.state.unidademedidaValues.push(insumo.unidademedida)
+                this.state.qtdeConferidaValues.push(insumo.quantidade_conferida)
             })
 
             // Atualizando id, que é a variável que controla o add e remove de campos
@@ -236,7 +231,8 @@ class PedidosCompra extends Component {
 
             this.props.form.setFieldsValue({
                 insumos,
-                quantidades
+                quantidades,
+                statusInsumos
             })
 
             this.setState({dynamicFieldsRendered: false})
@@ -256,8 +252,12 @@ class PedidosCompra extends Component {
     }
 
     handleOnChange = (value, event, index) => {
-        this.state.insValues[index] = event.props.ins;
-        this.state.unidademedidaValues[index] = event.props.unidademedida;
+        this.insertColumnsValues({
+            index: index,
+            ins: event.props.ins,
+            unidademedida: event.props.unidademedida,
+            qtde: event.props.quantidade_conferida
+        })
     }
 
     returnStatusDescription = (status, object) => {
@@ -285,6 +285,22 @@ class PedidosCompra extends Component {
         return 0
     }
 
+    insertColumnsValues = (object) => {
+        let insValues = this.state.insValues
+        let unidademedidaValues = this.state.unidademedidaValues
+        let qtdeConferidaValues = this.state.qtdeConferidaValues
+
+        insValues[object.index] = object.ins
+        unidademedidaValues[object.index] = object.unidademedida
+        qtdeConferidaValues[object.index] = object.qtde
+
+        this.setState({
+            insValues,
+            unidademedidaValues,
+            qtdeConferidaValues
+        })        
+    }
+
     returnNowDate = () => {
         var date = new Date();
         return date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()
@@ -304,8 +320,12 @@ class PedidosCompra extends Component {
             keys: nextKeys,
         })
 
-        this.state.insValues[(id-1)] = ''
-        this.state.unidademedidaValues[(id-1)] = ''
+        this.insertColumnsValues({
+            index: (id-1),
+            ins: '',
+            unidademedida: '',
+            qtde: '0'
+        })        
     }
 
     removeComposicaoRow = (k) => {
@@ -373,7 +393,7 @@ class PedidosCompra extends Component {
             <Row key={k} style={{marginBottom: '15px'}}>                
                 <Col span={24}>
                     <Row gutter={3}>
-                        <Col span={17} id="colInsumos" style={{position: 'relative'}}>
+                        <Col span={15} id="colInsumos" style={{position: 'relative'}}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`insumos[${k}]`, {
                                     rules: [{
@@ -397,7 +417,7 @@ class PedidosCompra extends Component {
                                 )}
                             </Form.Item>
                         </Col>
-                        <Col span={6} id="colQtde" style={{position: 'relative'}}>
+                        <Col span={3} id="colQtde" style={{position: 'relative'}}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`quantidades[${k}]`, {
                                     rules: [
@@ -413,6 +433,30 @@ class PedidosCompra extends Component {
                                 )}
                             </Form.Item>
                         </Col> 
+                        <Col span={5} id="colStatus" style={{position: 'relative'}}>
+                            <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
+                                {getFieldDecorator(`statusInsumos[${k}]`, {
+                                    initialValue: 'S',
+                                    rules: [{
+                                        required: true, message: "Informe o status"
+                                    }],
+                                })(
+                                    <Select
+                                        style={{ width: '100%' }}
+                                        placeholder="Selecione"
+                                        getPopupContainer={() => document.getElementById('colStatus')}
+                                        allowClear={true}
+                                        disabled
+                                    >
+                                        {
+                                            statusInsumoOption.map((option) => {
+                                                return (<Select.Option key={option.value} value={option.value} ins={option.ins} unidademedida={option.unidademedida}>{option.description}</Select.Option>)
+                                            })
+                                        }
+                                    </Select>
+                                )}
+                            </Form.Item>
+                        </Col>                        
                         <Col span={1} id="colDelete" style={{position: 'relative'}}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px', marginTop: '4px', textAlign: 'center'}}>
                                 {keys.length > 1 ? (
@@ -430,9 +474,12 @@ class PedidosCompra extends Component {
                         <Col span={7} id="colINS" style={{position: 'relative'}}>
                             <div style={{fontSize: '12px'}} dangerouslySetInnerHTML={{__html: '<span><strong>INS:</strong> '+this.state.insValues[k]+'</span>'}}></div>
                         </Col>
-                        <Col span={17} id="colUnidadeMedida" style={{position: 'relative'}}>
+                        <Col span={8} id="colUnidadeMedida" style={{position: 'relative'}}>
                             <div style={{fontSize: '12px'}} dangerouslySetInnerHTML={{__html: '<span><strong>Unidade de Medida:</strong> '+this.state.unidademedidaValues[k]+'</span>'}}></div>
                         </Col>
+                        <Col span={9} id="colQuantidadeConferida" style={{position: 'relative'}}>
+                            <div style={{fontSize: '12px'}} dangerouslySetInnerHTML={{__html: '<span><strong>Conferido:</strong> '+this.state.qtdeConferidaValues[k]+'</span>'}}></div>
+                        </Col>                        
                     </Row>
                 </Col>             
             </Row>
@@ -550,72 +597,6 @@ class PedidosCompra extends Component {
                                     )}
                                 </Form.Item>
                             </Col>
-                            <Col span={10} id="colChaveNF" style={{position: 'relative'}}>                            
-                                <Form.Item
-                                    label="Chave da Nota Fiscal"
-                                >
-                                    {getFieldDecorator('chave_nf', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe a chave da nota fiscal',
-                                            }
-                                        ]
-                                    })(
-                                        <Input
-                                            id="chave_nf"
-                                            placeholder="Digite a chave da nota fiscal"
-                                        />
-                                    )}
-                                </Form.Item>                              
-                            </Col>
-                        </Row>
-                        <Row gutter={2}>
-                            <Col span={9} id="colDataEntrega" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Data Prevista de Entrega"
-                                >
-                                    {getFieldDecorator('data_prevista', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe a data prevista de entrega',
-                                            }
-                                        ]
-                                    })(
-                                        <DatePicker
-                                            locale={ptBr}
-                                            format="DD/MM/YYYY"
-                                            placeholder="Selecione a data"
-                                            style={ {width: '100%'} }
-                                            getCalendarContainer={() => document.getElementById('colDataEntrega')}
-                                        />
-                                    )}
-                                </Form.Item>
-                            </Col>                             
-                            <Col span={5} id="colStatus" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Status"
-                                >
-                                    {getFieldDecorator('statusPedido', {
-                                        rules: [{
-                                            required: true, message: "Informe o fornecedor"
-                                        }],
-                                    })(
-                                        <Select
-                                            style={{ width: '100%' }}
-                                            placeholder="Selecione"
-                                            getPopupContainer={() => document.getElementById('colStatus')}
-                                            allowClear={true}
-                                            disabled
-                                        >
-                                            {
-                                                statusPedidoOption.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
-                                    )}
-                                </Form.Item>
-                            </Col>                                         
                             <Col span={5} id="colDataPedido" style={{position: 'relative'}}>
                                 <Form.Item
                                     label="Data do Pedido"
@@ -656,6 +637,47 @@ class PedidosCompra extends Component {
                                             style={ {width: '100%'} }
                                             getCalendarContainer={() => document.getElementById('colHoraPredido')}
                                             disabled
+                                        />
+                                    )}
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <Row gutter={2}>
+                            <Col span={14} id="colChaveNF" style={{position: 'relative'}}>                            
+                                <Form.Item
+                                    label="Chave da Nota Fiscal"
+                                >
+                                    {getFieldDecorator('chave_nf', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a chave da nota fiscal',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="chave_nf"
+                                            placeholder="Digite a chave da nota fiscal"
+                                        />
+                                    )}
+                                </Form.Item>                              
+                            </Col>                        
+                            <Col span={5} id="colDataEntrega" style={{position: 'relative'}}>
+                                <Form.Item
+                                    label="Data Prevista de Entrega"
+                                >
+                                    {getFieldDecorator('data_prevista', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a data prevista de entrega',
+                                            }
+                                        ]
+                                    })(
+                                        <DatePicker
+                                            locale={ptBr}
+                                            format="DD/MM/YYYY"
+                                            placeholder="Selecione a data"
+                                            style={ {width: '100%'} }
+                                            getCalendarContainer={() => document.getElementById('colDataEntrega')}
                                         />
                                     )}
                                 </Form.Item>
