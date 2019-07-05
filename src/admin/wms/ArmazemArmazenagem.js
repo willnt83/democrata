@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Modal, Input, Button, Row, Col, Form, Select, notification } from 'antd'
+import { Table, Icon, Modal, Input, Button, Row, Col, Form, Select, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import moment from 'moment'
@@ -12,12 +12,14 @@ class ArmazemArmazenagem extends Component {
         almoxarifadosOptions: [],
         idPedidoInsumo: null,
         nomeInsumo: null,
-        quantidadeInsumo: null,
+        quantidadeTotal: null,
+        quantidadeArmazenar: null,
         almoxarifadosPosicoes: [],
         dynamicFieldsRendered: false,
         almoxarifados: [],
         posicoes: [],
-        quantidades: []
+        quantidades: [],
+        btnSalvarLoading: false
     }
 
     showNotification = (msg, success) => {
@@ -156,7 +158,9 @@ class ArmazemArmazenagem extends Component {
         .then(res => {
             if(res.data.payload.length > 0){
                 var keys = []
+                var quantidadeArmazenar = this.state.quantidadeTotal
                 var almoxarifados = res.data.payload.map((row, index) => {
+                    quantidadeArmazenar -= row.quantidade
                     keys.push(index)
                     return(row.id_almoxarifado)
                 })
@@ -166,6 +170,7 @@ class ArmazemArmazenagem extends Component {
 
                 this.setState({
                     dynamicFieldsRendered: true,
+                    quantidadeArmazenar,
                     almoxarifados: res.data.payload.map(row => {
                         return(row.id_almoxarifado)
                     }),
@@ -188,6 +193,7 @@ class ArmazemArmazenagem extends Component {
         .then(res => {
             this.showNotification(res.data.msg, res.data.success)
             this.showArmazenagemModal(false)
+            this.setState({btnSalvarLoading: false})
         })
         .catch(error =>{
             console.log(error)
@@ -195,7 +201,7 @@ class ArmazemArmazenagem extends Component {
     }
 
     loadArmazenagemModal = (record) => {
-        this.setState({idPedidoInsumo: record.id, nomeInsumo: record.nomeInsumo, quantidadeInsumo: record.quantidadeConferida})
+        this.setState({idPedidoInsumo: record.id, nomeInsumo: record.nomeInsumo, quantidadeTotal: record.quantidadeConferida})
         this.getAlmoxarifados()
         this.getInsumosArmazenagem(record.id)
         this.showArmazenagemModal(true)
@@ -212,7 +218,7 @@ class ArmazemArmazenagem extends Component {
                 almoxarifadosPosicoes: [],
                 idPedidoInsumo: null,
                 nomeInsumo: null,
-                quantidadeInsumo: null
+                quantidadeArmazenar: null
             })
         }
     }
@@ -224,7 +230,51 @@ class ArmazemArmazenagem extends Component {
         if(value) this.getPosicoesArmazem(value, k)
     }
 
+    /*
+    changeQuantidade = (e) => {
+        console.log('e.target.id', e.target.id)
+        const keys = this.props.form.getFieldValue('keys')
+        var quantidadeArmazenar = this.state.quantidadeTotal
+        keys.forEach(row => {
+            quantidadeArmazenar -= this.props.form.getFieldValue(`quantidade[${row}]`)
+        })
+        
+        this.setState({quantidadeArmazenar})
+    }*/
+
+    changeQuantidade = (e) => {
+        if(e.target.value > 0){
+            const keys = this.props.form.getFieldValue('keys')
+            var quantidadeArmazenar = this.state.quantidadeTotal
+            var valorEntradaInicial = parseInt(this.props.form.getFieldValue(e.target.id))
+            console.log('valorEntradaInicial', valorEntradaInicial)
+            var somatoriaEntradas = 0
+            var valorExcedente = 0
+            var valorMaximoPermitido = 0
+
+            keys.forEach(row => {
+                somatoriaEntradas += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
+            })
+            console.log('somatoriaEntradas', somatoriaEntradas)
+
+            if(somatoriaEntradas > quantidadeArmazenar){
+                valorExcedente = somatoriaEntradas - quantidadeArmazenar
+                console.log('valorExcedente', valorExcedente)
+                valorMaximoPermitido = valorEntradaInicial - valorExcedente
+                console.log('valorMaximoPermitido', valorMaximoPermitido)
+                var strObj = '{"'+e.target.id+'": '+valorMaximoPermitido+'}'
+                var obj  = JSON.parse(strObj)
+                this.props.form.setFieldsValue(obj)
+                this.setState({quantidadeArmazenar: 0})
+            }
+            else
+                this.setState({quantidadeArmazenar: (quantidadeArmazenar - somatoriaEntradas)})
+        }
+    }
+
+
     handleFormSubmit = () => {
+        this.setState({btnSalvarLoading: true})
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
                 var rows = values.almoxarifado.map((row, i) => {
@@ -260,9 +310,16 @@ class ArmazemArmazenagem extends Component {
 
     removeComposicaoRow = (k) => {
         const keys = this.props.form.getFieldValue('keys')
-        if (keys.length === 1){
+        if(keys.length === 1){
             return
         }
+
+        // Atualizando quantidade total
+        if(parseInt(this.props.form.getFieldValue(`quantidade[${k}]`)) >= 0){
+            var quantidadeArmazenar = parseInt(this.state.quantidadeArmazenar) + parseInt(this.props.form.getFieldValue(`quantidade[${k}]`))
+            this.setState({quantidadeArmazenar})
+        }
+
         this.props.form.setFieldsValue({
             keys: keys.filter(key => key !== k),
         })
@@ -290,7 +347,6 @@ class ArmazemArmazenagem extends Component {
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
 
-        var filtered = []
         const porcionamentos = keys.map(k => (
             <Row key={k} gutter={5}>
                 <Col span={10} id="almoxarifado" style={{position: 'relative'}}>
@@ -355,6 +411,7 @@ class ArmazemArmazenagem extends Component {
                             <Input
                                 style={{ width: '75%', marginRight: 8 }}
                                 placeholder="Qtd"
+                                onKeyUp={this.changeQuantidade}
                             />
                         )}
                         {keys.length > 1 ? (
@@ -449,15 +506,21 @@ class ArmazemArmazenagem extends Component {
                     width={900}
                     footer={[
                         <Button key="back" onClick={() => this.showArmazenagemModal(false)}><Icon type="close" /> Cancelar</Button>,
-                        <Button key="submit" type="primary" loading={this.state.buttonSalvarConjunto} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
+                        <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
                     <Row>
                         <Col span={24} id="colArmazenagem" style={{position: 'relative'}}>
                             <Form layout="vertical">
-                                <Row className="bold" style={{marginBottom: 10}}>
+                                <Row style={{marginBottom: 10}}>
                                     <Col span={24}>
-                                        Insumo: {this.state.nomeInsumo} | Quantidade total: {this.state.quantidadeInsumo}
+                                        Insumo: <span className="bold" >{this.state.nomeInsumo}</span>
+                                    </Col>
+                                    <Col span={24}>
+                                        Quantidade conferida: <span className="bold" >{this.state.quantidadeTotal}</span>
+                                    </Col>
+                                    <Col span={24}>
+                                        Quantidade a ser armazenada: <span className="bold" >{this.state.quantidadeArmazenar}</span>
                                     </Col>
                                 </Row>
                                 {
