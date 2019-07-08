@@ -39,6 +39,7 @@ class ArmazemEntrada extends Component {
         quantidadeConferida: null,
         dataEntradaValues: [],
         horaEntradaValues: [],
+        quantidadeValues: [],
         entradas: [],
         dynamicFieldsRendered: false,
         btnSalvarLoading: false
@@ -117,7 +118,7 @@ class ArmazemEntrada extends Component {
     returnStatusDescription = (status, object) => {
         var returnStatus = '';
         if(object){
-            return object.forEach(objStatus => {
+            object.forEach(objStatus => {
                 if(objStatus.value === status) {
                     returnStatus = objStatus.description
                 }
@@ -127,17 +128,26 @@ class ArmazemEntrada extends Component {
     }
 
     loadArmazenagemModal = (record) => {
-        console.log(record);
         if(typeof(record) !== "undefined" && record.key) {
             this.setState({pedidoCompraId: record.key})
             axios
             .get(this.props.backEndPoint + '/getPedidoInsumoEntradas?id='+record.key)
             .then(res => {
+                var entradas = [];
                 var pedidoInsumoEntradas = res.data.payload;
-                if(pedidoInsumoEntradas && pedidoInsumoEntradas.length > 0){
-
+                if(pedidoInsumoEntradas && pedidoInsumoEntradas.length === 1){
+                    record.quantidade           = pedidoInsumoEntradas[0].quantidade
+                    record.quantidadeConferida  = pedidoInsumoEntradas[0].quantidadeConferida
+                    record.quantidadeArmazenada = pedidoInsumoEntradas[0].quantidadeArmazenada
+                    entradas = pedidoInsumoEntradas[0].entradas;
+                    var keys = entradas.map((entradas, index) => {
+                        return(index)
+                    })
+                    this.props.form.setFieldsValue({
+                        keys
+                    })                 
                 }
-
+                console.log(record.statusInsumoDescription);
                 this.setState({
                     idPedidoInsumo: record.key,
                     idPedido: record.id,
@@ -146,12 +156,13 @@ class ArmazemEntrada extends Component {
                     dataPedido: record.data_pedido,
                     horaPedido: record.hora_pedido,
                     previsaoPedido: record.data_previsao,
-                    nomeFornecedor: record.fornecedorDescription,
+                    nomeFornecedor: record.fornecedorDescription + 'dsfsdfsdf sdfsdf sdf sdfsdfsdfsdfsdfsdfsdf sdfsdf sdfsdf',
                     statusInsumo: record.statusInsumoDescription,
                     chaveNF: record.chave_nf,
                     quantidade: record.quantidade,
                     quantidadeConferida: record.quantidadeConferida,
-                    quantidadeArmazenada: record.quantidadeArmazenada
+                    quantidadeArmazenada: record.quantidadeArmazenada,
+                    entradas: entradas
                 })
                 this.showEntradaModal(true)
             });
@@ -380,14 +391,14 @@ class ArmazemEntrada extends Component {
                 >
                     <Form layout="vertical">
                         <Row>
-                            <Col span={16} id="colInsumo" style={{position: 'relative'}}>
+                            <Col span={19} id="colInsumo" style={{position: 'relative'}}>
                                 <Form.Item
                                     label="Insumo"
                                 >
                                 {this.state.nomeInsumo}
                                 </Form.Item>
                             </Col>
-                            <Col span={8} id="colInsInsumo" style={{position: 'relative'}}>
+                            <Col span={5} id="colInsInsumo" style={{position: 'relative'}}>
                                 <Form.Item
                                     label="INS"
                                 >
@@ -396,20 +407,28 @@ class ArmazemEntrada extends Component {
                             </Col>
                         </Row>
                         <Row>
-                            <Col span={16} id="colFornecedor" style={{position: 'relative'}}>
+                            <Col span={12} id="colFornecedor" style={{position: 'relative'}}>
                                 <Form.Item
                                     label="Fornecedor"
                                 >
                                 {this.state.nomeFornecedor}
                                 </Form.Item>
                             </Col>
-                            <Col span={8} id="colChaveNF" style={{position: 'relative'}}>
+                            <Col span={7} id="colChaveNF" style={{position: 'relative'}}>
                                 <Form.Item
                                     label="Chave N.F"
                                 >
                                 {this.state.chaveNF}
                                 </Form.Item>
                             </Col>
+                            <Col span={5} id="colStatusInsumo" style={{position: 'relative'}}>
+                                <Form.Item
+                                    label="Status"
+                                    style={{paddingBottom: '0px', marginBottom: '0px'}}
+                                >
+                                {this.state.statusInsumo}
+                                </Form.Item>
+                            </Col>                            
                         </Row>
                         <Row>
                             <Col span={8} id="colQuantidade" style={{position: 'relative'}}>
@@ -428,14 +447,14 @@ class ArmazemEntrada extends Component {
                                 {this.state.quantidadeConferida}
                                 </Form.Item>
                             </Col>
-                            <Col span={8} id="colStatusInsumo" style={{position: 'relative'}}>
+                            <Col span={8} id="colQuantidadeArmazenada" style={{position: 'relative'}}>
                                 <Form.Item
-                                    label="Status"
+                                    label="Quantidade Armazenada"
                                     style={{paddingBottom: '0px', marginBottom: '0px'}}
                                 >
-                                {this.state.statusInsumo}
+                                {this.state.quantidadeArmazenada}
                                 </Form.Item>
-                            </Col>
+                            </Col>                            
                         </Row>
                         <Divider />
                         <h4>Entrada de Insumos (Matérias-Primas)</h4>                          
@@ -475,7 +494,7 @@ class ArmazemEntrada extends Component {
                                 {this.state.nomeInsumo}
                                 </Form.Item>
                             </Col>
-                            <Col span={8} id="colInsInsumo" style={{position: 'relative'}}>
+                            <Col span={5} id="colInsInsumo" style={{position: 'relative'}}>
                                 <Form.Item
                                     label="INS"
                                 >
