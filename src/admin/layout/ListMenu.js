@@ -138,7 +138,13 @@ class ListMenu extends Component{
                                 <Icon type="right-square" />
                                 <span>Almoxarifados</span>
                             </Link>
-                        </Menu.Item>                                                
+                        </Menu.Item>
+                        <Menu.Item key="65">
+                            <Link to="/admin/wms/fornecedores">
+                                <Icon type="right-square" />
+                                <span>Fornecedores</span>
+                            </Link>
+                        </Menu.Item>                                                                       
                         <Menu.Item key="7">
                             <Link to="/admin/wms/insumos">
                                 <Icon type="right-square" />

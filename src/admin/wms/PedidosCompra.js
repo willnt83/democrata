@@ -7,8 +7,6 @@ import ptBr from 'antd/lib/locale-provider/pt_BR'
 import moment from 'moment'
 import 'moment/locale/pt-br'
 
-import "./../static/form.css"
-
 const { Content } = Layout
 
 let id = 0
@@ -32,6 +30,7 @@ class PedidosCompra extends Component {
         tableLoading: false,
         buttonSalvarPedidoCompra: false,
         insumosOptions: [],
+        itemsValues: [],
         insValues: [],
         unidademedidaValues: [],
         qtdeConferidaValues: [],
@@ -66,6 +65,7 @@ class PedidosCompra extends Component {
                         insumos: pedidocompra.insumos
                     })
                 })
+                console.log(tableData);
                 this.setState({tableData})
             }
             else
@@ -217,10 +217,11 @@ class PedidosCompra extends Component {
             var quantidades = []
             var statusInsumos = []
 
-            this.state.insumos.map(insumo => {
+            this.state.insumos.forEach(insumo => {
                 insumos.push(insumo.id)
                 quantidades.push(insumo.quantidade)
                 statusInsumos.push(insumo.statusInsumo)
+                this.state.itemsValues.push(insumo.item)
                 this.state.insValues.push(insumo.ins)
                 this.state.unidademedidaValues.push(insumo.unidademedida)
                 this.state.qtdeConferidaValues.push(insumo.quantidade_conferida)
@@ -254,6 +255,7 @@ class PedidosCompra extends Component {
     handleOnChange = (value, event, index) => {
         this.insertColumnsValues({
             index: index,
+            item: this.state.itemsValues[index],
             ins: event.props.ins,
             unidademedida: event.props.unidademedida,
             qtde: event.props.quantidade_conferida
@@ -262,7 +264,7 @@ class PedidosCompra extends Component {
 
     returnStatusDescription = (status, object) => {
         if(object){
-            return object.map(objStatus => {
+            object.forEach(objStatus => {
                 if(objStatus.value === status) {
                     return objStatus.description
                 }
@@ -286,15 +288,19 @@ class PedidosCompra extends Component {
     }
 
     insertColumnsValues = (object) => {
+        console.log(object);
+        let itemsValues = this.state.itemsValues
         let insValues = this.state.insValues
         let unidademedidaValues = this.state.unidademedidaValues
         let qtdeConferidaValues = this.state.qtdeConferidaValues
 
+        itemsValues[object.index] = object.item
         insValues[object.index] = object.ins
         unidademedidaValues[object.index] = object.unidademedida
         qtdeConferidaValues[object.index] = object.qtde
 
         this.setState({
+            itemsValues,
             insValues,
             unidademedidaValues,
             qtdeConferidaValues
@@ -322,6 +328,7 @@ class PedidosCompra extends Component {
 
         this.insertColumnsValues({
             index: (id-1),
+            item: null,
             ins: '',
             unidademedida: '',
             qtde: '0'
@@ -347,15 +354,16 @@ class PedidosCompra extends Component {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
                 var id = this.state.pedidoCompraId ? this.state.pedidoCompraId : null
-                console.log(values);
 
                 var insumos = null
                 if(values.insumos){
                     insumos = values.insumos
                     .map((insumo, index) => {
                         return ({
+                            item: this.state.itemsValues[index] ? parseInt(this.state.itemsValues[index]) : null,
                             idInsumo: insumo,
-                            quantidade: parseInt(values.quantidades[index])
+                            quantidade: parseInt(values.quantidades[index]),
+                            statusInsumo: values.statusInsumos[index]
                         })
                     })
                     .filter(insumo => {
@@ -372,6 +380,7 @@ class PedidosCompra extends Component {
                     idFornecedor: values.fornecedor,
                     insumos: insumos
                 }
+                console.log(request);
                 this.requestCreateUpdatePedidoCompra(request)
             }
             else{
@@ -684,7 +693,7 @@ class PedidosCompra extends Component {
                             </Col>
                         </Row>
                         <Divider />
-                        <h4>Insumos (Matérias Primas)</h4>  
+                        <h4>Insumos (Matérias-Primas)</h4>  
                         {composicaoItems}
                         <Row>
                             <Col span={24}>

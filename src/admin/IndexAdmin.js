@@ -28,6 +28,7 @@ import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
 import Insumos	 from "./wms/Insumos"
 import UnidadesMedida	 from "./wms/UnidadesMedida"
 import Almoxarifados from "./wms/Almoxarifados"
+import Fornecedores from "./wms/Fornecedores"
 import PosicaoArmazem from "./wms/PosicaoArmazem"
 import PedidosCompra from "./wms/PedidosCompra"
 import Armazem from "./wms/Armazem"
@@ -136,6 +137,12 @@ const routes = [
 		sidebar: () => <div>WMS/Almoxarifados</div>,
 		main: () => <Almoxarifados />
 	},
+	{
+		path: "/admin/wms/fornecedores",
+		exact: true,
+		sidebar: () => <div>WMS/Fornecedores</div>,
+		main: () => <Fornecedores />
+	},	
 	{
 		path: "/admin/wms/insumos",
 		exact: true,
