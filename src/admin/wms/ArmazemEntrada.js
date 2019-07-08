@@ -44,45 +44,6 @@ class ArmazemEntrada extends Component {
         btnSalvarLoading: false
     }
 
-    showNotification = (msg, success) => {
-        var type = null
-        var style = null
-        if(success){
-            type = 'check-circle'
-            style = {color: '#4ac955', fontWeight: '800'}
-        }
-        else {
-            type = 'exclamation-circle'
-            style = {color: '#f5222d', fontWeight: '800'}
-        }
-        const args = {
-            message: msg,
-            icon:  <Icon type={type} style={style} />,
-            duration: 3
-        }
-        notification.open(args)
-    }
-
-    compareByAlph = (a, b) => {
-        if (a > b)
-            return -1
-        if (a < b)
-            return 1
-        return 0
-    }
-
-    returnStatusDescription = (status, object) => {
-        var returnStatus = '';
-        if(object){
-            return object.forEach(objStatus => {
-                if(objStatus.value === status) {
-                    returnStatus = objStatus.description
-                }
-            });
-        }
-        return returnStatus;
-    }
-
     getInsumosEntrada = () => {
         this.setState({tableLoading: true})
         axios
@@ -126,13 +87,57 @@ class ArmazemEntrada extends Component {
         })
     }
 
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 3
+        }
+        notification.open(args)
+    }
+
+    compareByAlph = (a, b) => {
+        if (a > b)
+            return -1
+        if (a < b)
+            return 1
+        return 0
+    }
+
+    returnStatusDescription = (status, object) => {
+        var returnStatus = '';
+        if(object){
+            return object.forEach(objStatus => {
+                if(objStatus.value === status) {
+                    returnStatus = objStatus.description
+                }
+            });
+        }
+        return returnStatus;
+    }
+
     loadArmazenagemModal = (record) => {
         console.log(record);
         if(typeof(record) !== "undefined" && record.key) {
             this.setState({pedidoCompraId: record.key})
             axios
-            .get(this.props.backEndPoint + '/getPedidosCompraInsumos?id='+record.key)
+            .get(this.props.backEndPoint + '/getPedidoInsumoEntradas?id='+record.key)
             .then(res => {
+                var pedidoInsumoEntradas = res.data.payload;
+                if(pedidoInsumoEntradas && pedidoInsumoEntradas.length > 0){
+
+                }
+
                 this.setState({
                     idPedidoInsumo: record.key,
                     idPedido: record.id,
@@ -145,7 +150,8 @@ class ArmazemEntrada extends Component {
                     statusInsumo: record.statusInsumoDescription,
                     chaveNF: record.chave_nf,
                     quantidade: record.quantidade,
-                    quantidadeConferida: record.quantidadeConferida
+                    quantidadeConferida: record.quantidadeConferida,
+                    quantidadeArmazenada: record.quantidadeArmazenada
                 })
                 this.showEntradaModal(true)
             });
@@ -233,7 +239,7 @@ class ArmazemEntrada extends Component {
             <Row key={k} gutter={5} style={{marginBottom: '15px'}}>
                 <Col span={7} id="colData" style={{position: 'relative'}}>
                     <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
-                        {getFieldDecorator(`dataEntrada[${k}]`, {
+                        {getFieldDecorator(`data_entrada[${k}]`, {
                             rules: [{
                                 required: true, message: "Informe a Data"
                             }],
@@ -250,7 +256,7 @@ class ArmazemEntrada extends Component {
                 </Col>
                 <Col span={7} id="colHora" style={{position: 'relative'}}>
                     <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
-                        {getFieldDecorator(`horaEntrada[${k}]`, {
+                        {getFieldDecorator(`hora_entrada[${k}]`, {
                             rules: [{
                                 required: true, message: "Informe a Hora"
                             }],
