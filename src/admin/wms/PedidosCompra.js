@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, Divider, DatePicker, TimePicker } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, Divider, DatePicker, TimePicker, notification } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
@@ -47,6 +47,25 @@ class PedidosCompra extends Component {
         insumos: []
     }
 
+	showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 5
+        }
+        notification.open(args)
+	}    
+
     requestGetPedidosCompra = () => {
         this.setState({tableLoading: true})
         axios
@@ -54,12 +73,14 @@ class PedidosCompra extends Component {
         .then(res => {
             if(res.data.payload){
                 console.log('res.data.payload', res.data.payload)
-                var tableData = res.data.payload.map(pedidocompra => {                    
+                var tableData = res.data.payload.map(pedidocompra => {
+                    var data_pedido = moment(pedidocompra.data_pedido, 'YYYY-MM-DD')
+                    var data_previsao = moment(pedidocompra.data_prevista, 'YYYY-MM-DD')                                   
                     return({
                         key: pedidocompra.id,
-                        data_pedido: pedidocompra.data_pedido,
+                        data_pedido: data_pedido.format('DD/MM/YYYY'),
                         hora_pedido: pedidocompra.hora_pedido,
-                        data_prevista: pedidocompra.data_prevista,
+                        data_prevista: data_previsao.format('DD/MM/YYYY'),
                         fornecedorValue: pedidocompra.idFornecedor,
                         fornecedorDescription: pedidocompra.nomeFornecedor,
                         insumos: pedidocompra.insumos
@@ -69,12 +90,13 @@ class PedidosCompra extends Component {
                 this.setState({tableData})
             }
             else
-                console.log('Nenhum registro encontrado')
+                this.showNotification('Nenhum registro encontrado', false)
             this.setState({tableLoading: false})
         })
         .catch(error => {
             console.log(error)
             this.setState({tableLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
     }
 
@@ -98,13 +120,14 @@ class PedidosCompra extends Component {
                 })
             }
             else{
-                console.log('Nenhum registro encontrado')
+                this.showNotification('Nenhum registro encontrado', false)
             }
             this.setState({tableLoading: false})
         })
         .catch(error => {
             console.log(error)
             this.setState({tableLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
     }
 
@@ -130,13 +153,14 @@ class PedidosCompra extends Component {
                 })
             }
             else{
-                console.log('Nenhum registro encontrado')
+                this.showNotification('Nenhum registro encontrado', false)
             }
             this.setState({tableLoading: false})
         })
         .catch(error => {
             console.log(error)
             this.setState({tableLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
     }
 
@@ -144,13 +168,19 @@ class PedidosCompra extends Component {
         this.setState({buttonSalvarPedidoCompra: true})
         axios.post(this.props.backEndPoint + '/createUpdatePedidoCompra', request)
         .then(res => {
-            this.showPedidosCompraModal(false)
-            this.requestGetPedidosCompra()
-            this.setState({buttonSalvarPedidoCompra: false})
+            if(res.data.success){
+                this.showPedidosCompraModal(false)
+                this.requestGetPedidosCompra()
+                this.setState({buttonSalvarPedidoCompra: false})
+            } else {
+                this.setState({buttonSalvarPedidoCompra: false})
+                this.showNotification(res.data.msg, false)
+            }
         })
         .catch(error =>{
             console.log(error)
             this.setState({buttonSalvarPedidoCompra: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
     }
 
@@ -199,6 +229,7 @@ class PedidosCompra extends Component {
             .catch(error => {
                 console.log(error)
                 this.setState({tableLoading: false})
+                this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
             })
         }
         else{
@@ -249,6 +280,7 @@ class PedidosCompra extends Component {
         })
         .catch(error => {
             console.log(error)
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
     }
 
@@ -394,6 +426,22 @@ class PedidosCompra extends Component {
         this.requestGetPedidosCompra()
     }
 
+    handleQuantidadeValidator = (rule, value, callback) => {
+        let key = rule.fullField.replace(/quantidades|\[|\]/gi,'');
+        key = key && !isNaN(key) ? parseInt(key) : 0
+        if(key && !isNaN(key)){
+            value = value && !isNaN(value) ? parseFloat(value) : 0
+            let conferido = this.state.qtdeConferidaValues[key]
+            conferido = conferido && !isNaN(conferido) ? parseFloat(conferido) : 0
+            console.log(conferido+' - '+value)
+            if (conferido > 0 && value > 0 && value < conferido) {            
+                callback('Qtde inválida!')
+                this.showNotification('Quantidade inferior à conferida não permitida!', false)
+            }
+        }
+        callback()
+    }
+
     render(){
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
@@ -432,6 +480,9 @@ class PedidosCompra extends Component {
                                     rules: [
                                         {
                                             required: true, message: 'Informe a quantidade',
+                                        },
+                                        {
+                                            validator: this.handleQuantidadeValidator
                                         }
                                     ]
                                 })(
@@ -468,7 +519,7 @@ class PedidosCompra extends Component {
                         </Col>                        
                         <Col span={1} id="colDelete" style={{position: 'relative'}}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px', marginTop: '4px', textAlign: 'center'}}>
-                                {keys.length > 1 ? (
+                                {keys.length > 1 && this.state.qtdeConferidaValues[k] <= 0 ? (
                                     <Icon
                                         className="dynamic-delete-button"
                                         type="minus-circle-o"
@@ -524,10 +575,10 @@ class PedidosCompra extends Component {
             sorter: (a, b) => this.compareByAlph(a.data_prevista, b.data_prevista)
         },                
         {
-            title: 'Status',
-            dataIndex: 'statusDescription',
+            title: 'Insumos',
+            dataIndex: 'insumos',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.statusDescription, b.statusDescription)
+            sorter: (a, b) => this.compareByAlph(a.insumos, b.insumos)
         }, 
         {
             title: 'Operação',

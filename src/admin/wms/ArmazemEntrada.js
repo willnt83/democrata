@@ -27,11 +27,13 @@ class ArmazemEntrada extends Component {
         showEntradaModalStatus: false,
         idPedidoInsumo: null,
         idPedido: null,
+        idInsumo: null,
         nomeInsumo: null,
         insInsumo: null,
         dataPedido: null,
         horaPedido: null,
         previsaoPedido: null,
+        idFornecedor: null,
         nomeFornecedor: null,
         statusInsumo: null,
         chaveNF: null,
@@ -85,6 +87,7 @@ class ArmazemEntrada extends Component {
         .catch(error => {
             console.log(error)
             this.setState({tableLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
     }
 
@@ -139,30 +142,44 @@ class ArmazemEntrada extends Component {
                     record.quantidade           = pedidoInsumoEntradas[0].quantidade
                     record.quantidadeConferida  = pedidoInsumoEntradas[0].quantidadeConferida
                     record.quantidadeArmazenada = pedidoInsumoEntradas[0].quantidadeArmazenada
-                    entradas = pedidoInsumoEntradas[0].entradas;
-                    var keys = entradas.map((entradas, index) => {
-                        return(index)
-                    })
-                    this.props.form.setFieldsValue({
-                        keys
-                    })                 
+                    entradas = pedidoInsumoEntradas[0].entradas;               
                 }
-                console.log(record.statusInsumoDescription);
+
+                // Se não tiver entrada registrada, cria a primeira
+                if(entradas.length === 0){
+                    entradas.push({
+                        data_entrada: moment(this.returnNowDate(), 'YYYY-MM-DD'),
+                        hora_entrada: moment(this.returnNowHour(), 'HH:mm:ss'),
+                        quantidades: 0
+                    })
+                }
+
+                // Keys de entradas
+                var keys = entradas.map((entradas, index) => {
+                    return(index)
+                })
+                this.props.form.setFieldsValue({
+                    keys
+                })                  
+
                 this.setState({
                     idPedidoInsumo: record.key,
                     idPedido: record.id,
                     nomeInsumo: record.nomeInsumo,
+                    idInsumo: record.idInsumo,
                     insInsumo: record.insInsumo,
                     dataPedido: record.data_pedido,
                     horaPedido: record.hora_pedido,
                     previsaoPedido: record.data_previsao,
-                    nomeFornecedor: record.fornecedorDescription + 'dsfsdfsdf sdfsdf sdf sdfsdfsdfsdfsdfsdfsdf sdfsdf sdfsdf',
+                    idFornecedor: record.idfornecedor,
+                    nomeFornecedor: record.fornecedorDescription,
                     statusInsumo: record.statusInsumoDescription,
                     chaveNF: record.chave_nf,
                     quantidade: record.quantidade,
                     quantidadeConferida: record.quantidadeConferida,
                     quantidadeArmazenada: record.quantidadeArmazenada,
-                    entradas: entradas
+                    entradas: entradas,
+                    dynamicFieldsRendered: true
                 })
                 this.showEntradaModal(true)
             });
@@ -176,7 +193,6 @@ class ArmazemEntrada extends Component {
     }
 
     loadInsumoStatusModal = (record) => {
-        console.log(record);
         this.setState({
             idPedidoInsumo: record.key,
             idPedido: record.id,
@@ -198,12 +214,22 @@ class ArmazemEntrada extends Component {
         this.setState({showEntradaModalStatus})
     }
 
+    returnNowDate = () => {
+        var date = new Date();
+        return date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()
+    }
+
+    returnNowHour = () => {
+        var date = new Date();
+        return date.getHours()+':'+date.getMinutes()+':'+date.getSeconds();
+    } 
+
     addComposicaoRow = () => {
         const { form } = this.props
         const keys = form.getFieldValue('keys')
         const nextKeys = keys.concat(id++)
         this.props.form.setFieldsValue({
-            keys: nextKeys,
+            keys: nextKeys
         })
     }
 
@@ -214,8 +240,8 @@ class ArmazemEntrada extends Component {
         }
 
         // Atualizando quantidade total
-        if(parseInt(this.props.form.getFieldValue(`quantidade[${k}]`)) >= 0){
-            var quantidadeArmazenar = parseInt(this.state.quantidadeArmazenar) + parseInt(this.props.form.getFieldValue(`quantidade[${k}]`))
+        if(parseInt(this.props.form.getFieldValue(`quantidades[${k}]`)) >= 0){
+            var quantidadeArmazenar = parseInt(this.state.quantidadeArmazenar) + parseInt(this.props.form.getFieldValue(`quantidades[${k}]`))
             this.setState({quantidadeArmazenar})
         }
 
@@ -228,18 +254,95 @@ class ArmazemEntrada extends Component {
         this.getInsumosEntrada()
     }
 
-    // componentDidUpdate(){
-    //     if(this.state.dynamicFieldsRendered && this.state.almoxarifadosPosicoes.length > 0){
-    //         // Atualizando id, que é a variável que controla o add e remove de campos
-    //         id = (this.state.almoxarifados.length)
-    //         this.props.form.setFieldsValue({
-    //             almoxarifado: this.state.almoxarifados,
-    //             posicao: this.state.posicoes,
-    //             quantidade: this.state.quantidades
-    //         })
-    //         this.setState({dynamicFieldsRendered: false})
-    //     }
-    // }
+    componentWillUpdate(){
+        if(this.state.dynamicFieldsRendered){
+            var data_entrada    = []
+            var hora_entrada    = []
+            var quantidades     = []
+
+            this.state.entradas.forEach(insumo => {
+                data_entrada.push(moment(insumo.data_entrada, 'YYYY-MM-DD'))
+                hora_entrada.push(moment(insumo.hora_entrada, 'HH:mm:ss'))
+                quantidades.push(insumo.quantidade)
+            })
+
+            // Atualizando id, que é a variável que controla o add e remove de campos
+            id = (this.state.entradas.length)
+
+            // Insere uma linha se não tiver entrada registrada
+            // if(id === 0){
+            //     this.addComposicaoRow();
+            // }
+
+            this.props.form.setFieldsValue({
+                data_entrada,
+                hora_entrada,
+                quantidades
+            })
+
+            this.setState({dynamicFieldsRendered: false})
+        }
+    }
+
+    handleOnChangeQuantidade = (e) => {
+        let somatoria = 0
+        const keys = this.props.form.getFieldValue('keys')
+        keys.forEach(row => {
+            somatoria += parseInt(this.props.form.getFieldValue(`quantidades[${row}]`))
+        })
+        this.setState({quantidadeConferida: isNaN(somatoria) ? 0 : somatoria})
+    }    
+
+    handleFormSubmit = () => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if (!err){
+                var entradas = []
+                if(values.keys){
+                    entradas = values.keys
+                    .map((key, index) => {
+                        return ({
+                            id: this.state.entradas[index].id,
+                            data_entrada: values.data_entrada[index],
+                            hora_entrada: values.hora_entrada[index],
+                            quantidade: parseInt(values.quantidades[index])
+                        })
+                    })
+                    .filter(entrada => {
+                        return entrada !== null
+                    })
+                }
+                this.requestCreateUpdateArmazemEntrada({
+                    idPedidoInsumo: this.state.idPedidoInsumo,
+                    entradas: entradas
+                })
+            }
+            else{
+                console.log('erro no formulário')
+                console.log(err);
+            }
+        })
+    }
+
+    requestCreateUpdateArmazemEntrada = (request) => {
+        this.setState({btnSalvarLoading: true})
+        axios.post(this.props.backEndPoint + '/createUpdatePedidoInsumoEntradas', request)
+        .then(res => {
+            console.log(res)
+            if(res.data.success){
+                this.showEntradaModal(false)
+                this.getInsumosEntrada()
+                this.setState({btnSalvarLoading: false})
+            } else {
+                this.setState({btnSalvarLoading: false})
+                this.showNotification(res.data.msg, false)
+            }
+        })
+        .catch(error =>{
+            console.log(error)
+            this.setState({btnSalvarLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
+        })
+    }    
 
     render(){
         const { getFieldDecorator, getFieldValue } = this.props.form
@@ -251,6 +354,7 @@ class ArmazemEntrada extends Component {
                 <Col span={7} id="colData" style={{position: 'relative'}}>
                     <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                         {getFieldDecorator(`data_entrada[${k}]`, {
+                            initialValue: moment(this.returnNowDate(), 'YYYY-MM-DD'),
                             rules: [{
                                 required: true, message: "Informe a Data"
                             }],
@@ -268,6 +372,7 @@ class ArmazemEntrada extends Component {
                 <Col span={7} id="colHora" style={{position: 'relative'}}>
                     <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                         {getFieldDecorator(`hora_entrada[${k}]`, {
+                            initialValue: moment(this.returnNowHour(), 'HH:mm:ss'),
                             rules: [{
                                 required: true, message: "Informe a Hora"
                             }],
@@ -285,6 +390,7 @@ class ArmazemEntrada extends Component {
                 <Col span={8} id="colQuantidade" style={{position: 'relative'}}>
                     <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                         {getFieldDecorator(`quantidades[${k}]`, {
+                            initialValue: '0',
                             rules: [
                                 {
                                     required: true, message: 'Informe a quantidade',
@@ -294,6 +400,7 @@ class ArmazemEntrada extends Component {
                             <Input
                                 id="quantidade"
                                 placeholder="Quantidade"
+                                onKeyUp={this.handleOnChangeQuantidade}
                             />
                         )}
                     </Form.Item>
@@ -389,91 +496,93 @@ class ArmazemEntrada extends Component {
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Row>
-                            <Col span={19} id="colInsumo" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Insumo"
-                                >
-                                {this.state.nomeInsumo}
-                                </Form.Item>
-                            </Col>
-                            <Col span={5} id="colInsInsumo" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="INS"
-                                >
-                                {this.state.insInsumo}
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={12} id="colFornecedor" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Fornecedor"
-                                >
-                                {this.state.nomeFornecedor}
-                                </Form.Item>
-                            </Col>
-                            <Col span={7} id="colChaveNF" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Chave N.F"
-                                >
-                                {this.state.chaveNF}
-                                </Form.Item>
-                            </Col>
-                            <Col span={5} id="colStatusInsumo" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Status"
-                                    style={{paddingBottom: '0px', marginBottom: '0px'}}
-                                >
-                                {this.state.statusInsumo}
-                                </Form.Item>
-                            </Col>                            
-                        </Row>
-                        <Row>
-                            <Col span={8} id="colQuantidade" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Quantidade"
-                                    style={{paddingBottom: '0px', marginBottom: '0px'}}
-                                >
-                                {this.state.quantidade}
-                                </Form.Item>
-                            </Col>
-                            <Col span={8} id="colQuantidadeConferida" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Quantidade Conferida"
-                                    style={{paddingBottom: '0px', marginBottom: '0px'}}
-                                >
-                                {this.state.quantidadeConferida}
-                                </Form.Item>
-                            </Col>
-                            <Col span={8} id="colQuantidadeArmazenada" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Quantidade Armazenada"
-                                    style={{paddingBottom: '0px', marginBottom: '0px'}}
-                                >
-                                {this.state.quantidadeArmazenada}
-                                </Form.Item>
-                            </Col>                            
-                        </Row>
-                        <Divider />
-                        <h4>Entrada de Insumos (Matérias-Primas)</h4>                          
-                        {
-                            entradaRow.length > 0 ?
-                            <Row className="bold" style={{marginBottom: 10}}>
-                                <Col span={7}>Data</Col>
-                                <Col span={7}>Hora</Col>
-                                <Col span={8}>Quantidade</Col>
+                    {this.state.showEntradaModal ? ( 
+                        <Form layout="vertical">
+                            <Row>
+                                <Col span={19} id="colInsumo" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Insumo"
+                                    >
+                                    {this.state.idInsumo + ' - ' + this.state.nomeInsumo}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={5} id="colInsInsumo" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="INS"
+                                    >
+                                    {this.state.insInsumo}
+                                    </Form.Item>
+                                </Col>
                             </Row>
-                            :null
-                        }                        
-                        {entradaRow}
-                        <Row>
-                            <Col span={24}>
-                                <Button key="primary" title="Nova Entrada" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
-                            </Col>
-                        </Row>                        
-                    </Form>
+                            <Row>
+                                <Col span={12} id="colFornecedor" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Fornecedor"
+                                    >
+                                    {this.state.idFornecedor + ' - ' + this.state.nomeFornecedor}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={7} id="colChaveNF" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Chave N.F"
+                                    >
+                                    {this.state.chaveNF}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={5} id="colStatusInsumo" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Status"
+                                        style={{paddingBottom: '0px', marginBottom: '0px'}}
+                                    >
+                                    {this.state.statusInsumo}
+                                    </Form.Item>
+                                </Col>                            
+                            </Row>
+                            <Row>
+                                <Col span={8} id="colQuantidade" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Quantidade"
+                                        style={{paddingBottom: '0px', marginBottom: '0px'}}
+                                    >
+                                    {this.state.quantidade}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8} id="colQuantidadeConferida" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Quantidade Conferida"
+                                        style={{paddingBottom: '0px', marginBottom: '0px'}}
+                                    >
+                                    {this.state.quantidadeConferida}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8} id="colQuantidadeArmazenada" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Quantidade Armazenada"
+                                        style={{paddingBottom: '0px', marginBottom: '0px'}}
+                                    >
+                                    {this.state.quantidadeArmazenada}
+                                    </Form.Item>
+                                </Col>                            
+                            </Row>
+                            <Divider />
+                            <h4>Entrada de Insumos (Matérias-Primas)</h4>                          
+                            {
+                                entradaRow.length > 0 ?
+                                <Row className="bold" style={{marginBottom: 10}}>
+                                    <Col span={7}>Data</Col>
+                                    <Col span={7}>Hora</Col>
+                                    <Col span={8}>Quantidade</Col>
+                                </Row>
+                                :null
+                            }                        
+                            {entradaRow}
+                            <Row>
+                                <Col span={24}>
+                                    <Button key="primary" title="Nova Entrada" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
+                                </Col>
+                            </Row>                        
+                        </Form>
+                    ) : null}
                 </Modal>
                 <Modal
                     title="Atualização de Status do Insumos"
@@ -485,82 +594,84 @@ class ArmazemEntrada extends Component {
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Row>
-                            <Col span={16} id="colInsumo" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Insumo"
-                                >
-                                {this.state.nomeInsumo}
-                                </Form.Item>
-                            </Col>
-                            <Col span={5} id="colInsInsumo" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="INS"
-                                >
-                                {this.state.insInsumo}
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={16} id="colFornecedor" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Fornecedor"
-                                >
-                                {this.state.nomeFornecedor}
-                                </Form.Item>
-                            </Col>
-                            <Col span={8} id="colChaveNF" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Chave N.F"
-                                >
-                                {this.state.chaveNF}
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={8} id="colQuantidade" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Quantidade"
-                                >
-                                {this.state.quantidade}
-                                </Form.Item>
-                            </Col>
-                            <Col span={8} id="colQuantidadeConferida" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Quantidade Conferida"
-                                >
-                                {this.state.quantidadeConferida}
-                                </Form.Item>
-                            </Col>
-                            <Col span={8} id="colStatusInsumo" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Status"
-                                >
-                                    {getFieldDecorator('statusInsumo', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor selecione',
-                                            }
-                                        ]
-                                    })(
-                                        <Select
-                                            style={{ width: '100%' }}
-                                            placeholder="Selecione"
-                                            getPopupContainer={() => document.getElementById('colStatusInsumo')}
-                                            allowClear={true}
-                                        >
-                                            {
-                                                statusInsumoOption.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
-                                    )}
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                    </Form>
+                    {this.state.showEntradaModalStatus ? (
+                        <Form layout="vertical">
+                            <Row>
+                                <Col span={16} id="colInsumo" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Insumo"
+                                    >
+                                    {this.state.nomeInsumo}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={5} id="colInsInsumo" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="INS"
+                                    >
+                                    {this.state.insInsumo}
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col span={16} id="colFornecedor" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Fornecedor"
+                                    >
+                                    {this.state.nomeFornecedor}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8} id="colChaveNF" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Chave N.F"
+                                    >
+                                    {this.state.chaveNF}
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col span={8} id="colQuantidade" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Quantidade"
+                                    >
+                                    {this.state.quantidade}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8} id="colQuantidadeConferida" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Quantidade Conferida"
+                                    >
+                                    {this.state.quantidadeConferida}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8} id="colStatusInsumo" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Status"
+                                    >
+                                        {getFieldDecorator('statusInsumo', {
+                                            rules: [
+                                                {
+                                                    required: true, message: 'Por favor selecione',
+                                                }
+                                            ]
+                                        })(
+                                            <Select
+                                                style={{ width: '100%' }}
+                                                placeholder="Selecione"
+                                                getPopupContainer={() => document.getElementById('colStatusInsumo')}
+                                                allowClear={true}
+                                            >
+                                                {
+                                                    statusInsumoOption.map((option) => {
+                                                        return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                    })
+                                                }
+                                            </Select>
+                                        )}
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Form>
+                    ) : null}
                 </Modal>            
             </React.Fragment>
         )
