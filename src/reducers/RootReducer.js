@@ -1,6 +1,6 @@
 const initState = {
-    backEndPoint: 'http://localhost', //localhost
-    //backEndPoint: 'https://homologback.democratadecor.tk', // homolog
+    //backEndPoint: 'http://localhost', //localhost
+    backEndPoint: 'https://homologback.democratadecor.tk', // homolog
     //backEndPoint: 'https://testedemocrata.tk', // producao
     pageTitle: null,
     session: {
