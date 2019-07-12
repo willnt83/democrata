@@ -51,16 +51,19 @@ class ArmazemEntrada extends Component {
 
     getInsumosEntrada = (pedido = 0, insumo = '') => {
         this.setState({tableLoading: true})
+    
+        // Filtros
         let queryParams = ''
-        if(pedido) queryParams += '&id='.pedido
+        if(pedido) queryParams += '&id='+pedido
         if(insumo) {
             if(!isNaN(insumo))
-                queryParams += '&idPedidoInsumo='.insumo
+                queryParams += '&idPedidoInsumo='+insumo
             else
-                queryParams += '&nomeInsumo='.insumo
+                queryParams += '&nomeInsumo='+insumo
         }
+
         axios
-        .get(this.props.backEndPoint + '/getPedidosCompraInsumos?statusInsumo=S,E,C'+queryParams)
+        .get(this.props.backEndPoint + '/getPedidosCompraInsumos?statusInsumo=S,E,C' + queryParams)
         .then(res => {
             if(res.data.payload){
                 var tableData = [];
@@ -88,10 +91,10 @@ class ArmazemEntrada extends Component {
                     })
                 })
                 console.log(tableData);
-                this.setState({tableData,queryParams})
+                this.setState({tableData,queryParams})                
             }
             else
-                console.log('Nenhum registro encontrado')
+                console.log('Nenhum registro encontrado')            
             this.setState({tableLoading: false})
         })
         .catch(error => {
@@ -99,6 +102,7 @@ class ArmazemEntrada extends Component {
             this.setState({tableLoading: false})
             this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
+        this.showSearchModal(false)
     }
 
     showNotification = (msg, success) => {
@@ -140,7 +144,7 @@ class ArmazemEntrada extends Component {
         return returnStatus;
     }
 
-    loadArmazenagemModal = (record, modalEntradas = true) => {
+    loadArmazenagemModal = (record) => {
         if(typeof(record) !== "undefined" && record.key) {
             this.setState({pedidoCompraId: record.key})
             axios
@@ -191,19 +195,60 @@ class ArmazemEntrada extends Component {
                     entradas: entradas,
                     dynamicFieldsRendered: true
                 })
-                if(modalEntradas){
-                    this.showEntradaModal(true)
-                    this.showEntradaModalStatus(false)
-                } else {
-                    this.showEntradaModal(false)
-                    this.showEntradaModalStatus(true)
-                }
+
+                this.showEntradaModal(true)
+                this.showEntradaModalStatus(false)
             });
         } else {            
-            if(modalEntradas)
+            this.showEntradaModal(false)
+            this.showEntradaModalStatus(false)
+        }
+    }
+
+    loadInsumoStatusModal = (record) => {
+        if(typeof(record) !== "undefined" && record.key) {
+            this.setState({pedidoCompraId: record.key})
+            axios
+            .get(this.props.backEndPoint + '/getPedidoInsumoEntradas?id='+record.key)
+            .then(res => {
+                // Interpreta as Quantidades do insumo
+                var pedidoInsumoEntradas = res.data.payload;
+                if(pedidoInsumoEntradas && pedidoInsumoEntradas.length === 1){
+                    record.quantidade           = pedidoInsumoEntradas[0].quantidade
+                    record.quantidadeConferida  = pedidoInsumoEntradas[0].quantidadeConferida
+                    record.quantidadeArmazenada = pedidoInsumoEntradas[0].quantidadeArmazenada
+                }
+
                 this.showEntradaModal(false)
-            else
-                this.showEntradaModalStatus(false)
+                this.showEntradaModalStatus(true)
+
+                this.props.form.setFieldsValue({
+                    statusInsumo: record.statusInsumo
+                })
+
+                // Dados do insumo no state
+                this.setState({
+                    idPedidoInsumo: record.key,
+                    idPedido: record.id,
+                    nomeInsumo: record.nomeInsumo,
+                    idInsumo: record.idInsumo,
+                    insInsumo: record.insInsumo,
+                    dataPedido: record.data_pedido,
+                    horaPedido: record.hora_pedido,
+                    previsaoPedido: record.data_previsao,
+                    idFornecedor: record.idfornecedor,
+                    nomeFornecedor: record.fornecedorDescription,
+                    statusInsumo: record.statusInsumoDescription,
+                    chaveNF: record.chave_nf,
+                    quantidade: record.quantidade,
+                    quantidadeConferida: record.quantidadeConferida,
+                    quantidadeArmazenada: record.quantidadeArmazenada,
+                    dynamicFieldsRendered: false                 
+                })
+            });
+        } else {
+            this.showEntradaModal(false)
+            this.showEntradaModalStatus(false)
         }
     }
 
@@ -267,10 +312,11 @@ class ArmazemEntrada extends Component {
             var hora_entrada    = []
             var quantidades     = []
 
-            this.state.entradas.forEach(insumo => {
-                data_entrada.push(moment(insumo.data_entrada, 'YYYY-MM-DD'))
-                hora_entrada.push(moment(insumo.hora_entrada, 'HH:mm:ss'))
-                quantidades.push(insumo.quantidade)
+            this.state.entradas.forEach(entrada => {
+                console.log(entrada);
+                data_entrada.push(moment(entrada.data_entrada, 'YYYY-MM-DD'))
+                hora_entrada.push(moment(entrada.hora_entrada, 'HH:mm:ss'))
+                quantidades.push(entrada.quantidade)
             })
 
             // Atualizando id, que é a variável que controla o add e remove de campos
@@ -307,10 +353,12 @@ class ArmazemEntrada extends Component {
                 if(values.keys){
                     entradas = values.keys
                     .map((key, index) => {
+                        var data_entrada = moment(values.data_entrada[index], 'YYYY-MM-DD')
+                        var hora_entrada = moment(values.hora_entrada[index], 'HH:mm:ss')
                         return ({
                             id: this.state.entradas[index].id,
-                            data_entrada: values.data_entrada[index],
-                            hora_entrada: values.hora_entrada[index],
+                            data_entrada: data_entrada.format('YYYY-MM-DD'),
+                            hora_entrada: hora_entrada.format('HH:mm:ss'),
                             quantidade: parseInt(values.quantidades[index])
                         })
                     })
@@ -330,11 +378,23 @@ class ArmazemEntrada extends Component {
         })
     }
 
+    handleFormStatusSubmit = () => {        
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if (!err){
+                this.requesteUpdateStatusInsumo(this.state.idPedidoInsumo, values.statusInsumo)
+            }
+            else{
+                console.log('erro no formulário')
+                console.log(err);
+            }
+        })
+    }
+
     handleSearchData = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
                 values.idPedidoBusca = (values.idPedidoBusca && values.idPedidoBusca !== 'undefined') ? values.idPedidoBusca : 0
-                values.insumoBusca = (values.insumoBusca && values.insumoBusca !== 'undefined') ? values.insumoBusca : ''
+                values.insumoBusca = (values.insumoBusca && values.insumoBusca !== 'undefined') ? values.insumoBusca : ''                
                 this.getInsumosEntrada(values.idPedidoBusca,values.insumoBusca)
             }
             else{
@@ -343,6 +403,11 @@ class ArmazemEntrada extends Component {
                 console.log(err)
             }
         })
+    }
+
+    handleClearSearchData = () => {
+        this.showSearchModal(false)
+        this.getInsumosEntrada()
     }
 
     requestCreateUpdateArmazemEntrada = (request) => {
@@ -364,35 +429,55 @@ class ArmazemEntrada extends Component {
             this.setState({btnSalvarLoading: false})
             this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
-    }    
+    }
+    
+    requesteUpdateStatusInsumo = (idPedidoInsumo, status) => {
+        this.setState({btnSalvarLoading: true})
+        axios.post(this.props.backEndPoint + '/changeStatusInsumo?idPedidoInsumo='+idPedidoInsumo+'&status='+status)
+        .then(res => {
+            if(res.data.success){
+                this.showEntradaModalStatus(false)
+                this.getInsumosEntrada()
+                this.setState({btnSalvarLoading: false})
+            } else {
+                this.setState({btnSalvarLoading: false})
+                this.showNotification(res.data.msg, false)
+            }
+        })
+        .catch(error =>{
+            console.log(error)
+            this.setState({btnSalvarLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
+        })        
+    }
 
     handleQuantidadeValidator = (rule, value, callback) => {
-        let key = rule.fullField.replace(/quantidades|\[|\]/gi,'');
-        key = key && !isNaN(key) ? parseInt(key) : 0
-        if(key && !isNaN(key)){
-            value = value && !isNaN(value) ? parseFloat(value) : 0
-            let conferido = this.state.quantidadeConferida;
-            let armazenado = this.state.quantidadeArmazenada;
+        // let key = rule.fullField.replace(/quantidades|\[|\]/gi,'');
+        // key = key && !isNaN(key) ? parseInt(key) : 0
+        // if(key && !isNaN(key)){
+        //     value = value && !isNaN(value) ? parseFloat(value) : 0
+        //     let conferido = this.state.quantidadeConferida;
+        //     let armazenado = this.state.quantidadeArmazenada;
 
-            let error = false;
+        //     let error = false;
 
-            // Valida conferido
-            conferido = conferido && !isNaN(conferido) ? parseFloat(conferido) : 0
-            if (conferido > 0 && value > 0 && value < conferido) {            
-                error = true;
-                this.showNotification('Não é permitida quantidade superior a do Pedido de Compra', false)
-            }
+        //     // Valida conferido
+        //     conferido = conferido && !isNaN(conferido) ? parseFloat(conferido) : 0
+        //     if (conferido > 0 && value > 0 && value < conferido) {            
+        //         error = true;
+        //         this.showNotification('Não é permitida quantidade superior a do Pedido de Compra', false)
+        //     }
 
-            // Valida armazenado
-            armazenado = armazenado && !isNaN(armazenado) ? parseFloat(armazenado) : 0
-            if (armazenado > 0 && value > 0 && value < armazenado) {            
-                error = true;
-                this.showNotification('Não é permitida quantidade inferior à Armazenada', false)
-            }
+        //     // Valida armazenado
+        //     armazenado = armazenado && !isNaN(armazenado) ? parseFloat(armazenado) : 0
+        //     if (armazenado > 0 && value > 0 && value < armazenado) {            
+        //         error = true;
+        //         this.showNotification('Não é permitida quantidade inferior à Armazenada', false)
+        //     }
             
-            if(error) callback('Qtde inválida!')
-        }
-        callback()
+        //     if(error) callback('Qtde inválida!')
+        // }
+        // callback()
     }
 
     render(){
@@ -526,8 +611,8 @@ class ArmazemEntrada extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Incluir ou Alterar Entradas" onClick={() => this.loadArmazenagemModal(record, true)} />
-                        <Icon type="redo" style={{cursor: 'pointer', marginLeft: 20}} title="Alterar Status do Insumo" onClick={() => this.loadArmazenagemModal(record, false)} />
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Incluir ou Alterar Entradas" onClick={() => this.loadArmazenagemModal(record)} />
+                        <Icon type="redo" style={{cursor: 'pointer', marginLeft: 20}} title="Alterar Status do Insumo" onClick={() => this.loadInsumoStatusModal(record)} />
                     </React.Fragment>
                 )
             }
@@ -537,9 +622,14 @@ class ArmazemEntrada extends Component {
             <React.Fragment>                                    
                 <h3>Entrada de Insumos</h3>                    
                 <Row style={{marginTop: 30}}>
-                    <Col span={4} offset={20} style={{textAlign: 'right'}}>
+                    <Col span={3} offset={19} style={{textAlign: 'right'}}>
+                        <Button type="default" size="small" title="Clique para recarregar os dados originais" onClick={() => this.handleClearSearchData()}>
+                            Recarregar
+                        </Button>
+                    </Col>                    
+                    <Col span={2} style={{textAlign: 'right'}}>
                         <Button type="primary" size="small" icon="search" title="Clique para filtar os insumos desejados" onClick={() => this.showSearchModal(true)}>
-                            Buscar Insumos
+                            Buscar
                         </Button>
                     </Col>
                 </Row>
@@ -675,7 +765,7 @@ class ArmazemEntrada extends Component {
                                     >
                                     {this.state.quantidadeArmazenada}
                                     </Form.Item>
-                                </Col>                        
+                                </Col>
                             </Row>
                             <Divider />
                             <h4>Entrada de Insumos (Matérias-Primas)</h4>                          
@@ -704,17 +794,17 @@ class ArmazemEntrada extends Component {
                     width={600}
                     footer={[
                         <Button key="back" onClick={() => this.showEntradaModalStatus(false)}><Icon type="close" /> Cancelar</Button>,
-                        <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
+                        <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormStatusSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
                     {this.state.showEntradaModalStatus ? (
                         <Form layout="vertical">
                             <Row>
-                                <Col span={16} id="colInsumo" style={{position: 'relative'}}>
+                                <Col span={19} id="colInsumo" style={{position: 'relative'}}>
                                     <Form.Item
                                         label="Insumo"
                                     >
-                                    {this.state.nomeInsumo}
+                                    {this.state.idInsumo + ' - ' + this.state.nomeInsumo}
                                     </Form.Item>
                                 </Col>
                                 <Col span={5} id="colInsInsumo" style={{position: 'relative'}}>
@@ -726,37 +816,21 @@ class ArmazemEntrada extends Component {
                                 </Col>
                             </Row>
                             <Row>
-                                <Col span={16} id="colFornecedor" style={{position: 'relative'}}>
+                                <Col span={12} id="colFornecedor" style={{position: 'relative'}}>
                                     <Form.Item
                                         label="Fornecedor"
                                     >
-                                    {this.state.nomeFornecedor}
+                                    {this.state.idFornecedor + ' - ' + this.state.nomeFornecedor}
                                     </Form.Item>
                                 </Col>
-                                <Col span={8} id="colChaveNF" style={{position: 'relative'}}>
+                                <Col span={7} id="colChaveNF" style={{position: 'relative'}}>
                                     <Form.Item
                                         label="Chave N.F"
                                     >
                                     {this.state.chaveNF}
                                     </Form.Item>
                                 </Col>
-                            </Row>
-                            <Row>
-                                <Col span={8} id="colQuantidade" style={{position: 'relative'}}>
-                                    <Form.Item
-                                        label="Quantidade"
-                                    >
-                                    {this.state.quantidade}
-                                    </Form.Item>
-                                </Col>
-                                <Col span={8} id="colQuantidadeConferida" style={{position: 'relative'}}>
-                                    <Form.Item
-                                        label="Quantidade Conferida"
-                                    >
-                                    {this.state.quantidadeConferida}
-                                    </Form.Item>
-                                </Col>
-                                <Col span={8} id="colStatusInsumo" style={{position: 'relative'}}>
+                                <Col span={5} id="colStatusInsumo" style={{position: 'relative'}}>
                                     <Form.Item
                                         label="Status"
                                     >
@@ -781,8 +855,34 @@ class ArmazemEntrada extends Component {
                                             </Select>
                                         )}
                                     </Form.Item>
-                                </Col>
+                                </Col>                            
                             </Row>
+                            <Row>
+                                <Col span={8} id="colQuantidade" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Quantidade"
+                                        style={{paddingBottom: '0px', marginBottom: '0px'}}
+                                    >
+                                    {this.state.quantidade}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8} id="colQuantidadeConferida" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Quantidade Conferida"
+                                        style={{paddingBottom: '0px', marginBottom: '0px'}}
+                                    >
+                                    {this.state.quantidadeConferida}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8} id="colQuantidadeArmazenada" style={{position: 'relative'}}>
+                                    <Form.Item
+                                        label="Quantidade Armazenada"
+                                        style={{paddingBottom: '0px', marginBottom: '0px'}}
+                                    >
+                                    {this.state.quantidadeArmazenada}
+                                    </Form.Item>
+                                </Col>
+                            </Row>                            
                         </Form>
                     ) : null}
                 </Modal>            

@@ -75,7 +75,7 @@ class PedidosCompra extends Component {
                 console.log('res.data.payload', res.data.payload)
                 var tableData = res.data.payload.map(pedidocompra => {
                     var data_pedido = moment(pedidocompra.data_pedido, 'YYYY-MM-DD')
-                    var data_previsao = moment(pedidocompra.data_prevista, 'YYYY-MM-DD')                                   
+                    var data_previsao = moment(pedidocompra.data_prevista, 'YYYY-MM-DD')
                     return({
                         key: pedidocompra.id,
                         data_pedido: data_pedido.format('DD/MM/YYYY'),
@@ -429,7 +429,7 @@ class PedidosCompra extends Component {
     handleQuantidadeValidator = (rule, value, callback) => {
         let key = rule.fullField.replace(/quantidades|\[|\]/gi,'');
         key = key && !isNaN(key) ? parseInt(key) : 0
-        if(key && !isNaN(key)){
+        if(!isNaN(key)){
             value = value && !isNaN(value) ? parseFloat(value) : 0
             let conferido = this.state.qtdeConferidaValues[key]
             conferido = conferido && !isNaN(conferido) ? parseFloat(conferido) : 0
