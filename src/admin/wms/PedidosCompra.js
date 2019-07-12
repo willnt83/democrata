@@ -272,7 +272,7 @@ class PedidosCompra extends Component {
     handleDeletePedidoCompra = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get(this.props.backEndPoint + '/deleteConjunto?id='+id)
+        .get(this.props.backEndPoint + '/deletePedidoCompra?id='+id)
         .then(res => {
             this.requestGetPedidosCompra()
         })
@@ -601,9 +601,9 @@ class PedidosCompra extends Component {
                     <React.Fragment>
                         <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Pedido de Compra" onClick={() => this.loadPedidoCompraModal(record)} />
                         <Popconfirm title="Deseja imprimir o Pedido de Compra?" onConfirm={() => this.printPedidoCompra(record.key)}>
-                            <Icon type="printer" title="Imprimir Pedido de Compra" style={{color: 'darkblue', marginLeft: 20}} onClick={() => this.printPedidoCompra(record.key)}/>
-                        </Popconfirm>                        
-                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteConjunto(record.key)}>
+                            <Icon type="printer" title="Imprimir Pedido de Compra" style={{color: 'darkblue', marginLeft: 20}} />
+                        </Popconfirm>
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeletePedidoCompra(record.key)}>
                             <a href="/admin/cadastros/pedidoscompra" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
                         </Popconfirm>
                     </React.Fragment>
@@ -632,7 +632,7 @@ class PedidosCompra extends Component {
                     columns={columns}
                     dataSource={this.state.tableData}
                     loading={this.state.tableLoading}
-                />
+                />                
                 <Modal
                     title={this.screenTitleDescription()}
                     visible={this.state.showPedidosCompraModal}
