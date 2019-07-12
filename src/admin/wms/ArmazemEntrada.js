@@ -526,8 +526,8 @@ class ArmazemEntrada extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Incluir ou Alterar Entradas" alt="Incluir ou Alterar Entradas" onClick={() => this.loadArmazenagemModal(record, true)} />
-                        <Icon type="redo" style={{cursor: 'pointer', marginLeft: 20}} title="Alterar Status do Insumo" title="Alterar Status do Insumo" onClick={() => this.loadArmazenagemModal(record, false)} />
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Incluir ou Alterar Entradas" onClick={() => this.loadArmazenagemModal(record, true)} />
+                        <Icon type="redo" style={{cursor: 'pointer', marginLeft: 20}} title="Alterar Status do Insumo" onClick={() => this.loadArmazenagemModal(record, false)} />
                     </React.Fragment>
                 )
             }

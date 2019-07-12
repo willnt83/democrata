@@ -65,8 +65,7 @@ class ArmazemArmazenagem extends Component {
                             insInsumo: row.insInsumo,
                             nomeInsumo: row.nomeInsumo,
                             quantidadeConferida: row.quantidadeConferida,
-                            dthrRecebimento,
-                            local: row.local
+                            dthrRecebimento
                         })
                     })
                 })
@@ -464,12 +463,6 @@ class ArmazemArmazenagem extends Component {
             dataIndex: 'dthrRecebimento',
             align: 'center',
             sorter: (a, b) => this.compareByAlph(a.dthrRecebimento, b.dthrRecebimento)
-        },
-        {
-            title: 'Local',
-            dataIndex: 'local',
-            align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.local, b.local)
         },
         {
             title: 'Operação',

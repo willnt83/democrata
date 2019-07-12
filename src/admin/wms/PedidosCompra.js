@@ -441,6 +441,20 @@ class PedidosCompra extends Component {
         callback()
     }
 
+    printPedidoCompra = (id) => {
+        this.setState({tableLoading: true})
+        axios
+        .get(this.props.backEndPoint + '/printPedidoCompra?id='+id)
+        .then(res => {
+            window.open(this.props.backEndPoint + '/' + res.data.payload.url, '_blank');
+            this.setState({tableLoading: false})
+        })
+        .catch(error => {
+            console.log(error)
+            this.setState({tableLoading: false})
+        })
+    }
+
     render(){
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
@@ -590,7 +604,7 @@ class PedidosCompra extends Component {
                     <React.Fragment>
                         <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Pedido de Compra" onClick={() => this.loadPedidoCompraModal(record)} />
                         <Popconfirm title="Deseja imprimir o Pedido de Compra?" onConfirm={() => this.printPedidoCompra(record.key)}>
-                            <a href="/admin/cadastros/pedidoscompra" style={{marginLeft: 20}}><Icon type="printer" title="Imprimir Pedido de Compra" style={{color: 'darkblue'}} /></a>
+                            <Icon type="printer" title="Imprimir Pedido de Compra" style={{color: 'darkblue', marginLeft: 20}} onClick={() => this.printPedidoCompra(record.key)}/>
                         </Popconfirm>                        
                         <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteConjunto(record.key)}>
                             <a href="/admin/cadastros/pedidoscompra" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
