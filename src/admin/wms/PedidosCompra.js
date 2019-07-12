@@ -72,7 +72,6 @@ class PedidosCompra extends Component {
         .get(this.props.backEndPoint + '/getPedidosCompra')
         .then(res => {
             if(res.data.payload){
-                console.log('res.data.payload', res.data.payload)
                 var tableData = res.data.payload.map(pedidocompra => {
                     var data_pedido = moment(pedidocompra.data_pedido, 'YYYY-MM-DD')
                     var data_previsao = moment(pedidocompra.data_prevista, 'YYYY-MM-DD')
@@ -86,7 +85,6 @@ class PedidosCompra extends Component {
                         insumos: pedidocompra.insumos
                     })
                 })
-                console.log(tableData);
                 this.setState({tableData})
             }
             else
@@ -320,7 +318,6 @@ class PedidosCompra extends Component {
     }
 
     insertColumnsValues = (object) => {
-        console.log(object);
         let itemsValues = this.state.itemsValues
         let insValues = this.state.insValues
         let unidademedidaValues = this.state.unidademedidaValues
@@ -412,7 +409,7 @@ class PedidosCompra extends Component {
                     idFornecedor: values.fornecedor,
                     insumos: insumos
                 }
-                console.log(request);
+
                 this.requestCreateUpdatePedidoCompra(request)
             }
             else{

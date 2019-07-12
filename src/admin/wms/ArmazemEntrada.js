@@ -90,7 +90,6 @@ class ArmazemEntrada extends Component {
                         })
                     })
                 })
-                console.log(tableData);
                 this.setState({tableData,queryParams})                
             }
             else
@@ -313,7 +312,6 @@ class ArmazemEntrada extends Component {
             var quantidades     = []
 
             this.state.entradas.forEach(entrada => {
-                console.log(entrada);
                 data_entrada.push(moment(entrada.data_entrada, 'YYYY-MM-DD'))
                 hora_entrada.push(moment(entrada.hora_entrada, 'HH:mm:ss'))
                 quantidades.push(entrada.quantidade)
@@ -414,7 +412,6 @@ class ArmazemEntrada extends Component {
         this.setState({btnSalvarLoading: true})
         axios.post(this.props.backEndPoint + '/createUpdatePedidoInsumoEntradas', request)
         .then(res => {
-            console.log(res)
             if(res.data.success){
                 this.showEntradaModal(false)
                 this.getInsumosEntrada()
@@ -477,7 +474,7 @@ class ArmazemEntrada extends Component {
             
         //     if(error) callback('Qtde inválida!')
         // }
-        // callback()
+        callback()
     }
 
     render(){
