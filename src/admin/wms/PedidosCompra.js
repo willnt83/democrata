@@ -433,7 +433,6 @@ class PedidosCompra extends Component {
             value = value && !isNaN(value) ? parseFloat(value) : 0
             let conferido = this.state.qtdeConferidaValues[key]
             conferido = conferido && !isNaN(conferido) ? parseFloat(conferido) : 0
-            console.log(conferido+' - '+value)
             if (conferido > 0 && value > 0 && value < conferido) {            
                 callback('Qtde inválida!')
                 this.showNotification('Quantidade inferior à conferida não permitida!', false)
@@ -589,7 +588,10 @@ class PedidosCompra extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadPedidoCompraModal(record)} />
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Pedido de Compra" onClick={() => this.loadPedidoCompraModal(record)} />
+                        <Popconfirm title="Deseja imprimir o Pedido de Compra?" onConfirm={() => this.printPedidoCompra(record.key)}>
+                            <a href="/admin/cadastros/pedidoscompra" style={{marginLeft: 20}}><Icon type="printer" title="Imprimir Pedido de Compra" style={{color: 'darkblue'}} /></a>
+                        </Popconfirm>                        
                         <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteConjunto(record.key)}>
                             <a href="/admin/cadastros/pedidoscompra" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
                         </Popconfirm>

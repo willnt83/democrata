@@ -23,6 +23,7 @@ class ArmazemEntrada extends Component {
     state = {
         tableLoading: false,
         tableData: [],
+        showSearchModal: false,
         showEntradaModal: false,
         showEntradaModalStatus: false,
         idPedidoInsumo: null,
@@ -43,14 +44,23 @@ class ArmazemEntrada extends Component {
         horaEntradaValues: [],
         quantidadeValues: [],
         entradas: [],
+        queryParams: null,
         dynamicFieldsRendered: false,
         btnSalvarLoading: false
     }
 
-    getInsumosEntrada = () => {
+    getInsumosEntrada = (pedido = 0, insumo = '') => {
         this.setState({tableLoading: true})
+        let queryParams = ''
+        if(pedido) queryParams += '&id='.pedido
+        if(insumo) {
+            if(!isNaN(insumo))
+                queryParams += '&idPedidoInsumo='.insumo
+            else
+                queryParams += '&nomeInsumo='.insumo
+        }
         axios
-        .get(this.props.backEndPoint + '/getPedidosCompraInsumos?statusInsumo=S,E,C')
+        .get(this.props.backEndPoint + '/getPedidosCompraInsumos?statusInsumo=S,E,C'+queryParams)
         .then(res => {
             if(res.data.payload){
                 var tableData = [];
@@ -78,7 +88,7 @@ class ArmazemEntrada extends Component {
                     })
                 })
                 console.log(tableData);
-                this.setState({tableData})
+                this.setState({tableData,queryParams})
             }
             else
                 console.log('Nenhum registro encontrado')
@@ -130,7 +140,7 @@ class ArmazemEntrada extends Component {
         return returnStatus;
     }
 
-    loadArmazenagemModal = (record) => {
+    loadArmazenagemModal = (record, modalEntradas = true) => {
         if(typeof(record) !== "undefined" && record.key) {
             this.setState({pedidoCompraId: record.key})
             axios
@@ -181,38 +191,35 @@ class ArmazemEntrada extends Component {
                     entradas: entradas,
                     dynamicFieldsRendered: true
                 })
-                this.showEntradaModal(true)
+                if(modalEntradas){
+                    this.showEntradaModal(true)
+                    this.showEntradaModalStatus(false)
+                } else {
+                    this.showEntradaModal(false)
+                    this.showEntradaModalStatus(true)
+                }
             });
-        } else {
-            this.showEntradaModal(false)
+        } else {            
+            if(modalEntradas)
+                this.showEntradaModal(false)
+            else
+                this.showEntradaModalStatus(false)
         }
     }
 
     showEntradaModal = (showEntradaModal) => {
-        this.setState({showEntradaModal})
-    }
-
-    loadInsumoStatusModal = (record) => {
-        this.setState({
-            idPedidoInsumo: record.key,
-            idPedido: record.id,
-            nomeInsumo: record.nomeInsumo,
-            insInsumo: record.insInsumo,
-            dataPedido: record.data_pedido,
-            horaPedido: record.hora_pedido,
-            previsaoPedido: record.data_previsao,
-            nomeFornecedor: record.fornecedorDescription,
-            statusInsumo: record.statusInsumo,
-            chaveNF: record.chave_nf,
-            quantidade: record.quantidade,
-            quantidadeConferida: record.quantidadeConferida
-        })
-        this.showEntradaModalStatus(true)
+        let showSearchModal = false
+        this.setState({showSearchModal, showEntradaModal})
     }
 
     showEntradaModalStatus = (showEntradaModalStatus) => {
-        this.setState({showEntradaModalStatus})
+        let showSearchModal = false
+        this.setState({showSearchModal, showEntradaModalStatus})
     }
+
+    showSearchModal = (showSearchModal) => {
+        this.setState({showSearchModal})
+    }    
 
     returnNowDate = () => {
         var date = new Date();
@@ -323,6 +330,21 @@ class ArmazemEntrada extends Component {
         })
     }
 
+    handleSearchData = () => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if (!err){
+                values.idPedidoBusca = (values.idPedidoBusca && values.idPedidoBusca !== 'undefined') ? values.idPedidoBusca : 0
+                values.insumoBusca = (values.insumoBusca && values.insumoBusca !== 'undefined') ? values.insumoBusca : ''
+                this.getInsumosEntrada(values.idPedidoBusca,values.insumoBusca)
+            }
+            else{
+                this.showNotification('Erro ao buscar os dados! Tente novamente', false)
+                console.log('erro no formulário')
+                console.log(err)
+            }
+        })
+    }
+
     requestCreateUpdateArmazemEntrada = (request) => {
         this.setState({btnSalvarLoading: true})
         axios.post(this.props.backEndPoint + '/createUpdatePedidoInsumoEntradas', request)
@@ -344,10 +366,44 @@ class ArmazemEntrada extends Component {
         })
     }    
 
+    handleQuantidadeValidator = (rule, value, callback) => {
+        let key = rule.fullField.replace(/quantidades|\[|\]/gi,'');
+        key = key && !isNaN(key) ? parseInt(key) : 0
+        if(key && !isNaN(key)){
+            value = value && !isNaN(value) ? parseFloat(value) : 0
+            let conferido = this.state.quantidadeConferida;
+            let armazenado = this.state.quantidadeArmazenada;
+
+            let error = false;
+
+            // Valida conferido
+            conferido = conferido && !isNaN(conferido) ? parseFloat(conferido) : 0
+            if (conferido > 0 && value > 0 && value < conferido) {            
+                error = true;
+                this.showNotification('Não é permitida quantidade superior a do Pedido de Compra', false)
+            }
+
+            // Valida armazenado
+            armazenado = armazenado && !isNaN(armazenado) ? parseFloat(armazenado) : 0
+            if (armazenado > 0 && value > 0 && value < armazenado) {            
+                error = true;
+                this.showNotification('Não é permitida quantidade inferior à Armazenada', false)
+            }
+            
+            if(error) callback('Qtde inválida!')
+        }
+        callback()
+    }
+
     render(){
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
+
+        const formHorizontal = {
+            labelCol: { span: 4 },
+            wrapperCol: { span: 14 },
+        }
 
         const entradaRow = keys.map(k => (
             <Row key={k} gutter={5} style={{marginBottom: '15px'}}>
@@ -394,6 +450,9 @@ class ArmazemEntrada extends Component {
                             rules: [
                                 {
                                     required: true, message: 'Informe a quantidade',
+                                },
+                                {
+                                    validator: this.handleQuantidadeValidator
                                 }
                             ]
                         })(
@@ -419,7 +478,7 @@ class ArmazemEntrada extends Component {
                 </Col>                  
             </Row>
         ))
-
+        
         const columns = [{
             title: 'Pedido',
             dataIndex: 'id',
@@ -467,16 +526,24 @@ class ArmazemEntrada extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Entrada" onClick={() => this.loadArmazenagemModal(record)} />
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Incluir ou Alterar Entradas" alt="Incluir ou Alterar Entradas" onClick={() => this.loadArmazenagemModal(record, true)} />
+                        <Icon type="redo" style={{cursor: 'pointer', marginLeft: 20}} title="Alterar Status do Insumo" title="Alterar Status do Insumo" onClick={() => this.loadArmazenagemModal(record, false)} />
                     </React.Fragment>
                 )
             }
         }]
 
         return(
-            <React.Fragment>
-                <h3>Entrada de Insumos</h3>
+            <React.Fragment>                                    
+                <h3>Entrada de Insumos</h3>                    
                 <Row style={{marginTop: 30}}>
+                    <Col span={4} offset={20} style={{textAlign: 'right'}}>
+                        <Button type="primary" size="small" icon="search" title="Clique para filtar os insumos desejados" onClick={() => this.showSearchModal(true)}>
+                            Buscar Insumos
+                        </Button>
+                    </Col>
+                </Row>
+                <Row>
                     <Col span={24}>
                         <Table
                             columns={columns}
@@ -486,6 +553,52 @@ class ArmazemEntrada extends Component {
                         />
                     </Col>
                 </Row>
+                <Modal
+                    title="Busca de Insumos"
+                    visible={this.state.showSearchModal}
+                    onCancel={() => this.showSearchModal(false)}
+                    width={600}
+                    footer={[
+                        <Button key="back" onClick={() => this.showSearchModal(false)}><Icon type="close" /> Fechar</Button>,
+                        <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleSearchData()}><Icon type="search" /> Buscar</Button>
+                    ]}
+                >
+                    {this.state.showSearchModal ? (
+                        <Form layout='horizontal'>                            
+                            <Form.Item label="#Pedido" {...formHorizontal}>
+                                {getFieldDecorator('idPedidoBusca')(
+                                    <Input
+                                        id="idPedidoBusca"
+                                        placeholder="Código do Pedido"
+                                    />
+                                )}
+                            </Form.Item>
+                            <Form.Item label="Insumo" {...formHorizontal}>
+                                {getFieldDecorator('insumoBusca')(
+                                    <Input
+                                        id="insumoBusca"
+                                        placeholder="Código ou nome do insumo"
+                                    />
+                                )}
+                            </Form.Item>                            
+                            {/* <Form.Item label="Status" id="colStatusInsumoBusca" {...formHorizontal}>
+                                {getFieldDecorator('statusInsumo')(
+                                    <Select
+                                        style={{ width: '100%' }}
+                                        placeholder="Selecione"
+                                        allowClear={true}
+                                    >
+                                        {
+                                            statusInsumoOption.map((option) => {
+                                                return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                            })
+                                        }
+                                    </Select>
+                                )}
+                            </Form.Item>                           */}
+                        </Form>
+                    ) : null}
+                </Modal>                
                 <Modal
                     title="Entrada de Insumos"
                     visible={this.state.showEntradaModal}
@@ -562,7 +675,7 @@ class ArmazemEntrada extends Component {
                                     >
                                     {this.state.quantidadeArmazenada}
                                     </Form.Item>
-                                </Col>                            
+                                </Col>                        
                             </Row>
                             <Divider />
                             <h4>Entrada de Insumos (Matérias-Primas)</h4>                          
