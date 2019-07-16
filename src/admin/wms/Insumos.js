@@ -4,12 +4,20 @@ import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
 
+import Upload from "../shared/upload/Upload";
+
 const { Content } = Layout
 
 const ativoOptions = [
     {value: 'Y', description: 'Sim'},
     {value: 'N', description: 'Não'}
 ]
+
+const filesAccepted = [
+    'text/csv'
+]
+
+const UploadEndPoint = 'importInsumos'
 
 class Insumos extends Component {
     constructor(props) {
@@ -21,6 +29,7 @@ class Insumos extends Component {
         insumosId: null,
         tableData: [],
         showInsumosModal: false,
+        showInsumosImportModal: false,
         tableLoading: false,
         buttonSalvarInsumo: false,
         unidadeOptions: [],
@@ -109,7 +118,7 @@ class Insumos extends Component {
                     unidadeMedidaOptions: res.data.payload.map(unidademedida => {
                         return({
                             value: unidademedida.id,
-                            description: unidademedida.nome
+                            description: unidademedida.nome+' ('+unidademedida.unidade+')'
                         })
                     }),
                     unidadeMedidaSelectStatus: {
@@ -151,6 +160,10 @@ class Insumos extends Component {
         this.setState({showInsumosModal})
     }
 
+    showInsumosImportModal = (showInsumosImportModal) => {
+        this.setState({showInsumosImportModal})
+    }
+
     loadInsumosModal = (record) => {
         this.loadUnidadesOptions()
         this.loadUnidadesMedidaOptions()
@@ -176,6 +189,10 @@ class Insumos extends Component {
             })
         }
         this.showInsumosModal(true)
+    }
+
+    goToImportInsumos = () => {
+        this.showInsumosImportModal(true)
     }
 
     componentWillUpdate(){
@@ -300,7 +317,12 @@ class Insumos extends Component {
             >
 
                 <Row style={{ marginBottom: 16 }}>
-                    <Col span={24} align="end">
+                    <Col span={12} style={{ textAlign: 'left' }}>
+                        <Tooltip title="Improtar CSV" placement="right">
+                            <Button onClick={() => this.goToImportInsumos()}><Icon type="file-excel" /> Importar CSV</Button>
+                        </Tooltip>
+                    </Col>                    
+                    <Col span={12} style={{ textAlign: 'right' }}>
                         <Tooltip title="Cadastrar Novo Insumo" placement="right">
                             <Button className="buttonGreen" onClick={() => this.loadInsumosModal()}><Icon type="plus" /> Novo Insumo</Button>
                         </Tooltip>
@@ -312,6 +334,15 @@ class Insumos extends Component {
                     dataSource={this.state.tableData}
                     loading={this.state.tableLoading}
                 />
+                <Modal
+                    title="Importação de Insumos"
+                    visible={this.state.showInsumosImportModal}
+                    onCancel={() => this.showInsumosImportModal(false)}
+                    footer={null}
+                    width={700}
+                >
+                    <Upload UploadEndPoint={UploadEndPoint} filesAccepted={filesAccepted} />
+                </Modal>                
                 <Modal
                     title="Cadastro de Insumos"
                     visible={this.state.showInsumosModal}
@@ -374,13 +405,7 @@ class Insumos extends Component {
                                     )}
                                 </Form.Item>
                                 <Form.Item label="Unidade">
-                                    {getFieldDecorator('unidade', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor selecione a unidade',
-                                            }
-                                        ]
-                                    })(
+                                    {getFieldDecorator('unidade', {})(
                                         <Select
                                             style={{ width: '100%' }}
                                             placeholder={this.state.unidadeSelectStatus.placeholder}

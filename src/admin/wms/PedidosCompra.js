@@ -141,7 +141,7 @@ class PedidosCompra extends Component {
                             value: insumo.id,
                             description: insumo.nome,
                             ins: insumo.ins,
-                            unidademedida: insumo.nomeUnidadeMedida
+                            unidademedida: insumo.unidadeUnidadeMedida
                         })
                     }),
                     insumosSelectStatus: {
@@ -623,7 +623,7 @@ class PedidosCompra extends Component {
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
                         <Tooltip title="Cadastrar Novo Pedido de Compra" placement="right">
-                            <Button className="buttonGreen" onClick={() => this.loadPedidoCompraModal()}><Icon type="plus" /> Novo Pedido Compra</Button>
+                            <Button className="buttonGreen" onClick={() => this.loadPedidoCompraModal()}><Icon type="plus" /> Novo Pedido de Compra</Button>
                         </Tooltip>
                     </Col>
                 </Row>

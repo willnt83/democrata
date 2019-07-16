@@ -148,7 +148,7 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>WMS/Insumos</div>,
 		main: () => <Insumos />
-	},
+	},	
 	{
 		path: "/admin/wms/posicaoarmazem",
 		exact: true,

@@ -36,6 +36,7 @@ class UnidadesMedida extends Component {
                     return({
                         key: unidadeMedida.id,
                         nome: unidadeMedida.nome,
+                        unidade: unidadeMedida.unidade,
                         ativo: ativo,
                         ativoValue: unidadeMedida.ativo
                     })
@@ -81,6 +82,7 @@ class UnidadesMedida extends Component {
             // Edit
             this.props.form.setFieldsValue({
                 nome: record.nome,
+                unidade: record.unidade,
                 ativo: record.ativoValue
             })
 
@@ -113,6 +115,7 @@ class UnidadesMedida extends Component {
                 var request = {
                     id: id,
                     nome: values.nome,
+                    unidade: values.unidade,
                     ativo: values.ativo
                 }
                 this.requestCreateUpdateUnidadeMedida(request)
@@ -145,6 +148,10 @@ class UnidadesMedida extends Component {
             title: 'Descrição',
             dataIndex: 'nome',
             sorter: (a, b) => this.compareByAlph(a.description, b.description)
+        }, {
+            title: 'Unidade',
+            dataIndex: 'unidade',
+            sorter: (a, b) => this.compareByAlph(a.unidade, b.unidade)            
         }, {
             title: 'Ativo',
             dataIndex: 'ativo',
@@ -218,7 +225,7 @@ class UnidadesMedida extends Component {
                                     {getFieldDecorator('nome', {
                                         rules: [
                                             {
-                                                required: true, message: 'Por favor informe o nome do unidade de medida',
+                                                required: true, message: 'Por favor informe o nome da unidade de medida',
                                             }
                                         ]
                                     })(
@@ -228,6 +235,22 @@ class UnidadesMedida extends Component {
                                         />
                                     )}
                                 </Form.Item>
+                                <Form.Item
+                                    label="Unidade"
+                                >
+                                    {getFieldDecorator('unidade', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a unidade mínima da unidade de medida',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="unidade"
+                                            placeholder="Digite a unidade mínima da unidade de medida"
+                                        />
+                                    )}
+                                </Form.Item>                                
                                 <Form.Item label="Ativo">
                                     {getFieldDecorator('ativo', {
                                         rules: [
