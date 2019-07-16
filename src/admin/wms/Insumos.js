@@ -63,7 +63,7 @@ class Insumos extends Component {
                         unidadeValue: insumo.idUnidade,
                         unidadeDescription: insumo.nomeUnidade,                        
                         unidadeMedidaValue: insumo.idUnidadeMedida,
-                        unidadeMedidaDescription: insumo.nomeUnidadeMedida
+                        unidadeMedidaDescription: insumo.nomeUnidadeMedida+' ('+insumo.unidadeUnidadeMedida+')'
                     })
                 })
                 this.setState({tableData})
@@ -340,6 +340,7 @@ class Insumos extends Component {
                     onCancel={() => this.showInsumosImportModal(false)}
                     footer={null}
                     width={700}
+                    afterClose={() => this.requestGetInsumos()}
                 >
                     <Upload UploadEndPoint={UploadEndPoint} filesAccepted={filesAccepted} />
                 </Modal>                

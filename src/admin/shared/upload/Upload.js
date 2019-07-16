@@ -1,13 +1,10 @@
 import React, { Component } from "react";
-import { Layout, Alert, Tooltip, Button, Row, Col, Icon, Spin, notification } from 'antd'
+import { Alert, Tooltip, Button, Row, Col, Icon, Spin, notification } from 'antd'
 import Dropzone from "./dropzone/Dropzone";
 import Progress from "./progress/Progress";
 import { connect } from 'react-redux'
-import axios from "axios"
 
 import "./Upload.css";
-
-const { Content } = Layout
 
 class Upload extends Component {
   constructor(props) {
@@ -158,7 +155,7 @@ class Upload extends Component {
 
       // Response data
       req.onreadystatechange = (value) => {
-        if (req.readyState == XMLHttpRequest.DONE) {
+        if (req.readyState === XMLHttpRequest.DONE) {
           let index = file.index
           file.updatingStep = 2
           if(req.responseText) {
@@ -181,20 +178,6 @@ class Upload extends Component {
       req.open("POST", this.props.backEndPoint + '/' + this.state.UploadEndPoint)
       req.send(formData);
 
-      /*
-      axios.post(this.props.backEndPoint + '/' + this.state.UploadEndPoint, formData)
-      .then(res => {
-          console.log(res)
-          // this.showInsumosModal(false)
-          // this.requestGetInsumos()
-          // this.setState({buttonSalvarInsumo: false})
-      })
-      .catch(error =>{
-          // console.log(error)
-          // this.setState({buttonSalvarInsumo: false})
-      })      
-      */
-
       // stating the file
       let index = file.index
       file.updatingStep = 1;
@@ -214,11 +197,6 @@ class Upload extends Component {
     }
   }
 
-  // renderActions() {
-  //   return (
-          
-  //   )
-  // }
 
   render() {
 

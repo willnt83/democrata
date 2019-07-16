@@ -141,6 +141,7 @@ class PedidosCompra extends Component {
                             value: insumo.id,
                             description: insumo.nome,
                             ins: insumo.ins,
+                            unidadeUnidademedida: insumo.unidadeUnidadeMedida,
                             unidademedida: insumo.unidadeUnidadeMedida
                         })
                     }),
@@ -241,7 +242,7 @@ class PedidosCompra extends Component {
     }
 
     componentWillUpdate(){
-        if(this.state.dynamicFieldsRendered){
+        if(this.state.dynamicFieldsRendered){            
             var insumos = []
             var quantidades = []
             var statusInsumos = []
@@ -322,6 +323,9 @@ class PedidosCompra extends Component {
         let insValues = this.state.insValues
         let unidademedidaValues = this.state.unidademedidaValues
         let qtdeConferidaValues = this.state.qtdeConferidaValues
+
+        if(typeof object.qtde === 'undefined' || !object.qtde)
+            object.qtde = 0
 
         itemsValues[object.index] = object.item
         insValues[object.index] = object.ins
