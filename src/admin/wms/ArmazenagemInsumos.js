@@ -173,10 +173,6 @@ class ArmazenagemInsumos extends Component {
     }
 
     showQuantidades = (idPedidoInsumo, k, insumosTemp) => {
-        console.log('---=== showQuantidades ===---')
-        console.log('idPedidoInsumo', idPedidoInsumo)
-        console.log('k', k)
-        console.log('insumosTemp', insumosTemp)
         var quantidadeEntrada = 0
         var quantidadeArmazenar = 0
 
@@ -190,13 +186,10 @@ class ArmazenagemInsumos extends Component {
         const keys = this.props.form.getFieldValue('keys')
         keys.forEach(row => {
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
-                console.log('linha', row)
-                console.log('Atualizando insumo', idPedidoInsumo)
                 var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade armazenar: '+quantidadeArmazenar
                 var insumosInfo = this.state.insumosInfo
 
                 insumosInfo.splice(row, 1, content)
-                console.log('insumosInfo', insumosInfo)
                 this.setState({insumosInfo})
             }
         })
@@ -232,12 +225,18 @@ class ArmazenagemInsumos extends Component {
         if(value) this.getPosicoesArmazem(value, k)
     }
 
+    validaQuantidade = () => {
+
+    }
+
     changeQuantidade = (e) => {
         var pos = e.target.id.replace('quantidade[', '').replace(']', '')
 
         if(e.target.value > 0){
             var idPedidoInsumo = this.props.form.getFieldValue(`insumo[${pos}]`)
             var insumosTemp = this.contabilizaQuantidades(idPedidoInsumo)
+
+
             this.showQuantidades(idPedidoInsumo, pos, insumosTemp)
         }
 
@@ -306,7 +305,6 @@ class ArmazenagemInsumos extends Component {
     }
 
     removeComposicaoRow = (k) => {
-        console.log('removeComposicaoRow', k)
         var keys = this.props.form.getFieldValue('keys')
         if(keys.length === 1){
             return
@@ -324,7 +322,6 @@ class ArmazenagemInsumos extends Component {
                 quantidadeAtualizada += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
         })
 
-        console.log('quantidadeAtualizada', quantidadeAtualizada)
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idPedidoInsumo === idPedidoInsumo){
                 insumosTemp[index].insumo.quantidadeArmazenar -= quantidadeAtualizada
