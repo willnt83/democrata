@@ -127,55 +127,66 @@ class ListMenu extends Component{
                         </Link>
                     </Menu.Item>
                     <SubMenu key="sub2" title={<span><Icon type="solution" /><span>WMS</span></span>}>
-                        <Menu.Item key="6">
-                            <Link to="/admin/wms/unidadesmedida">
-                                <Icon type="right-square" />
-                                <span>Unid. de Medida</span>
-                            </Link>
-                        </Menu.Item> 
-                        <Menu.Item key="61">
-                            <Link to="/admin/wms/almoxarifados">
-                                <Icon type="right-square" />
-                                <span>Almoxarifados</span>
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item key="65">
-                            <Link to="/admin/wms/fornecedores">
-                                <Icon type="right-square" />
-                                <span>Fornecedores</span>
-                            </Link>
-                        </Menu.Item>                                                                       
-                        <Menu.Item key="7">
-                            <Link to="/admin/wms/insumos">
-                                <Icon type="right-square" />
-                                <span>Insumos</span>
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item key="62">
-                            <Link to="/admin/wms/posicaoarmazem">
-                                <Icon type="right-square" />
-                                <span>Pos. do Armazém</span>
-                            </Link>
-                        </Menu.Item>
+                        <SubMenu key="sub3" title={<span><Icon type="bars" /><span>Cadastros</span></span>}>
+                            <Menu.Item key="6">
+                                <Link to="/admin/wms/unidadesmedida">
+                                    <Icon type="right-square" />
+                                    <span>Unid. de Medida</span>
+                                </Link>
+                            </Menu.Item> 
+                            <Menu.Item key="61">
+                                <Link to="/admin/wms/almoxarifados">
+                                    <Icon type="right-square" />
+                                    <span>Almoxarifados</span>
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key="65">
+                                <Link to="/admin/wms/fornecedores">
+                                    <Icon type="right-square" />
+                                    <span>Fornecedores</span>
+                                </Link>
+                            </Menu.Item>                                                                       
+                            <Menu.Item key="7">
+                                <Link to="/admin/wms/insumos">
+                                    <Icon type="right-square" />
+                                    <span>Insumos</span>
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key="62">
+                                <Link to="/admin/wms/posicaoarmazem">
+                                    <Icon type="right-square" />
+                                    <span>Pos. do Armazém</span>
+                                </Link>
+                            </Menu.Item>
+                        </SubMenu>
                         <Menu.Item key="63">
                             <Link to="/admin/wms/pedidoscompra">
                                 <Icon type="form" />
                                 <span>Ped. de Compra</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="64">
-                            <Link to="/admin/wms/armazem">
-                                <Icon type="bank" />
-                                <span>Armazém</span>
-                            </Link>
-                        </Menu.Item>                        
-                    </SubMenu>                   
-                    <Menu.Item key="16">
-                        <Link to="/admin/estoque">
-                            <Icon type="gold" />
-                            <span>Estoque</span>
-                        </Link>
-                    </Menu.Item>
+                        <SubMenu key="sub4" title={<span><Icon type="bank" /><span>Armazém</span></span>}>
+                            <Menu.Item key="80">
+                                <Link to="/admin/wms/armazem/entrada">
+                                    <Icon type="right-square" />
+                                    <span>Entrada</span>
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key="81">
+                                <Link to="/admin/wms/armazem/armazenagem">
+                                    <Icon type="right-square" />
+                                    <span>Armazenagem</span>
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key="82">
+                                <Link to="/admin/wms/armazem/saida">
+                                    <Icon type="right-square" />
+                                    <span>Saída</span>
+                                </Link>
+                            </Menu.Item>
+                        </SubMenu>
+                    </SubMenu>
+                    
                     <SubMenu key="sub3" title={<span><Icon type="bar-chart" /><span>Relatórios</span></span>}>
                         <Menu.Item key="17">
                             <Link to="/admin/relatorios/produtos-cadastrados">
