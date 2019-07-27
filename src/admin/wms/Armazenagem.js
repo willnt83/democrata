@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Layout, Table, Icon, Button, Row, Col } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
-import axios from "axios"
+//import axios from "axios"
 import ArmazenagemInsumos from './ArmazenagemInsumos'
 
 const { Content } = Layout

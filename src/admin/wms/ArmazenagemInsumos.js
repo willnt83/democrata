@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { Table, Icon, Modal, Button, Row, Col, Form, Select, Input, notification } from 'antd'
+import { Icon, Modal, Button, Row, Col, Form, Select, Input, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import cloneDeep from 'lodash/cloneDeep';
-import moment from 'moment'
+//import moment from 'moment'
 
 let id = 0
 
@@ -16,6 +16,7 @@ class ArmazenagemInsumos extends Component {
     state = {
         tableLoading: false,
         showArmazenagemLancamentoModal: false,
+        insumosTemp: [],
         insumosInfo: [],
         nomeInsumo: null,
         insumos: [],
@@ -171,14 +172,16 @@ class ArmazenagemInsumos extends Component {
         })
     }
 
-    showQuantidades = (value, k, insumosTemp) => {
+    showQuantidades = (idPedidoInsumo, k, insumosTemp) => {
+        console.log('---=== showQuantidades ===---')
+        console.log('idPedidoInsumo', idPedidoInsumo)
+        console.log('k', k)
+        console.log('insumosTemp', insumosTemp)
         var quantidadeEntrada = 0
         var quantidadeArmazenar = 0
 
-        if(insumosTemp === null) insumosTemp = this.state.insumos
-
         insumosTemp.forEach(insumo => {
-            if(insumo.idPedidoInsumo === value){
+            if(insumo.idPedidoInsumo === idPedidoInsumo){
                 quantidadeEntrada = insumo.insumo.quantidadeEntrada
                 quantidadeArmazenar = insumo.insumo.quantidadeArmazenar
             }
@@ -187,17 +190,39 @@ class ArmazenagemInsumos extends Component {
         const keys = this.props.form.getFieldValue('keys')
         keys.forEach(row => {
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
+                console.log('linha', row)
+                console.log('Atualizando insumo', idPedidoInsumo)
                 var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade armazenar: '+quantidadeArmazenar
                 var insumosInfo = this.state.insumosInfo
 
-                insumosInfo.splice(row, 0, content)
+                insumosInfo.splice(row, 1, content)
+                console.log('insumosInfo', insumosInfo)
                 this.setState({insumosInfo})
             }
         })
+        this.setState({insumosTemp})
     }
 
-    changeInsumo = (value, k) => {
-        this.showQuantidades(value, k, null)
+    // Contabiliza quantidade de insumos que estão sendo armazenados no lançamento e atualiza insumosTemp
+    contabilizaQuantidades = (idPedidoInsumo) => {
+        const keys = this.props.form.getFieldValue('keys')
+        var somatoriaEntradas = 0
+        keys.forEach(row => {
+            if(this.props.form.getFieldValue(`insumo[${row}]`) === idPedidoInsumo)
+                somatoriaEntradas += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
+        })
+        var insumosTemp = cloneDeep(this.state.insumos)
+        insumosTemp.forEach((insumo, index) => {
+            if(insumo.idPedidoInsumo === idPedidoInsumo){
+                insumosTemp[index].insumo.quantidadeArmazenar -= somatoriaEntradas
+            }
+        })
+        return insumosTemp
+    }
+
+    changeInsumo = (idPedidoInsumo, k) => {
+        var insumosTemp = this.contabilizaQuantidades(idPedidoInsumo)
+        this.showQuantidades(idPedidoInsumo, k, insumosTemp)
     }
 
     changeAlmoxarifado = (value, k) => {
@@ -208,31 +233,11 @@ class ArmazenagemInsumos extends Component {
     }
 
     changeQuantidade = (e) => {
-        e.preventDefault()
         var pos = e.target.id.replace('quantidade[', '').replace(']', '')
+
         if(e.target.value > 0){
-            const keys = this.props.form.getFieldValue('keys')
             var idPedidoInsumo = this.props.form.getFieldValue(`insumo[${pos}]`)
-            var somatoriaEntradas = 0
-            keys.forEach(row => {
-                if(this.props.form.getFieldValue(`insumo[${row}]`) === idPedidoInsumo)
-                    somatoriaEntradas += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
-            })
-            console.log('somatoriaEntradas', somatoriaEntradas)
-
-            var insumosTemp = cloneDeep(this.state.insumos)
-
-            console.log('pegando base', insumosTemp)
-
-            insumosTemp.forEach((insumo, index) => {
-                if(insumo.idPedidoInsumo === idPedidoInsumo){
-                    insumosTemp[index].insumo.quantidadeArmazenar -= somatoriaEntradas
-                }
-            })
-
-            console.log('insumosTemp depois', insumosTemp[0].insumo.quantidadeArmazenar)
-            console.log('this.state.insumos', this.state.insumos)
-    
+            var insumosTemp = this.contabilizaQuantidades(idPedidoInsumo)
             this.showQuantidades(idPedidoInsumo, pos, insumosTemp)
         }
 
@@ -302,35 +307,34 @@ class ArmazenagemInsumos extends Component {
 
     removeComposicaoRow = (k) => {
         console.log('removeComposicaoRow', k)
-        const keys = this.props.form.getFieldValue('keys')
+        var keys = this.props.form.getFieldValue('keys')
         if(keys.length === 1){
             return
         }
 
-        // Atualizando quantidade total
-        if(parseInt(this.props.form.getFieldValue(`quantidade[${k}]`)) >= 0){
-            var quantidadeArmazenar = parseInt(this.state.quantidadeArmazenar) + parseInt(this.props.form.getFieldValue(`quantidade[${k}]`))
-            this.setState({quantidadeArmazenar})
-        }
+        keys = this.props.form.getFieldValue('keys')
 
-        //AQUIii
-        /*
-        var somatoriaEntradas = 0
-            keys.forEach(row => {
-                if(this.props.form.getFieldValue(`insumo[${row}]`) === idPedidoInsumo)
-                    somatoriaEntradas += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
-            })
-        */
-       
-        console.log('k', k)
-        console.log('keys', keys)
-        console.log('keys filtered', keys.filter(key => key !== k))
+        // Atualizando quantidade total
+        var insumosTemp = cloneDeep(this.state.insumos) // Clonando state.insumos sem referência
+
+        const idPedidoInsumo = this.props.form.getFieldValue(`insumo[${k}]`)
+        var quantidadeAtualizada = 0
+        keys.forEach(row => {
+            if(row !== k && this.props.form.getFieldValue(`insumo[${row}]`) === idPedidoInsumo)
+                quantidadeAtualizada += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
+        })
+
+        console.log('quantidadeAtualizada', quantidadeAtualizada)
+        insumosTemp.forEach((insumo, index) => {
+            if(insumo.idPedidoInsumo === idPedidoInsumo){
+                insumosTemp[index].insumo.quantidadeArmazenar -= quantidadeAtualizada
+            }
+        })
+        this.showQuantidades(idPedidoInsumo, k, insumosTemp)
 
         this.props.form.setFieldsValue({
             keys: keys.filter(key => key !== k),
         })
-
-
     }
 
     componentDidUpdate(prevProps, prevState){
