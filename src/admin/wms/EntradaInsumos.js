@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Divider, Icon, Modal, Button, Div, Row, Col, Form, Select, Input, InputNumber, DatePicker, TimePicker, notification } from 'antd'
+import { Divider, Icon, Modal, Button, Row, Col, Form, Select, Input, InputNumber, DatePicker, TimePicker, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import ptBr from 'antd/lib/locale-provider/pt_BR'
@@ -22,11 +22,29 @@ class EntradaInsumos extends Component {
         pedidoCompraOptions: [],
         nfValues: [],
         qtdValues: [],
-        conferidoValues: [],
         tableLoading: false,
         dynamicFieldsRendered: false,
         btnSalvarLoading: false
     }
+
+	showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 5
+        }
+        notification.open(args)
+	} 
 
     returnNowDate = () => {
         var date = new Date();
@@ -136,17 +154,13 @@ class EntradaInsumos extends Component {
                     pedidosInsumos.forEach(pedidoInsumo => {
                         if(parseInt(pedidoInsumo.idInsumo) === idInsumo){
                             valid = true;
-                            this.insertQtyValues(
-                                {
-                                    qtd: pedidoInsumo.quantidade, 
-                                    conferido: pedidoInsumo.quantidadeConferida
-                                }, index)
+                            this.insertQtyValues(pedidoInsumo.quantidade - pedidoInsumo.quantidadeConferida,index)
                             return;
                         }
                     })
                     if(!valid) {
                         this.props.form.resetFields([`insumos[${index}]`])
-                        this.insertQtyValues({qtd: 0, conferido: 0}, index)
+                        this.insertQtyValues(0, index)
                     }
                 }
             }
@@ -243,28 +257,28 @@ class EntradaInsumos extends Component {
             insumosOptions[index]   = this.state.insumosAvailables
             this.setState({insumosOptions})
             this.insertNfValue('', index)
-            this.insertQtyValues({qtd: 0, conferido: 0}, index)
+            this.insertQtyValues(0, index)
         }
+        this.props.form.resetFields([`quantidades[${index}]`])
     }
 
     handleOnChangeInsumo = (value, event, index) => {
         if(typeof value !== 'undefined' && value) {
             this.getPedidosCompraInsumo(value,index)
-            this.insertQtyValues({qtd: event.props.qtde, conferido: event.props.conferida}, index)          
+            this.insertQtyValues(event.props.qtde - event.props.conferida, index)         
         } else {
             let pedidoCompraOptions     = this.state.pedidoCompraOptions
             pedidoCompraOptions[index]  = this.state.pedidoCompraOptions
             this.setState({pedidoCompraOptions})
-            this.insertQtyValues({qtd: 0, conferido: 0}, index)
-        } 
+            this.insertQtyValues(0, index)
+        }
+        this.props.form.resetFields([`quantidades[${index}]`])
     }
 
-    insertQtyValues = (object, index) => {
-        let qtdValues           = this.state.qtdValues
-        let conferidoValues     = this.state.conferidoValues
-        qtdValues[index]        = object.qtd
-        conferidoValues[index]  = object.conferido
-        this.setState({qtdValues, conferidoValues})
+    insertQtyValues = (qtde, index) => {
+        let qtdValues    = this.state.qtdValues
+        qtdValues[index] = qtde
+        this.setState({qtdValues})
     }
 
     insertNfValue = (nf, index) => {
@@ -285,28 +299,31 @@ class EntradaInsumos extends Component {
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
-                console.log(values);
-                var entradas = []
                 if(values.keys){
-                    entradas = values.keys
+                    let entradas = values.keys
                     .map((key, index) => {
-                        var data_entrada = moment(values.data_entrada[index], 'YYYY-MM-DD')
-                        var hora_entrada = moment(values.hora_entrada[index], 'HH:mm:ss')
                         return ({
-                            id: this.state.entradas[index].id,
-                            data_entrada: data_entrada.format('YYYY-MM-DD'),
-                            hora_entrada: hora_entrada.format('HH:mm:ss'),
+                            idPedido: parseInt(values.pedidos[index]),
+                            idInsumo: parseInt(values.insumos[index]),
                             quantidade: parseInt(values.quantidades[index])
                         })
                     })
                     .filter(entrada => {
                         return entrada !== null
                     })
+                    if(entradas && entradas.length > 0) {
+                        this.requestCreateUpdateArmazemEntrada({
+                            data_entrada: moment(values.data_entrada, 'YYYY-MM-DD'),
+                            hora_entrada: moment(values.hora_entrada, 'HH:mm:ss'),
+                            usuario: this.props.session.usuario.id,
+                            entradas: entradas
+                        })
+                    } else {
+                        this.showNotification('Não há entrada válida para inserir! Tente novamente', false);
+                    }                
+                } else {
+                    this.showNotification('Não há entrada válida para inserir! Tente novamente', false);
                 }
-                this.requestCreateUpdateArmazemEntrada({
-                    idPedidoInsumo: this.state.idPedidoInsumo,
-                    entradas: entradas
-                })
             }
             else{
                 console.log('erro no formulário')
@@ -317,50 +334,79 @@ class EntradaInsumos extends Component {
 
     requestCreateUpdateArmazemEntrada = (request) => {
         this.setState({btnSalvarLoading: true})
-        axios.post(this.props.backEndPoint + '/createUpdatePedidoInsumoEntradas', request)
-        .then(res => {
-            if(res.data.success){
-                this.showEntradaModal(false)
-                this.getInsumosEntrada()
-                this.setState({btnSalvarLoading: false})
-            } else {
-                this.setState({btnSalvarLoading: false})
-                this.showNotification(res.data.msg, false)
+        console.log(request);
+        this.setState({btnSalvarLoading: false})
+        // axios.post(this.props.backEndPoint + '/createUpdatePedidoInsumoEntradas', request)
+        // .then(res => {
+        //     if(res.data.success){
+        //         this.showEntradaModal(false)
+        //         this.getInsumosEntrada()
+        //         this.setState({btnSalvarLoading: false})
+        //     } else {
+        //         this.setState({btnSalvarLoading: false})
+        //         this.showNotification(res.data.msg, false)
+        //     }
+        // })
+        // .catch(error =>{
+        //     console.log(error)
+        //     this.setState({btnSalvarLoading: false})
+        //     this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
+        // })
+    }
+
+    handlePedidoValidator = (rule, value, callback) => {
+        let key = rule.fullField.replace(/pedidos|\[|\]/gi,'')
+        key     = key && !isNaN(key) ? parseInt(key) : null
+        if(key != null && value && !isNaN(value)) {
+            let idPedido = parseInt(value)
+            let idInsumo = this.props.form.getFieldValue(`insumos[${key}]`)
+            idInsumo     = idInsumo && !isNaN(idInsumo) ? parseInt(idInsumo) : 0
+            if(idPedido > 0 && idInsumo > 0) {
+                const keys  = this.props.form.getFieldValue('keys')
+                keys.forEach(row => {
+                    let idPedidoRow = this.props.form.getFieldValue(`pedidos[${row}]`)
+                    let idInsumoRow = this.props.form.getFieldValue(`insumos[${row}]`)
+                    if(row !== key && idPedidoRow === idPedido && idInsumoRow === idInsumo) {
+                        callback('Pedido e Insumo já selecionado');
+                    }
+                })
             }
-        })
-        .catch(error =>{
-            console.log(error)
-            this.setState({btnSalvarLoading: false})
-            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
-        })
+        }
+        callback()
+    }
+
+    handleInsumoValidator = (rule, value, callback) => {
+        let key = rule.fullField.replace(/insumos|\[|\]/gi,'')
+        key     = key && !isNaN(key) ? parseInt(key) : null
+        if(key != null && value && !isNaN(value)) {
+            let idInsumo = parseInt(value)
+            let idPedido = this.props.form.getFieldValue(`pedidos[${key}]`)
+            idPedido     = idPedido && !isNaN(idPedido) ? parseInt(idPedido) : 0
+            if(idPedido > 0 && idInsumo > 0) {
+                const keys  = this.props.form.getFieldValue('keys')
+                keys.forEach(row => {
+                    let idPedidoRow = this.props.form.getFieldValue(`pedidos[${row}]`)
+                    let idInsumoRow = this.props.form.getFieldValue(`insumos[${row}]`)
+                    if(row !== key && idPedidoRow === idPedido && idInsumoRow === idInsumo) {
+                        callback('Pedido e Insumo já selecionado');
+                    }
+                })
+            }
+        }
+        callback()
     }
 
     handleQuantidadeValidator = (rule, value, callback) => {
-        // let key = rule.fullField.replace(/quantidades|\[|\]/gi,'');
-        // key = key && !isNaN(key) ? parseInt(key) : 0
-        // if(key && !isNaN(key)){
-        //     value = value && !isNaN(value) ? parseFloat(value) : 0
-        //     let conferido = this.state.quantidadeConferida;
-        //     let armazenado = this.state.quantidadeArmazenada;
-
-        //     let error = false;
-
-        //     // Valida quantidade
-        //     conferido = conferido && !isNaN(conferido) ? parseFloat(conferido) : 0
-        //     if (conferido > 0 && value > 0 && value < conferido) {            
-        //         error = true;
-        //         this.showNotification('Não é permitida quantidade superior a do Pedido de Compra', false)
-        //     }
-
-        //     // Valida conferido
-        //     armazenado = armazenado && !isNaN(armazenado) ? parseFloat(armazenado) : 0
-        //     if (armazenado > 0 && value > 0 && value < armazenado) {            
-        //         error = true;
-        //         this.showNotification('Não é permitida quantidade inferior à Armazenada', false)
-        //     }
-            
-        //     if(error) callback('Qtde inválida!')
-        // }
+        let key = rule.fullField.replace(/quantidades|\[|\]/gi,'')
+        key     = key && !isNaN(key) ? parseInt(key) : null
+        if(key != null && value && !isNaN(value)) {
+            let qtdEntrada      = parseFloat(value)
+            let qtdeDisponivel  = parseFloat(this.state.qtdValues[key])
+            if(qtdEntrada > qtdeDisponivel) {
+                callback('Quantidade inválida')
+                this.showNotification('Não é permitida quantidade superior à Disponível', false)
+            }
+        }
         callback()
     }
 
@@ -382,7 +428,6 @@ class EntradaInsumos extends Component {
         // Default
         this.state.nfValues.push('')
         this.state.qtdValues.push('')
-        this.state.conferidoValues.push('')
         this.state.pedidoCompraOptions.push(this.state.pedidoCompraAvailables)
         this.state.insumosOptions.push(this.state.insumosAvailables)
         console.log(this.state.insumosOptions);
@@ -418,9 +463,14 @@ class EntradaInsumos extends Component {
                             <Col span={24}>
                                 <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                     {getFieldDecorator(`pedidos[${k}]`, {
-                                        rules: [{
-                                            required: true, message: "Informe o Pedido"
-                                        }],
+                                        rules: [
+                                            {
+                                                required: true, message: "Informe o Pedido"
+                                            },
+                                            {
+                                                validator: this.handlePedidoValidator
+                                            }
+                                        ],
                                     })(
                                         <Select
                                             style={{ width: '100%' }}
@@ -457,9 +507,14 @@ class EntradaInsumos extends Component {
                             <Col span={24}>
                                 <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                     {getFieldDecorator(`insumos[${k}]`, {
-                                        rules: [{
-                                            required: true, message: "Informe o Insumo"
-                                        }],
+                                        rules: [
+                                            {
+                                                required: true, message: "Informe o Insumo"
+                                            },
+                                            {
+                                                validator: this.handleInsumoValidator
+                                            }
+                                        ],
                                     })(
                                         <Select
                                             style={{ width: '100%' }}
@@ -470,7 +525,7 @@ class EntradaInsumos extends Component {
                                         >
                                             {
                                                 this.state.insumosOptions[k].map((option) => {
-                                                    return (<Select.Option key={option.id} value={option.idInsumo} qtde={option.quantidade} conferida={option.quantidadeConferida} >{option.insInsumo} - {option.nomeInsumo}</Select.Option>)
+                                                    return (<Select.Option key={option.id} value={option.idInsumo} qtde={option.quantidade} conferida={option.quantidadeConferida}>{option.insInsumo} - {option.nomeInsumo}</Select.Option>)
                                                 })
                                             }
                                         </Select>
@@ -478,10 +533,9 @@ class EntradaInsumos extends Component {
                                 </Form.Item>
                             </Col>
                             {
-                                this.state.qtdValues[k] || this.state.conferidoValues[k] ? (   
+                                this.state.qtdValues[k] ? (   
                                     <Col span={24} style={{fontSize: '12px', textAlign: 'right'}}>
-                                        <span><strong>Qtd.:</strong>{this.state.qtdValues[k]}</span>&nbsp;|&nbsp;
-                                        <span><strong>Conferido:</strong>{this.state.conferidoValues[k]}</span>
+                                        <span><strong>Qtd. Disponível:</strong>{this.state.qtdValues[k]}</span>&nbsp;|&nbsp;
                                     </Col>
                                 ) : null
                             }                            
@@ -493,10 +547,10 @@ class EntradaInsumos extends Component {
                                     rules: [
                                         {
                                             required: true, message: 'Informe a quantidade',
+                                        },
+                                        {
+                                            validator: this.handleQuantidadeValidator
                                         }
-                                        // {
-                                        //     validator: this.handleQuantidadeValidator
-                                        // }
                                     ]
                                 })(
                                     <InputNumber
