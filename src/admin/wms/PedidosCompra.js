@@ -435,6 +435,24 @@ class PedidosCompra extends Component {
         this.requestGetPedidosCompra()
     }
 
+    handleInsumoValidator = (rule, value, callback) => {
+        let key = rule.fullField.replace(/insumos|\[|\]/gi,'')
+        key     = key && !isNaN(key) ? parseInt(key) : null
+        if(key != null && value && !isNaN(value)) {
+            let idInsumo = parseInt(value)
+            if(idInsumo > 0) {
+                const keys  = this.props.form.getFieldValue('keys')
+                keys.forEach(row => {
+                    let idInsumoRow = this.props.form.getFieldValue(`insumos[${row}]`)
+                    if(row !== key && idInsumoRow === idInsumo) {
+                        callback('Insumo já selecionado');
+                    }
+                })
+            }
+        }
+        callback()
+    }
+
     handleQuantidadeValidator = (rule, value, callback) => {
         let key = rule.fullField.replace(/quantidades|\[|\]/gi,'');
         key = key && !isNaN(key) ? parseInt(key) : 0
@@ -475,9 +493,14 @@ class PedidosCompra extends Component {
                         <Col span={24}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`insumos[${k}]`, {
-                                    rules: [{
-                                        required: true, message: "Informe o insumo"
-                                    }],
+                                    rules: [
+                                        {
+                                            required: true, message: "Informe o insumo"
+                                        },
+                                        {
+                                            validator: this.handleInsumoValidator
+                                        }
+                                    ],
                                 })(
                                     <Select
                                         style={{ width: '100%' }}
@@ -541,9 +564,11 @@ class PedidosCompra extends Component {
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`statusInsumos[${k}]`, {
                                     initialValue: 'S',
-                                    rules: [{
-                                        required: true, message: "Informe o status"
-                                    }],
+                                    rules: [
+                                        {
+                                            required: true, message: "Informe o status"
+                                        }
+                                    ],
                                 })(
                                     <Select
                                         style={{ width: '100%' }}
