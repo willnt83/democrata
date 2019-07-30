@@ -84,7 +84,6 @@ class ArmazenagemInsumos extends Component {
         .get(this.props.backEndPoint + '/getInsumosArmazenados?id_armazenagem='+idArmazenagem)
         .then(res => {
             if(res.data.payload){
-                console.log('response', res.data.payload)
                 this.props.form.setFieldsValue({
                     keys: res.data.payload.map((row, index) => {
                         return index
@@ -154,26 +153,16 @@ class ArmazenagemInsumos extends Component {
         .then(res => {
             var prevAlmoxarifado = null
             var almoxarifadosPosicoes = []
-            console.log('response', res.data.payload)
-
             res.data.payload.forEach((row, i) => {
-                console.log('---i---', i)
-                console.log('row.almoxarifado', row.almoxarifado)
                 if(prevAlmoxarifado !== row.almoxarifado){
-                    console.log('diferente')
                     almoxarifadosPosicoes = [...almoxarifadosPosicoes, {
                         almoxarifado: row.almoxarifado,
                         posicoes: [row.posicao]
                     }]
                     prevAlmoxarifado = row.almoxarifado
-                    console.log('row.posicao', row.posicao)
-                    console.log('almoxarifadosPosicoes', almoxarifadosPosicoes)
                 }
                 else{
-                    console.log('igual')
-                    almoxarifadosPosicoes[i-1].posicoes = [...almoxarifadosPosicoes[i-1].posicoes, row.posicao]
-                    console.log('row.posicao', row.posicao)
-                    console.log('almoxarifadosPosicoes', almoxarifadosPosicoes)
+                    almoxarifadosPosicoes[almoxarifadosPosicoes.length-1].posicoes = [...almoxarifadosPosicoes[almoxarifadosPosicoes.length-1].posicoes, row.posicao]
                 }
             })
             
@@ -250,8 +239,6 @@ class ArmazenagemInsumos extends Component {
     }
 
     changeAlmoxarifado = (value, k) => {
-        console.log('value', value)
-        console.log('k', k)
         var strObj = '{"posicao['+k+']": ""}'
         var obj  = JSON.parse(strObj)
         this.props.form.setFieldsValue(obj)
@@ -366,7 +353,6 @@ class ArmazenagemInsumos extends Component {
     componentDidUpdate(prevProps, prevState){
         if(this.state.dynamicFieldsRendered && this.state.insumosOptions.length > 0 && this.state.almoxarifadosOptions.length > 0){
             id = (this.state.almoxarifados.length)
-
             // Insumo
             var strObj = '{'
             var comma = ''
@@ -392,6 +378,31 @@ class ArmazenagemInsumos extends Component {
             this.props.form.setFieldsValue(obj)
             this.getMultiplasPosicoeArmazens(almoxarifados)
             this.setState({dynamicFieldsRendered: false})
+
+            // Quantidade
+
+            strObj = '{'
+            comma = ''
+            this.state.insumosArmazenados.forEach((insumo, index) => {
+                comma = index === 0 ? '' : ', '
+                strObj += comma+'"quantidade['+index+']": '+insumo.insumo.quantidade+''
+            })
+            strObj += '}'
+            obj  = JSON.parse(strObj)
+            this.props.form.setFieldsValue(obj)
+        }
+
+        if(prevState.almoxarifadosPosicoes.length === 0 && this.state.almoxarifadosPosicoes.length > 0){
+            // Posicao
+            strObj = '{'
+            comma = ''
+            this.state.insumosArmazenados.forEach((insumo, index) => {
+                comma = index === 0 ? '' : ', '
+                strObj += comma+'"posicao['+index+']": '+insumo.insumo.idPosicao+''
+            })
+            strObj += '}'
+            obj  = JSON.parse(strObj)
+            this.props.form.setFieldsValue(obj)
         }
 
         // Evento: Modal aberto
@@ -404,7 +415,6 @@ class ArmazenagemInsumos extends Component {
     }
 
     render(){
-        console.log('this.state.almoxarifadosPosicoes', this.state.almoxarifadosPosicoes)
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
@@ -471,9 +481,11 @@ class ArmazenagemInsumos extends Component {
                                     {
                                         this.state.almoxarifadosPosicoes.filter(posicao => {
                                             var selectedAlmoxarifado = this.props.form.getFieldValue(`almoxarifado[${k}]`)
+                                            /*
                                             console.log('pos', k)
                                             console.log('posicao.almoxarifado', posicao.almoxarifado)
                                             console.log('selectedAlmoxarifado', selectedAlmoxarifado)
+                                            */
                                             return(posicao.almoxarifado === selectedAlmoxarifado)
                                         })
                                         .map(option => {
