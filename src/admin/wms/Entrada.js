@@ -100,6 +100,10 @@ class ArmazemEntrada extends Component {
         this.setState({showEntradaModal})
     }
 
+    entradaIdF = (entradaId) => {
+        this.setState({entradaId})
+    }
+
     componentWillMount(){
         this.requestGetEntradaInsumos()
     }

@@ -441,7 +441,7 @@ class EntradaInsumos extends Component {
     }
 
     componentWillUpdate(){
-        if(this.state.dynamicFieldsRendering && this.state.entradaId !== this.props.entradaIdIn){
+        if(this.state.dynamicFieldsRendering && this.props.entradaIdIn && this.state.entradaId !== this.props.entradaIdIn){
             console.log('Load')
             this.loadEntradaModal(this.props.entradaIdIn)
             this.setState({entradaId: this.props.entradaIdIn, dynamicFieldsRendering: false })
@@ -483,6 +483,10 @@ class EntradaInsumos extends Component {
             keys: keys.filter(key => key !== k),
         })
     }  
+
+    hideModal = () => {
+        window.location.href = ''
+    }
 
     render(){
         const { getFieldDecorator, getFieldValue } = this.props.form
@@ -627,11 +631,11 @@ class EntradaInsumos extends Component {
                 <Modal
                     title="Entrada de Insumos"
                     visible={this.props.showEntradaModal}
-                    onCancel={() => this.props.showEntradaModalF(false)}
+                    onCancel={() => this.props.hideModal(false)}
                     width='90%'
                     style={{minWidth:'600px'}}
                     footer={[
-                        <Button key="back" onClick={() => this.props.showEntradaModalF(false)}><Icon type="close" /> Cancelar</Button>,
+                        <Button key="back" onClick={() => this.hideModal()}><Icon type="close" /> Cancelar</Button>,
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
