@@ -8,12 +8,6 @@ import EntradaInsumos from './EntradaInsumos'
 
 const { Content } = Layout
 
-const statusInsumoOption = [
-    {value: 'S', description: 'Solicitado'},
-    {value: 'E', description: 'Entregue'},
-    {value: 'C', description: 'Conferido'}
-]
-
 class ArmazemEntrada extends Component {
     constructor(props) {
         super()
@@ -21,74 +15,43 @@ class ArmazemEntrada extends Component {
     }
 
     state = {
+        entradaId: null,
         tableLoading: false,
         tableData: [],
         showEntradaModal: false,
-        idPedidoInsumo: null,
-        idPedido: null,
-        idInsumo: null,
-        nomeInsumo: null,
-        insInsumo: null,
-        dataPedido: null,
-        horaPedido: null,
-        previsaoPedido: null,
-        idFornecedor: null,
-        nomeFornecedor: null,
-        statusInsumo: null,
-        chaveNF: null,
-        quantidade: null,
-        quantidadeConferida: null,
-        dataEntradaValues: [],
-        horaEntradaValues: [],
-        quantidadeValues: [],
-        entradas: [],
-        queryParams: null,
         dynamicFieldsRendered: false,
         btnSalvarLoading: false
     }
 
-    getInsumosEntrada = (pedido = 0, insumo = '') => {
+    requestGetEntradaInsumos = () => {
         this.setState({tableLoading: true})
-    
-        // Filtros
-        let queryParams = ''
-        if(pedido) queryParams += '&id='+pedido
-        if(insumo) {
-            if(!isNaN(insumo))
-                queryParams += '&idPedidoInsumo='+insumo
-            else
-                queryParams += '&nomeInsumo='+insumo
-        }
-
         axios
-        .get(this.props.backEndPoint + '/getPedidosCompraInsumos?statusInsumo=S,E,C' + queryParams)
+        .get(this.props.backEndPoint + '/getEntradaInsumos')
         .then(res => {
             if(res.data.payload){
-                var tableData = [];
-                res.data.payload.forEach(pedidoCompra => {
-                    pedidoCompra.insumos.forEach(insumo =>{
-                        var data_pedido = moment(pedidoCompra.data_pedido, 'YYYY-MM-DD')
-                        var data_previsao = moment(pedidoCompra.data_previsao, 'YYYY-MM-DD')
+                var tableData = []
+                res.data.payload.forEach(entrada => {
+                    var data_entrada = moment(entrada.data_entrada, 'YYYY-MM-DD')
+                    entrada.insumos.forEach((insumo, index) =>{
                         tableData.push({
-                            key: insumo.item,
-                            id: pedidoCompra.id,
-                            data_previsao: data_previsao.format('DD/MM/YYYY'),
-                            data_pedido: data_pedido.format('DD/MM/YYYY'),
-                            hora_pedido: pedidoCompra.hora_pedido,
-                            chave_nf: pedidoCompra.chave_nf,
-                            idfornecedor: pedidoCompra.idFornecedor,
-                            fornecedorDescription: pedidoCompra.nomeFornecedor,
-                            idInsumo: insumo.id,
-                            nomeInsumo: insumo.nome,
-                            insInsumo: insumo.ins,
+                            key: insumo.id,
+                            id: entrada.id,
+                            data_entrada: data_entrada.format('DD/MM/YYYY'),
+                            hora_entrada: entrada.hora_entrada,
+                            idPedido: insumo.idPedido,
+                            idPedidoInsumo: insumo.idPedidoInsumo,
+                            chaveNF: insumo.chaveNF,
+                            idfornecedor: insumo.idFornecedor,
+                            nomeFornecedor: insumo.nomeFornecedor,
+                            idInsumo: insumo.idInsumo,
+                            nomeInsumo: insumo.nomeInsumo,
+                            insInsumo: insumo.insInsumo,
                             quantidade: insumo.quantidade,
-                            quantidade_conferida: insumo.quantidade_conferida,
-                            statusInsumo: insumo.statusInsumo,
-                            statusInsumoDescription: this.returnStatusDescription(insumo.statusInsumo,statusInsumoOption)
+                            // quantidade_conferida: insumo.quantidade_conferida,
                         })
                     })
                 })
-                this.setState({tableData,queryParams})                
+                this.setState({tableData})                
             }
             else
                 console.log('Nenhum registro encontrado')            
@@ -98,7 +61,7 @@ class ArmazemEntrada extends Component {
             console.log(error)
             this.setState({tableLoading: false})
             this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
-        })
+        })    
     }
 
     showNotification = (msg, success) => {
@@ -128,58 +91,68 @@ class ArmazemEntrada extends Component {
         return 0
     }
 
+    loadEntradaModal = (record) => {
+        this.setState({entradaId: record.id})
+        this.showEntradaModalF(true)
+    }
+
     showEntradaModalF = (showEntradaModal) => {
         this.setState({showEntradaModal})
     }
 
-    render(){
-        const { getFieldDecorator, getFieldValue } = this.props.form
-        getFieldDecorator('keys', { initialValue: [] })
-        const keys = getFieldValue('keys')
+    entradaIdF = (entradaId) => {
+        this.setState({entradaId})
+    }
 
-        const formHorizontal = {
-            labelCol: { span: 4 },
-            wrapperCol: { span: 14 },
-        }
-            
+    componentWillMount(){
+        this.requestGetEntradaInsumos()
+    }
+
+    render(){            
         const columns = [{
-            title: 'Pedido',
+            title: 'ID',
             dataIndex: 'id',
+            align: 'center',
             sorter: (a, b) => a.id - b.id,
         },
         {
-            title: 'Data Pedido',
-            dataIndex: 'data_pedido',
-            sorter: (a, b) => this.compareByAlph(a.data_pedido, b.data_pedido)
+            title: 'Data',
+            dataIndex: 'data_entrada',
+            sorter: (a, b) => this.compareByAlph(a.data_entrada, b.data_entrada)
         },
+        {
+            title: 'Hora',
+            dataIndex: 'hora_entrada',
+            sorter: (a, b) => this.compareByAlph(a.hora_entrada, b.hora_entrada)
+        },
+        {
+            title: 'Pedido',
+            dataIndex: 'idPedido',
+            sorter: (a, b) => this.compareByAlph(a.idPedido, b.idPedido)
+        },   
         {
             title: 'Fornecedor',
-            dataIndex: 'fornecedorDescription',
-            sorter: (a, b) => this.compareByAlph(a.fornecedorDescription, b.fornecedorDescription)
-        },
-        {
-            title: 'Chave N.F',
-            dataIndex: 'chave_nf',
-            sorter: (a, b) => this.compareByAlph(a.chave_nf, b.chave_nf)
-        },             
+            dataIndex: 'nomeFornecedor',
+            sorter: (a, b) => this.compareByAlph(a.nomeFornecedor, b.nomeFornecedor)
+        },           
         {
             title: 'Insumo',
-            dataIndex: 'nomeInsumo',
+            dataIndex: 'idInsumo',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.nomeInsumo, b.nomeInsumo)
+            sorter: (a, b) => this.compareByAlph(a.idInsumo, b.idInsumo)
         },
+        {
+            title: 'INS',
+            dataIndex: 'insInsumo',
+            align: 'center',
+            sorter: (a, b) => this.compareByAlph(a.insInsumo, b.insInsumo)
+        },        
         {
             title: 'Quantidade',
             dataIndex: 'quantidade',
             align: 'center',
             sorter: (a, b) => a.quantidade - b.quantidade,
-        },
-        {
-            title: 'Status',
-            dataIndex: 'statusInsumoDescription',
-            align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.statusInsumoDescription, b.statusInsumoDescription)
-        },        
+        },      
         {
             title: 'Operação',
             colSpan: 2,
@@ -189,7 +162,7 @@ class ArmazemEntrada extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Incluir ou Alterar Entradas" onClick={() => this.loadEntradaModal(record)} />
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Entrada" onClick={() => this.loadEntradaModal(record)} />
                     </React.Fragment>
                 )
             }
@@ -204,7 +177,6 @@ class ArmazemEntrada extends Component {
                     minHeight: 280
                 }}
             >
-
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
                         <Tooltip title="Cadastrar Nova Entrada de Insumos" placement="right">
@@ -220,6 +192,7 @@ class ArmazemEntrada extends Component {
                     rowKey='key'
                 />
                 <EntradaInsumos
+                    entradaIdIn={this.state.entradaId}
                     showEntradaModalF={this.showEntradaModalF}
                     showEntradaModal={this.state.showEntradaModal}
                 />
