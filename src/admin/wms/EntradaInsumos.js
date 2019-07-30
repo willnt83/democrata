@@ -15,15 +15,18 @@ class EntradaInsumos extends Component {
     }
 
     state = {
-        entradaId: null,
+        entradaIdIn: null,
         insumosAvailables: [],
         pedidoCompraAvailables: [],
         insumosOptions: [],
         pedidoCompraOptions: [],
+        itemsValues: [],
+        disabledValues: [],
         nfValues: [],
         qtdValues: [],
+        insumos: [],
         tableLoading: false,
-        dynamicFieldsRendered: false,
+        dynamicFieldsRendering: false,
         btnSalvarLoading: false
     }
 
@@ -185,63 +188,77 @@ class EntradaInsumos extends Component {
         return returnStatus;
     }
 
-    loadEntradaModal = (record) => {
-        if(typeof(record) !== "undefined" && record.key) {
-            this.setState({pedidoCompraId: record.key})
-            axios
-            .get(this.props.backEndPoint + '/getPedidoInsumoEntradas?id='+record.key)
-            .then(res => {
-                var entradas = [];
-                var pedidoInsumoEntradas = res.data.payload;
-                if(pedidoInsumoEntradas && pedidoInsumoEntradas.length === 1){
-                    record.quantidade           = pedidoInsumoEntradas[0].quantidade
-                    record.quantidadeConferida  = pedidoInsumoEntradas[0].quantidadeConferida
-                    record.quantidadeArmazenada = pedidoInsumoEntradas[0].quantidadeArmazenada
-                    entradas = pedidoInsumoEntradas[0].entradas;               
-                }
-
-                // Se não tiver entrada registrada, cria a primeira
-                if(entradas.length === 0){
-                    entradas.push({
-                        data_entrada: moment(this.returnNowDate(), 'YYYY-MM-DD'),
-                        hora_entrada: moment(this.returnNowHour(), 'HH:mm:ss'),
-                        quantidades: 0
-                    })
-                }
-
-                // Keys de entradas
-                var keys = entradas.map((entradas, index) => {
+    loadEntradaModal = (idEntrada) => {
+        axios
+        .get(this.props.backEndPoint + '/getEntradaInsumos?id='+idEntrada)
+        .then(res => {
+            if(res.data.payload){
+                let entrada = res.data.payload[0];
+                let keys = entrada.insumos.map((insumo, index) => {
                     return(index)
                 })
-                this.props.form.setFieldsValue({
-                    keys
-                })                  
 
-                this.setState({
-                    idPedidoInsumo: record.key,
-                    idPedido: record.id,
-                    nomeInsumo: record.nomeInsumo,
-                    idInsumo: record.idInsumo,
-                    insInsumo: record.insInsumo,
-                    dataPedido: record.data_pedido,
-                    horaPedido: record.hora_pedido,
-                    previsaoPedido: record.data_previsao,
-                    idFornecedor: record.idfornecedor,
-                    nomeFornecedor: record.fornecedorDescription,
-                    statusInsumo: record.statusInsumoDescription,
-                    chaveNF: record.chave_nf,
-                    quantidade: record.quantidade,
-                    quantidadeConferida: record.quantidadeConferida,
-                    quantidadeArmazenada: record.quantidadeArmazenada,
-                    entradas: entradas,
-                    dynamicFieldsRendered: true
+                // Default
+                let pedidos     = [];
+                let insumos     = [];
+                let quantidades = [];
+
+                let itemsValues         = []
+                let nfValues            = []
+                let qtdValues           = []
+                let pedidoCompraOptions = []
+                let insumosOptions      = []
+                let disabledValues      = []
+                let insumosObjects      = []
+
+                entrada.insumos.forEach((insumo, index) =>{
+                    // Fields
+                    pedidos.push(insumo.idPedido)
+                    insumos.push(insumo.idInsumo)
+                    quantidades.push(insumo.quantidade)
+
+                    // State
+                    itemsValues.push(insumo.id)
+                    nfValues.push(insumo.chaveNF)
+                    qtdValues.push(insumo.quantidade + insumo.quantidadeConferida)
+                    pedidoCompraOptions.push(this.state.pedidoCompraAvailables)
+                    insumosOptions.push(this.state.insumosAvailables)
+                    disabledValues.push(true)
+                    insumosObjects.push(insumo)
                 })
 
-                this.showEntradaModal(true)
-            });
-        } else {            
-            this.showEntradaModal(true)
-        }
+                this.setState({
+                    entradaId: entrada.id,
+                    itemsValues,
+                    nfValues,
+                    qtdValues,         
+                    pedidoCompraOptions,
+                    insumosOptions,
+                    disabledValues,
+                    insumos: insumosObjects
+                })
+
+                this.props.form.setFieldsValue({
+                    data_entrada: moment(entrada.data_entrada, 'YYYY-MM-DD'),
+                    hora_entrada: moment(entrada.hora_entrada, 'HH:mm:ss'),
+                    usuario: entrada.idUsuario + ' - ' + entrada.nomeUsuario,
+                    pedidos,
+                    insumos,
+                    quantidades,
+                    keys
+                })
+
+                // Atualizando id, que é a variável que controla o add e remove de campos
+                id = (this.state.insumos.length)
+            }
+            else
+                console.log('Nenhum registro encontrado')
+        })
+        .catch(error => {
+            console.log(error)
+            this.setState({tableLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
+        })
     }
 
     showEntradaModal = (showEntradaModal) => {
@@ -249,6 +266,7 @@ class EntradaInsumos extends Component {
     }
 
     handleOnChangePedido = (value, event, index) => {
+        console.log('PEDIDO')
         if(typeof value !== 'undefined' && value) {
             this.getInsumosPedidoCompra(value,index)
             this.insertNfValue(event.props.chave_nf, index)
@@ -263,16 +281,22 @@ class EntradaInsumos extends Component {
     }
 
     handleOnChangeInsumo = (value, event, index) => {
+        console.log('INSUMO')
         if(typeof value !== 'undefined' && value) {
             this.getPedidosCompraInsumo(value,index)
             this.insertQtyValues(event.props.qtde - event.props.conferida, index)         
         } else {
             let pedidoCompraOptions     = this.state.pedidoCompraOptions
-            pedidoCompraOptions[index]  = this.state.pedidoCompraOptions
+            pedidoCompraOptions[index]  = this.state.pedidoCompraAvailables
             this.setState({pedidoCompraOptions})
             this.insertQtyValues(0, index)
         }
         this.props.form.resetFields([`quantidades[${index}]`])
+    }
+
+    handleOnChangeQuantidade = (value, event, index) => {
+        console.log('QUANTIDADE')
+        // this.insertQtyValues(0, index);
     }
 
     insertQtyValues = (qtde, index) => {
@@ -286,15 +310,12 @@ class EntradaInsumos extends Component {
         nfValues[index] = nf
         this.setState({nfValues})
     }
-
-    handleOnChangeQuantidade = (e) => {
-        let somatoria = 0
-        const keys = this.props.form.getFieldValue('keys')
-        keys.forEach(row => {
-            somatoria += parseInt(this.props.form.getFieldValue(`quantidades[${row}]`))
-        })
-        this.setState({quantidadeConferida: isNaN(somatoria) ? 0 : somatoria})
-    }    
+    
+    insertDisableValue = (disable, index) => {
+        let disabledValues    = this.state.disabledValues
+        disabledValues[index] = disable
+        this.setState({disabledValues})       
+    }
 
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
@@ -303,8 +324,9 @@ class EntradaInsumos extends Component {
                     let entradas = values.keys
                     .map((key, index) => {
                         return ({
-                            idPedido: parseInt(values.pedidos[index]),
-                            idInsumo: parseInt(values.insumos[index]),
+                            id        : this.state.itemsValues[index] ? parseInt(this.state.itemsValues[index]): null,
+                            idPedido  : parseInt(values.pedidos[index]),
+                            idInsumo  : parseInt(values.insumos[index]),
                             quantidade: parseInt(values.quantidades[index])
                         })
                     })
@@ -313,10 +335,11 @@ class EntradaInsumos extends Component {
                     })
                     if(entradas && entradas.length > 0) {
                         this.requestCreateUpdateArmazemEntrada({
-                            data_entrada: moment(values.data_entrada, 'YYYY-MM-DD'),
-                            hora_entrada: moment(values.hora_entrada, 'HH:mm:ss'),
-                            usuario: this.props.session.usuario.id,
-                            entradas: entradas
+                            id          : this.state.entradaId,
+                            data_entrada: values.data_entrada,
+                            hora_entrada: values.hora_entrada,
+                            usuario     : this.props.session.usuario.id,
+                            entradas    : entradas
                         })
                     } else {
                         this.showNotification('Não há entrada válida para inserir! Tente novamente', false);
@@ -336,22 +359,21 @@ class EntradaInsumos extends Component {
         this.setState({btnSalvarLoading: true})
         console.log(request);
         this.setState({btnSalvarLoading: false})
-        // axios.post(this.props.backEndPoint + '/createUpdatePedidoInsumoEntradas', request)
-        // .then(res => {
-        //     if(res.data.success){
-        //         this.showEntradaModal(false)
-        //         this.getInsumosEntrada()
-        //         this.setState({btnSalvarLoading: false})
-        //     } else {
-        //         this.setState({btnSalvarLoading: false})
-        //         this.showNotification(res.data.msg, false)
-        //     }
-        // })
-        // .catch(error =>{
-        //     console.log(error)
-        //     this.setState({btnSalvarLoading: false})
-        //     this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
-        // })
+        axios.post(this.props.backEndPoint + '/createUpdateEntradaInsumos', request)
+        .then(res => {
+            if(res.data.success){
+                this.showEntradaModal(false)
+                this.setState({btnSalvarLoading: false})
+            } else {
+                this.setState({btnSalvarLoading: false})
+                this.showNotification(res.data.msg, false)
+            }
+        })
+        .catch(error =>{
+            console.log(error)
+            this.setState({btnSalvarLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
+        })
     }
 
     handlePedidoValidator = (rule, value, callback) => {
@@ -414,6 +436,15 @@ class EntradaInsumos extends Component {
         if(!prevProps.showEntradaModal && this.props.showEntradaModal){
             this.getInsumosAvailables()
             this.getPedidosCompraAvailables()
+            this.setState({dynamicFieldsRendering: true })
+        }
+    }
+
+    componentWillUpdate(){
+        if(this.state.dynamicFieldsRendering && this.state.entradaId !== this.props.entradaIdIn){
+            console.log('Load')
+            this.loadEntradaModal(this.props.entradaIdIn)
+            this.setState({entradaId: this.props.entradaIdIn, dynamicFieldsRendering: false })
         }
     }
 
@@ -425,12 +456,22 @@ class EntradaInsumos extends Component {
             keys: nextKeys
         })
 
-        // Default
-        this.state.nfValues.push('')
-        this.state.qtdValues.push('')
-        this.state.pedidoCompraOptions.push(this.state.pedidoCompraAvailables)
-        this.state.insumosOptions.push(this.state.insumosAvailables)
-        console.log(this.state.insumosOptions);
+        // Default item 
+        let itemsValues      = this.state.itemsValues;
+        itemsValues[(id-1)]  = this.state.insumosAvailables
+        this.setState({itemsValues})
+
+        // Default Values
+        this.insertNfValue('', (id-1))
+        this.insertQtyValues(0, (id-1))
+        this.insertDisableValue(false,(id-1))
+
+        // Default Selects
+        let pedidoCompraOptions     = this.state.pedidoCompraOptions;
+        let insumosOptions          = this.state.insumosOptions;
+        pedidoCompraOptions[(id-1)] = this.state.pedidoCompraAvailables
+        insumosOptions[(id-1)]      = this.state.insumosAvailables
+        this.setState({pedidoCompraOptions, insumosOptions})
     }
 
     removeEntradaRow = (k) => {
@@ -438,17 +479,10 @@ class EntradaInsumos extends Component {
         if(keys.length === 1){
             return
         }
-
-        // Atualizando quantidade total
-        if(parseInt(this.props.form.getFieldValue(`quantidades[${k}]`)) >= 0){
-            var quantidadeArmazenar = parseInt(this.state.quantidadeArmazenar) + parseInt(this.props.form.getFieldValue(`quantidades[${k}]`))
-            this.setState({quantidadeArmazenar})
-        }
-
         this.props.form.setFieldsValue({
             keys: keys.filter(key => key !== k),
         })
-    }
+    }  
 
     render(){
         const { getFieldDecorator, getFieldValue } = this.props.form
@@ -478,6 +512,7 @@ class EntradaInsumos extends Component {
                                             getPopupContainer={() => document.getElementById('colPedidoCompra')}
                                             onChange={(value, event) => this.handleOnChangePedido(value, event, k)}
                                             allowClear={true}
+                                            disabled={this.state.disabledValues[k]}
                                         >
                                             {
                                                 this.state.pedidoCompraOptions[k].map((option) => {
@@ -522,6 +557,7 @@ class EntradaInsumos extends Component {
                                             getPopupContainer={() => document.getElementById('colPedidoCompra')}
                                             onChange={(value, event) => this.handleOnChangeInsumo(value, event, k)}
                                             allowClear={true}
+                                            disabled={this.state.disabledValues[k]}
                                         >
                                             {
                                                 this.state.insumosOptions[k].map((option) => {
@@ -535,7 +571,7 @@ class EntradaInsumos extends Component {
                             {
                                 this.state.qtdValues[k] ? (   
                                     <Col span={24} style={{fontSize: '12px', textAlign: 'right'}}>
-                                        <span><strong>Qtd. Disponível:</strong>{this.state.qtdValues[k]}</span>&nbsp;|&nbsp;
+                                        <span><strong>Qtd. Disponível:</strong>{this.state.qtdValues[k]}</span>
                                     </Col>
                                 ) : null
                             }                            
@@ -543,7 +579,7 @@ class EntradaInsumos extends Component {
                         <Col span={3} id="colQuantidade" style={{position: 'relative'}}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`quantidades[${k}]`, {
-                                    initialValue: '1',
+                                    initialValue: '0',
                                     rules: [
                                         {
                                             required: true, message: 'Informe a quantidade',
@@ -558,7 +594,7 @@ class EntradaInsumos extends Component {
                                         placeholder="Quantidade"
                                         min={0} 
                                         max={9999999}
-                                        // onChange={this.handleOnChangeQuantidade}
+                                        onChange={(value, event) => this.handleOnChangeQuantidade(value, event, k)}
                                     />
                                 )}
                             </Form.Item>
