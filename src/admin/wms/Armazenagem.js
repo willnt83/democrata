@@ -2,8 +2,9 @@ import React, { Component } from 'react'
 import { Layout, Table, Icon, Button, Row, Col } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
-//import axios from "axios"
+import axios from "axios"
 import ArmazenagemInsumos from './ArmazenagemInsumos'
+import moment from 'moment'
 
 const { Content } = Layout
 
@@ -16,7 +17,8 @@ class Armazenagem extends Component {
     state = {
         tableData: [],
         tableLoading: false,
-        showArmazenagemModal: false
+        showArmazenagemModal: false,
+        idArmazenagem: null
     }
 
     compareByAlph = (a, b) => {
@@ -27,74 +29,64 @@ class Armazenagem extends Component {
         return 0
     }
 
-    /*
-    requestGetSetores = () => {
-        this.setState({tableLoading: true})
+    requestGetArmazenagens = () => {
         axios
-        .get(this.props.backEndPoint + '/getSetores?param1=09320')
+        .get(this.props.backEndPoint + '/getArmazenagens')
         .then(res => {
             if(res.data.payload){
-                var tableData = res.data.payload.map(setor => {
-                    var ativo = setor.ativo === 'Y' ? 'Sim' : 'Não'
-                    return({
-                        key: setor.id,
-                        nome: setor.nome,
-                        ativo: ativo,
-                        ativoValue: setor.ativo
+                this.setState({
+                    tableData: res.data.payload.map(armazenagem => {
+                        var dthrArmazenagem = moment(armazenagem.dthrArmazenagem).format('DD/MM/YYYY H:mm:ss')
+                        return({
+                            idArmazenagem: armazenagem.idArmazenagem,
+                            usuario: {
+                                id: armazenagem.usuario.id,
+                                nome: armazenagem.usuario.nome
+                            },
+                            dthrArmazenagem: dthrArmazenagem
+                        })
                     })
                 })
-                this.setState({tableData})
             }
             else{
                 console.log('Nenhum registro encontrado')
             }
-            this.setState({tableLoading: false})
         })
         .catch(error => {
             console.log(error)
-            this.setState({tableLoading: false})
         })
     }
 
-    requestCreateUpdateSetor = (request) => {
-        this.setState({buttonSalvarSetor: true})
-        axios.post(this.props.backEndPoint + '/createUpdateSetor', request)
-        .then(res => {
-            this.showSetoresModal(false)
-            this.requestGetSetores()
-            this.setState({buttonSalvarSetor: false})
-        })
-        .catch(error =>{
-            console.log(error)
-            this.setState({buttonSalvarUnidade: false})
-        })
-    }
-    */
-    showArmazenagemModalF = (showArmazenagemModal) => {
+    showArmazenagemModalF = (showArmazenagemModal, idArmazenagem = null) => {
+        if(idArmazenagem != null)
+            this.setState({idArmazenagem: idArmazenagem})
         // Se estiver fechando
-        if(!showArmazenagemModal){
-            //this.props.form.resetFields()
-        }
+        if(!showArmazenagemModal)
+            this.setState({idArmazenagem: null})
         this.setState({showArmazenagemModal})
+    }
+
+    componentDidMount(){
+        this.requestGetArmazenagens()
     }
 
     render(){
         const columns = [{
             title: 'ID',
-            dataIndex: 'id',
-            sorter: (a, b) => a.id - b.key,
+            dataIndex: 'idArmazenagem',
+            sorter: (a, b) => a.idArmazenagem - b.idArmazenagem,
         },
         {
             title: 'Data da Armazenagem',
             dataIndex: 'dthrArmazenagem',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.insumo.dataEntrada, b.insumo.dataEntrada)
+            sorter: (a, b) => this.compareByAlph(a.dthrArmazenagem, b.dthrArmazenagem)
         },
         {
-            title: 'Operador',
-            dataIndex: 'operador',
+            title: 'Usuario',
+            dataIndex: 'usuario.nome',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.operador, b.operador)
+            sorter: (a, b) => this.compareByAlph(a.usuario.nome, b.usuario.nome)
         },
         {
             title: 'Operação',
@@ -105,7 +97,7 @@ class Armazenagem extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Armazenar" onClick={() => this.loadArmazenagemModal(record)} />
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Editar armazenagem" onClick={() => this.showArmazenagemModalF(true, record.idArmazenagem)} />
                     </React.Fragment>
                 )
             }
@@ -120,7 +112,6 @@ class Armazenagem extends Component {
                     minHeight: 280
                 }}
             >
-
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
                         <Tooltip title="Efetuar uma nova armazenagem?" placement="right">
@@ -133,8 +124,10 @@ class Armazenagem extends Component {
                     columns={columns}
                     dataSource={this.state.tableData}
                     loading={this.state.tableLoading}
+                    rowKey='idArmazenagem'
                 />
                 <ArmazenagemInsumos
+                    idArmazenagem={this.state.idArmazenagem}
                     showArmazenagemModalF={this.showArmazenagemModalF}
                     showArmazenagemModal={this.state.showArmazenagemModal}
                 />
