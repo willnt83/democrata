@@ -32,6 +32,7 @@ import Fornecedores from "./wms/Fornecedores"
 import PosicaoArmazem from "./wms/PosicaoArmazem"
 import PedidosCompra from "./wms/PedidosCompra"
 import Armazenagem from "./wms/Armazenagem"
+import Entrada from "./wms/Entrada"
 //import Armazem from "./wms/Armazem"
 
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
@@ -170,6 +171,12 @@ const routes = [
 		main: () => <Armazem />
 	},
 	*/
+	{
+		path: "/admin/wms/armazem/entrada",
+		exact: true,
+		sidebar: () => <div>Entrada</div>,
+		main: () => <Entrada />
+	},	
 	{
 		path: "/admin/wms/armazem/armazenagem",
 		exact: true,

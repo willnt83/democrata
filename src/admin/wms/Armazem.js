@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Layout, Row, Col, Form, Tabs } from 'antd'
 import { connect } from 'react-redux'
 import ArmazemArmazenagem from "./ArmazemArmazenagem"
-import ArmazemEntrada from "./ArmazemEntrada"
 
 
 const { Content } = Layout
@@ -35,7 +34,7 @@ class Armazem extends Component {
                     <Col span={24}>
                         <Tabs defaultActiveKey="1" onChange={this.tabChange}>
                             <TabPane tab="Entrada" key="1">
-                                <ArmazemEntrada />
+                                {/* <ArmazemEntrada /> */}
                             </TabPane>
                             <TabPane tab="Armazenagem" key="2">
                                 <ArmazemArmazenagem />
