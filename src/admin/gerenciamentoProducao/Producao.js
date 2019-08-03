@@ -278,7 +278,6 @@ class Producao extends Component {
         axios
         .get(this.props.backEndPoint + '/gerarCodigosDeBarrasCSV?id_producao='+id)
         .then(res => {
-            console.log('abrir', this.props.backEndPoint + '/' + res.data.payload.url)
             window.open(this.props.backEndPoint + '/' + res.data.payload.url, '_blank');
             this.setState({tableLoading: false})
         })

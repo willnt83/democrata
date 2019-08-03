@@ -3,24 +3,22 @@ import { Layout, Table, Icon, Button, Row, Col } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
-import ArmazenagemInsumos from './ArmazenagemInsumos'
-import ArmazenagemEtiquetas from './ArmazenagemEtiquetas'
+import SaidaInsumos from './SaidaInsumos'
 import moment from 'moment'
 
 const { Content } = Layout
 
-class Armazenagem extends Component {
+class Saida extends Component {
     constructor(props) {
         super()
-        props.setPageTitle('Armazenagem')
+        props.setPageTitle('Saída')
     }
 
     state = {
         tableData: [],
         tableLoading: false,
-        showArmazenagemModal: false,
-        idArmazenagem: null,
-        showArmazenagemEtiquetasModal: false
+        showSaidaModal: false,
+        idSaida: null
     }
 
     compareByAlph = (a, b) => {
@@ -37,15 +35,15 @@ class Armazenagem extends Component {
         .then(res => {
             if(res.data.payload){
                 this.setState({
-                    tableData: res.data.payload.map(armazenagem => {
-                        var dthrArmazenagem = moment(armazenagem.dthrArmazenagem).format('DD/MM/YYYY H:mm:ss')
+                    tableData: res.data.payload.map(saida => {
+                        var dthrSaida = moment(saida.dthrSaida).format('DD/MM/YYYY H:mm:ss')
                         return({
-                            idArmazenagem: armazenagem.idArmazenagem,
+                            idSaida: saida.idSaida,
                             usuario: {
-                                id: armazenagem.usuario.id,
-                                nome: armazenagem.usuario.nome
+                                id: saida.usuario.id,
+                                nome: saida.usuario.nome
                             },
-                            dthrArmazenagem: dthrArmazenagem
+                            dthrSaida: dthrSaida
                         })
                     })
                 })
@@ -59,17 +57,17 @@ class Armazenagem extends Component {
         })
     }
 
-    showArmazenagemModalF = (showArmazenagemModal, idArmazenagem = null) => {
-        if(idArmazenagem != null)
-            this.setState({idArmazenagem: idArmazenagem})
+    showSaidaModalF = (showSaidaModal, idSaida = null) => {
+        if(idSaida != null)
+            this.setState({idSaida: idSaida})
         // Se estiver fechando
-        if(!showArmazenagemModal)
-            this.setState({idArmazenagem: null})
-        this.setState({showArmazenagemModal})
+        if(!showSaidaModal)
+            this.setState({idSaida: null})
+        this.setState({showSaidaModal})
     }
 
-    showArmazenagemEtiquetasModalF = (bool, idArmazenagem) => {
-        this.setState({showArmazenagemEtiquetasModal: bool, idArmazenagem})
+    showSaidaEtiquetasModalF = (bool, idSaida) => {
+        this.setState({showSaidaEtiquetasModal: bool, idSaida})
     }
 
     componentDidMount(){
@@ -79,14 +77,14 @@ class Armazenagem extends Component {
     render(){
         const columns = [{
             title: 'ID',
-            dataIndex: 'idArmazenagem',
-            sorter: (a, b) => a.idArmazenagem - b.idArmazenagem,
+            dataIndex: 'idSaida',
+            sorter: (a, b) => a.idSaida - b.idSaida,
         },
         {
-            title: 'Data da Armazenagem',
-            dataIndex: 'dthrArmazenagem',
+            title: 'Data da Saída',
+            dataIndex: 'dthrSaida',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.dthrArmazenagem, b.dthrArmazenagem)
+            sorter: (a, b) => this.compareByAlph(a.dthrSaida, b.dthrSaida)
         },
         {
             title: 'Usuario',
@@ -103,8 +101,7 @@ class Armazenagem extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Editar armazenagem" onClick={() => this.showArmazenagemModalF(true, record.idArmazenagem)} />
-                        <Icon type="barcode" style={{cursor: 'pointer', marginLeft: 20}} title="Gerar etiquetas" onClick={() => this.showArmazenagemEtiquetasModalF(true, record.idArmazenagem)} />
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Editar saída" onClick={() => this.showSaidaModalF(true, record.idSaida)} />
                     </React.Fragment>
                 )
             }
@@ -121,8 +118,8 @@ class Armazenagem extends Component {
             >
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
-                        <Tooltip title="Efetuar uma nova armazenagem?" placement="right">
-                            <Button className="buttonGreen" onClick={() => this.showArmazenagemModalF(true)}><Icon type="plus" /> Nova Armazenagem</Button>
+                        <Tooltip title="Efetuar uma nova saída?" placement="right">
+                            <Button className="buttonGreen" onClick={() => this.showSaidaModalF(true)}><Icon type="plus" /> Nova Saida</Button>
                         </Tooltip>
                     </Col>
                 </Row>
@@ -131,17 +128,12 @@ class Armazenagem extends Component {
                     columns={columns}
                     dataSource={this.state.tableData}
                     loading={this.state.tableLoading}
-                    rowKey='idArmazenagem'
+                    rowKey='idSaida'
                 />
-                <ArmazenagemInsumos
-                    idArmazenagem={this.state.idArmazenagem}
-                    showArmazenagemModalF={this.showArmazenagemModalF}
-                    showArmazenagemModal={this.state.showArmazenagemModal}
-                />
-                <ArmazenagemEtiquetas
-                    showArmazenagemEtiquetasModalF = {this.showArmazenagemEtiquetasModalF}
-                    showArmazenagemEtiquetasModal = {this.state.showArmazenagemEtiquetasModal}
-                    idArmazenagem = {this.state.idArmazenagem}
+                <SaidaInsumos
+                    idSaida={this.state.idSaida}
+                    showSaidaModalF={this.showSaidaModalF}
+                    showSaidaModal={this.state.showSaidaModal}
                 />
           </Content>
         )
@@ -160,4 +152,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(Armazenagem)
+export default connect(MapStateToProps, mapDispatchToProps)(Saida)

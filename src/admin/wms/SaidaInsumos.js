@@ -6,14 +6,14 @@ import cloneDeep from 'lodash/cloneDeep';
 
 let id = 0
 
-class ArmazenagemInsumos extends Component {
+class SaidaInsumos extends Component {
     constructor(props) {
         super()
-        props.setPageTitle('Armazenagem de Insumos')
+        props.setPageTitle('Saída de Insumos')
     }
 
     state = {
-        showArmazenagemLancamentoModal: false,
+        showSaidaLancamentoModal: false,
         //insumosTemp: [],
         insumosInfo: [],
         //nomeInsumo: null,
@@ -74,9 +74,9 @@ class ArmazenagemInsumos extends Component {
         })
     }
 
-    requestGetInsumosArmazenados = (idArmazenagem) => {
+    requestGetInsumosArmazenados = (idSaida) => {
         axios
-        .get(this.props.backEndPoint + '/getInsumosArmazenados?id_armazenagem='+idArmazenagem)
+        .get(this.props.backEndPoint + '/getInsumosArmazenados?id_saida='+idSaida)
         .then(res => {
             if(res.data.payload){
                 console.log('response', res.data.payload)
@@ -169,8 +169,8 @@ class ArmazenagemInsumos extends Component {
         })
     }
 
-    createUpdateInsumosArmazenagem = (request) => {
-        axios.post(this.props.backEndPoint + '/createUpdateArmazenagem', request)
+    createUpdateInsumosSaida = (request) => {
+        axios.post(this.props.backEndPoint + '/createUpdateSaida', request)
         .then(res => {
             this.showNotification(res.data.msg, res.data.success)
             this.props.form.resetFields()
@@ -181,7 +181,7 @@ class ArmazenagemInsumos extends Component {
                 idPedidoInsumo: null,
                 quantidadeArmazenar: null
             })
-            this.props.showArmazenagemModalF(false)
+            this.props.showSaidaModalF(false)
         })
         .catch(error =>{
             console.log(error)
@@ -296,11 +296,11 @@ class ArmazenagemInsumos extends Component {
                 })
 
                 var request = {
-                    idArmazenagem: this.props.idArmazenagem,
+                    idSaida: this.props.idSaida,
                     lancamentos: rows,
                     idUsuario: this.props.session.usuario.id
                 }
-                this.createUpdateInsumosArmazenagem(request)
+                this.createUpdateInsumosSaida(request)
             }
             else{
                 console.log('erro no formulário')
@@ -401,9 +401,9 @@ class ArmazenagemInsumos extends Component {
         }
 
         // Evento: Modal aberto
-        if(!prevProps.showArmazenagemModal && this.props.showArmazenagemModal){
+        if(!prevProps.showSaidaModal && this.props.showSaidaModal){
             // Edit
-            if(this.props.idArmazenagem) this.requestGetInsumosArmazenados(this.props.idArmazenagem)
+            if(this.props.idSaida) this.requestGetInsumosArmazenados(this.props.idSaida)
             this.requestGetInsumosArmazenar()
             this.getAlmoxarifados()
         }
@@ -426,7 +426,7 @@ class ArmazenagemInsumos extends Component {
                             })(
                                 <Select
                                     style={{ width: '100%' }}
-                                    getPopupContainer={() => document.getElementById('colArmazenagem')}
+                                    getPopupContainer={() => document.getElementById('colSaida')}
                                     allowClear={true}
                                     onChange={(value) => this.changeInsumo(value, k)}
                                 >
@@ -448,7 +448,7 @@ class ArmazenagemInsumos extends Component {
                             })(
                                 <Select
                                     style={{ width: '100%' }}
-                                    getPopupContainer={() => document.getElementById('colArmazenagem')}
+                                    getPopupContainer={() => document.getElementById('colSaida')}
                                     allowClear={true}
                                     onChange={(value) => this.changeAlmoxarifado(value, k)}
                                 >
@@ -465,12 +465,12 @@ class ArmazenagemInsumos extends Component {
                         <Form.Item style={{marginBottom: 0}}>
                             {getFieldDecorator(`posicao[${k}]`, {
                                 rules: [{
-                                    required: true, message: "Informe a posição para armazenagem"
+                                    required: true, message: "Informe a posição para Saída"
                                 }],
                             })(
                                 <Select
                                     style={{ width: '100%' }}
-                                    getPopupContainer={() => document.getElementById('colArmazenagem')}
+                                    getPopupContainer={() => document.getElementById('colSaida')}
                                     allowClear={true}
                                 >
                                     {
@@ -533,17 +533,17 @@ class ArmazenagemInsumos extends Component {
         return(
             <React.Fragment>
                 <Modal
-                    title="Armazenagem de Insumos"
-                    visible={this.props.showArmazenagemModal}
-                    onCancel={() => this.props.showArmazenagemModalF(false)}
+                    title="Saída de Insumos"
+                    visible={this.props.showSaidaModal}
+                    onCancel={() => this.props.showSaidaModalF(false)}
                     width={1300}
                     footer={[
-                        <Button key="back" onClick={() => this.props.showArmazenagemModalF(false)}><Icon type="close" /> Fechar</Button>,
+                        <Button key="back" onClick={() => this.props.showSaidaModalF(false)}><Icon type="close" /> Fechar</Button>,
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
                     <Row>
-                        <Col span={24} id="colArmazenagem" style={{position: 'relative'}}>
+                        <Col span={24} id="colSaida" style={{position: 'relative'}}>
                             <Form layout="vertical">
                                 {/*
                                 <Row style={{marginBottom: 10}}>
@@ -597,4 +597,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(ArmazenagemInsumos))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(SaidaInsumos))

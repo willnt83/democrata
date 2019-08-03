@@ -11,7 +11,7 @@ let id = 0
 class EntradaInsumos extends Component {
     constructor(props) {
         super()
-        props.setPageTitle('Armazenagem de Insumos')
+        props.setPageTitle('Entrada de Insumos')
     }
 
     state = {
