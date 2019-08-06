@@ -29,9 +29,9 @@ class Saida extends Component {
         return 0
     }
 
-    requestGetArmazenagens = () => {
+    requestGetSaidas = () => {
         axios
-        .get(this.props.backEndPoint + '/getArmazenagens')
+        .get(this.props.backEndPoint + '/getSaidas')
         .then(res => {
             if(res.data.payload){
                 this.setState({
@@ -66,12 +66,8 @@ class Saida extends Component {
         this.setState({showSaidaModal})
     }
 
-    showSaidaEtiquetasModalF = (bool, idSaida) => {
-        this.setState({showSaidaEtiquetasModal: bool, idSaida})
-    }
-
     componentDidMount(){
-        this.requestGetArmazenagens()
+        this.requestGetSaidas()
     }
 
     render(){
