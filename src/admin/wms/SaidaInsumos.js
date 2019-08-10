@@ -49,6 +49,7 @@ class SaidaInsumos extends Component {
         .get(this.props.backEndPoint + '/getInsumosDisponiveisParaSaida')
         .then(res => {
             if(res.data.payload){
+                console.log('response', res.data.payload)
                 var insumosOptions = res.data.payload.map(insumo => {
                     return({
                         id: insumo.idArmazenagemInsumo,

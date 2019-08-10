@@ -137,6 +137,7 @@ class Armazenagem extends Component {
                     idArmazenagem={this.state.idArmazenagem}
                     showArmazenagemModalF={this.showArmazenagemModalF}
                     showArmazenagemModal={this.state.showArmazenagemModal}
+                    requestGetArmazenagens={this.requestGetArmazenagens}
                 />
                 <ArmazenagemEtiquetas
                     showArmazenagemEtiquetasModalF = {this.showArmazenagemEtiquetasModalF}

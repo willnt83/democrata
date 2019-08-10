@@ -1,6 +1,6 @@
 const initState = {
-    //backEndPoint: 'http://localhost', //localhost
-    backEndPoint: 'https://homologback.democratadecor.tk', // homolog
+    backEndPoint: 'http://localhost', //localhost
+    //backEndPoint: 'https://homologback.democratadecor.tk', // homolog
     //backEndPoint: 'https://testedemocrata.tk', // producao
     pageTitle: null,
     session: {
@@ -33,8 +33,8 @@ const RootReducer = (state = initState, action) => {
     }
     else if(action.type === 'RESET_ALL'){
         return {
-            //backEndPoint: 'http://localhost', //localhost
-            backEndPoint: 'https://homologback.democratadecor.tk', // homolog
+            backEndPoint: 'http://localhost', //localhost
+            //backEndPoint: 'https://homologback.democratadecor.tk', // homolog
             //backEndPoint: 'https://testedemocrata.tk', // producao
             pageTitle: null,
             session: {
