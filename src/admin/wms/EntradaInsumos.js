@@ -262,7 +262,7 @@ class EntradaInsumos extends Component {
     }
 
     showEntradaModal = (showEntradaModal) => {
-        this.setState({showEntradaModal})
+        this.props.showEntradaModalF(false)
     }
 
     handleOnChangePedido = (value, event, index) => {
@@ -364,6 +364,7 @@ class EntradaInsumos extends Component {
             if(res.data.success){
                 this.showEntradaModal(false)
                 this.setState({btnSalvarLoading: false})
+                this.hideModal()
             } else {
                 this.setState({btnSalvarLoading: false})
                 this.showNotification(res.data.msg, false)
@@ -441,10 +442,9 @@ class EntradaInsumos extends Component {
     }
 
     componentWillUpdate(){
-        if(this.state.dynamicFieldsRendering && this.props.entradaIdIn && this.state.entradaId !== this.props.entradaIdIn){
-            console.log('Load')
-            this.loadEntradaModal(this.props.entradaIdIn)
+        if(this.state.dynamicFieldsRendering && this.props.entradaIdIn && this.state.entradaId !== this.props.entradaIdIn){            
             this.setState({entradaId: this.props.entradaIdIn, dynamicFieldsRendering: false })
+            this.loadEntradaModal(this.props.entradaIdIn)
         }
     }
 
@@ -631,11 +631,11 @@ class EntradaInsumos extends Component {
                 <Modal
                     title="Entrada de Insumos"
                     visible={this.props.showEntradaModal}
-                    onCancel={() => this.props.hideModal(false)}
+                    onCancel={() => this.showEntradaModal(false)}
                     width='90%'
                     style={{minWidth:'600px'}}
                     footer={[
-                        <Button key="back" onClick={() => this.hideModal()}><Icon type="close" /> Cancelar</Button>,
+                        <Button key="back" onClick={() => this.showEntradaModal(false)}><Icon type="close" /> Cancelar</Button>,
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
