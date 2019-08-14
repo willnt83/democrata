@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Modal, Select, Icon, Button, Divider, Table } from 'antd'
+import { Row, Col, Form, Modal, Select, Icon, Button, Divider, Table, Input, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -30,9 +30,29 @@ class LancamentoProducao extends Component{
             nomeFuncionario: null,
             tableData: [],
             funcionariosOptions: [],
-            barcodeReader: false
+            barcodeReader: false,
+            lancamentoManual: false
         }
         this.handleScanLancamento = this.handleScanLancamento.bind(this)
+    }
+
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 1
+        }
+        notification.open(args)
     }
 
     handleScanLancamento(data){
@@ -44,7 +64,7 @@ class LancamentoProducao extends Component{
             this.requestLancamentoProducao(request)
         }
         else{
-            this.props.showNotification('Selecione um funcionário', false)
+            this.showNotification('Selecione um funcionário', false)
         }
     }
 
@@ -89,12 +109,12 @@ class LancamentoProducao extends Component{
         .post(this.props.backEndPoint + '/lancamentoCodigoDeBarras', request)
         .then(res => {
             if(res.data.success){
-                this.props.showNotification(res.data.msg, res.data.success)
+                this.showNotification(res.data.msg, res.data.success)
                 var range = this.getMonthDateRange(2019, this.state.mesSelecionado)
                 this.getCodigosDeBarrasLancados(this.state.idFuncionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
             }
             else{
-                this.props.showNotification(res.data.msg, res.data.success)
+                this.showNotification(res.data.msg, res.data.success)
             }
         })
         .catch(error => {
@@ -153,6 +173,23 @@ class LancamentoProducao extends Component{
             tableData: []
         })
         this.props.showModalLancamentoProducaoF(false)
+    }
+
+    habilitarLancamentoManual = () => {
+        var bool = this.state.lancamentoManual ? false : true
+        this.setState({lancamentoManual: bool})
+    }
+
+    lancamentoManual = () => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if(!err){
+                var request = {
+                    idFuncionario: this.state.idFuncionario,
+                    barcode: values.codigoDeBarras
+                }
+                this.requestLancamentoProducao(request)
+            }
+        })
     }
 
     componentWillReceiveProps(nextProps){
@@ -291,6 +328,35 @@ class LancamentoProducao extends Component{
                                     <span className="bold">Funcionário: {this.state.nomeFuncionario}</span>
                                     <span className="bold" onClick={this.alterarFuncionario} style={{marginLeft: 10, cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Alterar</span>
                                 </Col>
+
+                                <Col span={24}>
+                                    <span className="bold" onClick={this.habilitarLancamentoManual} style={{cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Lançamento Manual</span>
+                                </Col>
+                                {
+                                    this.state.lancamentoManual ?
+                                    <Col span={24} style={{marginTop: 20}}>
+                                        <Form layout="vertical">
+                                            <Form.Item
+                                                label="Código de Barras"
+                                            >
+                                                {getFieldDecorator('codigoDeBarras', {
+                                                    rules: [
+                                                        {
+                                                            required: true, message: 'Por favor informe o código de barras',
+                                                        }
+                                                    ]
+                                                })(
+                                                    <Input
+                                                        id="nome"
+                                                        placeholder="Digite o código de barras"
+                                                    />
+                                                )}
+                                            </Form.Item>
+                                            <Button key="submit" type="primary" onClick={this.lancamentoManual}><Icon type="save" /> Lançar</Button>
+                                        </Form>
+                                    </Col>
+                                    : null
+                                }
                             </Row>
                         }
                         <Divider />
@@ -299,7 +365,6 @@ class LancamentoProducao extends Component{
                             <Row style={{overflowX: 'scroll'}}>
                                 <Col span={24}>
                                     <Table
-                                        
                                         columns={columns}
                                         dataSource={this.state.tableData}
                                         rowKey='id'

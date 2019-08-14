@@ -36,6 +36,10 @@ class IndexProducao extends Component {
 	showModalLogout = (bool) => {
         this.setState({showModalLogout : bool})
 	}
+
+	logout = () => {
+        this.setState({showModalLogout: true})
+    }
 	
 	handleConfirmLogout = () => {
         this.setState({btnConfirmarLoading: true})
@@ -44,8 +48,7 @@ class IndexProducao extends Component {
             if(res.data.success){
                 this.setState({btnConfirmarLoading: false})
                 this.props.resetAll()
-                this.showModalLogout(false)
-                window.location.replace("/")
+				this.showModalLogout(false)
             }
             else{
                 this.setState({btnConfirmarLoading: false})
@@ -77,13 +80,21 @@ class IndexProducao extends Component {
 	}
 
 	render() {
-		const routes = this.props.session.setores.map(setor => {
-			return({
-				path: setor.slug,
-				extact: true,
-				main: () => <ProducaoLancamento idSetor={setor.id} nomeSetor={setor.nome} />
+		console.log('this.props.session.setores', this.props.session.setores)
+		var routes = null
+		if(this.props.session.setores.id !== null){
+			routes = this.props.session.setores.map(setor => {
+				return({
+					path: setor.slug,
+					extact: true,
+					main: () => <ProducaoLancamento idSetor={setor.id} nomeSetor={setor.nome} />
+				})
 			})
-		})
+		}
+		else{
+			console.log('volta pra login')
+			window.location.replace("/")
+		}
 
 		return (
 			<React.Fragment>
@@ -109,6 +120,11 @@ class IndexProducao extends Component {
 										)
 									})
 								}
+
+								<Menu.Item key="999" onClick={() => this.logout()}>
+									<Icon type="export" />
+									<span>Sair</span>
+								</Menu.Item>
 								
 							</Menu>
 						</Sider>

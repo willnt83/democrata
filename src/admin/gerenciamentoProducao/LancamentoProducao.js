@@ -342,7 +342,6 @@ class LancamentoProducao extends Component{
                                             <Button key="submit" type="primary" onClick={this.lancamentoManual}><Icon type="save" /> Lançar</Button>
                                         </Form>
                                     </Col>
-
                                     : null
                                 }
                             </Row>
