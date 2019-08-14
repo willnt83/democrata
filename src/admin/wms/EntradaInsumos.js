@@ -15,7 +15,8 @@ class EntradaInsumos extends Component {
     }
 
     state = {
-        entradaIdIn: null,
+        idEntrada: null,
+        insumosConferidos: [],
         insumosAvailables: [],
         pedidoCompraAvailables: [],
         insumosOptions: [],
@@ -65,7 +66,12 @@ class EntradaInsumos extends Component {
         .then(res => {
             if(res.data.payload){
                 this.setState({
-                    pedidoCompraAvailables: res.data.payload
+                    pedidoCompraAvailables: res.data.payload.map(pedido => {
+                        return {
+                            ...pedido,
+                            textValue: pedido.id + ' - ' + pedido.nomeFornecedor
+                        }
+                    })
                 })
             }
             else{
@@ -88,9 +94,14 @@ class EntradaInsumos extends Component {
                 });
 
                 let pedidoCompraOptions = this.state.pedidoCompraOptions;
-                pedidoCompraOptions[index] = pedidosInsumos;
+                pedidoCompraOptions[index] = pedidosInsumos.map(pedido => {
+                    return {
+                        ...pedido,
+                        textValue: pedido.id + ' - ' + pedido.nomeFornecedor
+                    }
+                });
                 this.setState({pedidoCompraOptions});
-                
+
                 // Verifica se o pedido de compra é válido
                 let idPedidoCompra = this.props.form.getFieldValue(`pedidos[${index}]`)
                 if(typeof idPedidoCompra !== 'undefined' && idPedidoCompra){
@@ -127,6 +138,7 @@ class EntradaInsumos extends Component {
                     insumo.nomeInsumo          = insumo.nome
                     insumo.quantidade          = 0
                     insumo.quantidadeConferida = 0
+                    insumo.textValue           = insumo.ins + ' - ' + insumo.nome
                     return insumo
                 })
                 this.setState({insumosAvailables})
@@ -146,10 +158,17 @@ class EntradaInsumos extends Component {
         .then(res => {
             let pedidosInsumos = res.data.payload;
             if(pedidosInsumos){
-                let insumosOptions = this.state.insumosOptions;
-                insumosOptions[index] = pedidosInsumos;
+                pedidosInsumos = pedidosInsumos.map(insumo => {
+                    return {
+                        ...insumo,
+                        textValue: insumo.insInsumo + ' - ' + insumo.nomeInsumo
+                    }
+                }); 
+
+                let insumosOptions = this.state.insumosOptions
+                insumosOptions[index] = pedidosInsumos  
                 this.setState({insumosOptions});
-                
+
                 // Verifica se o insumo é válido
                 let idInsumo = this.props.form.getFieldValue(`insumos[${index}]`)
                 if(typeof idInsumo !== 'undefined' && idInsumo){
@@ -188,21 +207,19 @@ class EntradaInsumos extends Component {
         return returnStatus;
     }
 
-    loadEntradaModal = (idEntrada) => {
+    requestGetInsumosConferidos = (idEntrada) => {
         axios
         .get(this.props.backEndPoint + '/getEntradaInsumos?id='+idEntrada)
         .then(res => {
             if(res.data.payload){
                 let entrada = res.data.payload[0];
+
+                // Keys
                 let keys = entrada.insumos.map((insumo, index) => {
                     return(index)
                 })
 
-                // Default
-                let pedidos     = [];
-                let insumos     = [];
-                let quantidades = [];
-
+                // States
                 let itemsValues         = []
                 let nfValues            = []
                 let qtdValues           = []
@@ -211,24 +228,18 @@ class EntradaInsumos extends Component {
                 let disabledValues      = []
                 let insumosObjects      = []
 
+                // Set
                 entrada.insumos.forEach((insumo, index) =>{
-                    // Fields
-                    pedidos.push(insumo.idPedido)
-                    insumos.push(insumo.idInsumo)
-                    quantidades.push(insumo.quantidade)
-
-                    // State
                     itemsValues.push(insumo.id)
                     nfValues.push(insumo.chaveNF)
                     qtdValues.push(insumo.quantidade + insumo.quantidadeConferida)
-                    pedidoCompraOptions.push(this.state.pedidoCompraAvailables)
-                    insumosOptions.push(this.state.insumosAvailables)
+                    pedidoCompraOptions = this.state.pedidoCompraAvailables
+                    insumosOptions = this.state.insumosAvailables
                     disabledValues.push(true)
                     insumosObjects.push(insumo)
                 })
 
                 this.setState({
-                    entradaId: entrada.id,
                     itemsValues,
                     nfValues,
                     qtdValues,         
@@ -238,18 +249,18 @@ class EntradaInsumos extends Component {
                     insumos: insumosObjects
                 })
 
+                // Header Fields and Keys
                 this.props.form.setFieldsValue({
                     data_entrada: moment(entrada.data_entrada, 'YYYY-MM-DD'),
                     hora_entrada: moment(entrada.hora_entrada, 'HH:mm:ss'),
                     usuario: entrada.idUsuario + ' - ' + entrada.nomeUsuario,
-                    pedidos,
-                    insumos,
-                    quantidades,
                     keys
                 })
 
                 // Atualizando id, que é a variável que controla o add e remove de campos
                 id = (this.state.insumos.length)
+
+                this.setState({dynamicFieldsRendered: true})
             }
             else
                 console.log('Nenhum registro encontrado')
@@ -261,12 +272,28 @@ class EntradaInsumos extends Component {
         })
     }
 
-    showEntradaModal = (showEntradaModal) => {
-        this.props.showEntradaModalF(false)
+    loadItemsFields = () => {
+        // Default
+        let pedidos     = [];
+        let insumos     = [];
+        let quantidades = [];
+
+        // Fields
+        this.state.insumos.forEach((insumo, index) =>{
+            pedidos.push(insumo.idPedido)
+            insumos.push(insumo.idInsumo)
+            quantidades.push(insumo.quantidade)
+        })
+
+        // Set
+        this.props.form.setFieldsValue({
+            pedidos,
+            insumos,
+            quantidades
+        })        
     }
 
     handleOnChangePedido = (value, event, index) => {
-        console.log('PEDIDO')
         if(typeof value !== 'undefined' && value) {
             this.getInsumosPedidoCompra(value,index)
             this.insertNfValue(event.props.chave_nf, index)
@@ -281,7 +308,6 @@ class EntradaInsumos extends Component {
     }
 
     handleOnChangeInsumo = (value, event, index) => {
-        console.log('INSUMO')
         if(typeof value !== 'undefined' && value) {
             this.getPedidosCompraInsumo(value,index)
             this.insertQtyValues(event.props.qtde - event.props.conferida, index)         
@@ -357,14 +383,13 @@ class EntradaInsumos extends Component {
 
     requestCreateUpdateArmazemEntrada = (request) => {
         this.setState({btnSalvarLoading: true})
-        console.log(request);
         this.setState({btnSalvarLoading: false})
         axios.post(this.props.backEndPoint + '/createUpdateEntradaInsumos', request)
         .then(res => {
             if(res.data.success){
-                this.showEntradaModal(false)
-                this.setState({btnSalvarLoading: false})
+                this.showNotification(res.data.msg, res.data.success)
                 this.hideModal()
+                this.props.requestGetEntradaInsumosF()
             } else {
                 this.setState({btnSalvarLoading: false})
                 this.showNotification(res.data.msg, false)
@@ -434,17 +459,15 @@ class EntradaInsumos extends Component {
     }
 
     componentDidUpdate(prevProps, prevState){
+        if(this.state.dynamicFieldsRendered && this.state.insumos.length > 0){
+            this.loadItemsFields()
+            this.setState({dynamicFieldsRendered: false})
+        }
+
         if(!prevProps.showEntradaModal && this.props.showEntradaModal){
+            if(this.props.idEntrada) this.requestGetInsumosConferidos(this.props.idEntrada)
             this.getInsumosAvailables()
             this.getPedidosCompraAvailables()
-            this.setState({dynamicFieldsRendering: true })
-        }
-    }
-
-    componentWillUpdate(){
-        if(this.state.dynamicFieldsRendering && this.props.entradaIdIn && this.state.entradaId !== this.props.entradaIdIn){            
-            this.setState({entradaId: this.props.entradaIdIn, dynamicFieldsRendering: false })
-            this.loadEntradaModal(this.props.entradaIdIn)
         }
     }
 
@@ -485,7 +508,24 @@ class EntradaInsumos extends Component {
     }  
 
     hideModal = () => {
-        window.location.href = ''
+        id = 0
+        this.props.form.resetFields()
+        this.setState({
+            idEntrada: null,
+            insumosAvailables: [],
+            pedidoCompraAvailables: [],
+            insumosOptions: [],
+            pedidoCompraOptions: [],
+            itemsValues: [],
+            disabledValues: [],
+            nfValues: [],
+            qtdValues: [],
+            insumos: [],
+            tableLoading: false,
+            dynamicFieldsRendering: false,
+            btnSalvarLoading: false
+        })
+        this.props.showEntradaModalF(false)
     }
 
     render(){
@@ -511,16 +551,20 @@ class EntradaInsumos extends Component {
                                         ],
                                     })(
                                         <Select
+                                            showSearch
                                             style={{ width: '100%' }}
                                             placeholder="Selecione o Pedido de Compra"
                                             getPopupContainer={() => document.getElementById('colPedidoCompra')}
                                             onChange={(value, event) => this.handleOnChangePedido(value, event, k)}
                                             allowClear={true}
                                             disabled={this.state.disabledValues[k]}
+                                            filterOption={(input, option) =>
+                                                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                            }
                                         >
                                             {
                                                 this.state.pedidoCompraOptions[k].map((option) => {
-                                                    return (<Select.Option key={option.id} value={option.id} chave_nf={option.chave_nf} data_pedido={option.data_pedido} hora_pedido={option.hora_pedido}>{option.id} - {option.nomeFornecedor}</Select.Option>)
+                                                    return (<Select.Option key={option.id} value={option.id} chave_nf={option.chave_nf} data_pedido={option.data_pedido} hora_pedido={option.hora_pedido}>{option.textValue}</Select.Option>)
                                                 })
                                             }
                                         </Select>
@@ -556,16 +600,20 @@ class EntradaInsumos extends Component {
                                         ],
                                     })(
                                         <Select
+                                            showSearch
                                             style={{ width: '100%' }}
                                             placeholder="Selecione o Insumo"
                                             getPopupContainer={() => document.getElementById('colPedidoCompra')}
                                             onChange={(value, event) => this.handleOnChangeInsumo(value, event, k)}
                                             allowClear={true}
                                             disabled={this.state.disabledValues[k]}
+                                            filterOption={(input, option) =>
+                                                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                            }
                                         >
                                             {
                                                 this.state.insumosOptions[k].map((option) => {
-                                                    return (<Select.Option key={option.id} value={option.idInsumo} qtde={option.quantidade} conferida={option.quantidadeConferida}>{option.insInsumo} - {option.nomeInsumo}</Select.Option>)
+                                                    return (<Select.Option key={option.id} value={option.idInsumo} qtde={option.quantidade} conferida={option.quantidadeConferida}>{option.textValue}</Select.Option>)
                                                 })
                                             }
                                         </Select>
@@ -631,11 +679,11 @@ class EntradaInsumos extends Component {
                 <Modal
                     title="Entrada de Insumos"
                     visible={this.props.showEntradaModal}
-                    onCancel={() => this.showEntradaModal(false)}
+                    onCancel={() => this.hideModal()}
                     width='90%'
                     style={{minWidth:'600px'}}
                     footer={[
-                        <Button key="back" onClick={() => this.showEntradaModal(false)}><Icon type="close" /> Cancelar</Button>,
+                        <Button key="back" onClick={() => this.hideModal()}><Icon type="close" /> Cancelar</Button>,
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >

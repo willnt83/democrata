@@ -15,7 +15,7 @@ class ArmazemEntrada extends Component {
     }
 
     state = {
-        entradaId: null,
+        idEntrada: null,
         tableLoading: false,
         tableData: [],
         showEntradaModal: false,
@@ -47,7 +47,6 @@ class ArmazemEntrada extends Component {
                             nomeInsumo: insumo.nomeInsumo,
                             insInsumo: insumo.insInsumo,
                             quantidade: insumo.quantidade,
-                            // quantidade_conferida: insumo.quantidade_conferida,
                         })
                     })
                 })
@@ -63,6 +62,11 @@ class ArmazemEntrada extends Component {
             this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })    
     }
+
+    requestGetEntradaInsumosF = () => {
+        this.setState({idEntrada: null})
+        this.requestGetEntradaInsumos()
+    }    
 
     showNotification = (msg, success) => {
         var type = null
@@ -91,20 +95,18 @@ class ArmazemEntrada extends Component {
         return 0
     }
 
-    loadEntradaModal = (record) => {
-        this.setState({entradaId: record.id})
-        this.showEntradaModalF(true)
+    showEntradaModalF = (showEntradaModal, idEntrada = null) => {
+        if(idEntrada != null)
+            this.setState({idEntrada: idEntrada})
+            
+        // Se estiver fechando
+        if(!showEntradaModal)
+            this.setState({idEntrada: null})
+
+       this.setState({showEntradaModal})
     }
 
-    showEntradaModalF = (showEntradaModal) => {
-        this.setState({showEntradaModal})
-    }
-
-    entradaIdF = (entradaId) => {
-        this.setState({entradaId})
-    }
-
-    componentWillMount(){
+    componentDidMount(){
         this.requestGetEntradaInsumos()
     }
 
@@ -162,7 +164,7 @@ class ArmazemEntrada extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Entrada" onClick={() => this.loadEntradaModal(record)} />
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Entrada" onClick={() => this.showEntradaModalF(true, record.id)} />
                     </React.Fragment>
                 )
             }
@@ -192,9 +194,10 @@ class ArmazemEntrada extends Component {
                     rowKey='key'
                 />
                 <EntradaInsumos
-                    entradaIdIn={this.state.entradaId}
+                    idEntrada={this.state.idEntrada}
                     showEntradaModalF={this.showEntradaModalF}
                     showEntradaModal={this.state.showEntradaModal}
+                    requestGetEntradaInsumosF={this.requestGetEntradaInsumosF}
                 />
           </Content>
         )

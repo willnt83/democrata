@@ -6,6 +6,7 @@ import axios from "axios"
 import ptBr from 'antd/lib/locale-provider/pt_BR'
 import moment from 'moment'
 import 'moment/locale/pt-br'
+import _ from 'lodash';
 
 const { Content } = Layout
 
@@ -109,14 +110,14 @@ class PedidosCompra extends Component {
         axios
         .get(this.props.backEndPoint + '/getFornecedores?ativo=Y')
         .then(res => {
-            if(res.data){                
+            if(res.data){
                 this.setState({
-                    fornecedoresOptions: res.data.payload.map(fornecedor => {
+                    fornecedoresOptions: _.orderBy(res.data.payload.map(fornecedor => {
                         return({
                             value: fornecedor.id,
                             description: fornecedor.nome,
                         })
-                    }),
+                    }),'description','asc'),
                     fornecedoresSelectStatus: {
                         placeholder: 'Selecione o fornecedor',
                         disabled: false
@@ -141,8 +142,8 @@ class PedidosCompra extends Component {
         .get(this.props.backEndPoint + '/getInsumos?ativo=Y')
         .then(res => {
             if(res.data){                
-                this.setState({                    
-                    insumosOptions: res.data.payload.map(insumo => {
+                this.setState({                  
+                    insumosOptions: _.orderBy(res.data.payload.map(insumo => {
                         return({
                             value: insumo.id,
                             description: insumo.nome,
@@ -150,7 +151,7 @@ class PedidosCompra extends Component {
                             unidadeUnidademedida: insumo.unidadeUnidadeMedida,
                             unidademedida: insumo.unidadeUnidadeMedida
                         })
-                    }),
+                    }),'description', 'asc'),
                     insumosSelectStatus: {
                         placeholder: 'Selecione o insumo',
                         disabled: false
@@ -503,12 +504,16 @@ class PedidosCompra extends Component {
                                     ],
                                 })(
                                     <Select
+                                        showSearch
                                         style={{ width: '100%' }}
                                         placeholder={this.state.insumosSelectStatus.placeholder}
                                         disabled={this.state.insumosSelectStatus.disabled}
                                         getPopupContainer={() => document.getElementById('colInsumos')}
                                         onSelect={(value, event) => this.handleOnChange(value, event, k)}
                                         allowClear={true}
+                                        filterOption={(input, option) =>
+                                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                        }
                                     >
                                         {
                                             this.state.insumosOptions.map((option) => {
@@ -705,11 +710,15 @@ class PedidosCompra extends Component {
                                         }],
                                     })(
                                         <Select
+                                            showSearch
                                             style={{ width: '100%' }}
                                             placeholder={this.state.fornecedoresSelectStatus.placeholder}
                                             disabled={this.state.fornecedoresSelectStatus.disabled}
                                             getPopupContainer={() => document.getElementById('fornecedor')}
                                             allowClear={true}
+                                            filterOption={(input, option) =>
+                                                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                            }
                                         >
                                             {
                                                 this.state.fornecedoresOptions.map((option) => {
