@@ -15,7 +15,6 @@ class EntradaInsumos extends Component {
     }
 
     state = {
-        idEntrada: null,
         insumosConferidos: [],
         insumosAvailables: [],
         pedidoCompraAvailables: [],
@@ -26,7 +25,7 @@ class EntradaInsumos extends Component {
         nfValues: [],
         qtdValues: [],
         insumos: [],
-        tableLoading: false,
+        entradaLoad: false,
         dynamicFieldsRendering: false,
         btnSalvarLoading: false
     }
@@ -60,6 +59,14 @@ class EntradaInsumos extends Component {
         return date.getHours()+':'+date.getMinutes()+':'+date.getSeconds();
     } 
 
+    setInitialData = () => {
+        this.props.form.setFieldsValue({
+            data_entrada: moment(this.returnNowDate(), 'YYYY-MM-DD'),
+            hora_entrada: moment(this.returnNowHour(), 'HH:mm:ss'),
+            usuario: this.props.session.usuario.id+' - '+this.props.session.usuario.nome
+        }) 
+    }
+
     getPedidosCompraAvailables = () => {
         axios
         .get(this.props.backEndPoint + '/getPedidosCompra?status=A')
@@ -73,6 +80,31 @@ class EntradaInsumos extends Component {
                         }
                     })
                 })
+            }
+            else{
+                console.log('Nenhum registro encontrado')
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }
+
+    getInsumosAvailables = () => {
+        axios
+        .get(this.props.backEndPoint + '/getInsumosAvailabesToEnter')
+        .then(res => {
+            if(res.data.payload){
+                let insumosAvailables = res.data.payload.map((insumo) => {
+                    insumo.idInsumo            = insumo.id
+                    insumo.insInsumo           = insumo.ins
+                    insumo.nomeInsumo          = insumo.nome
+                    insumo.quantidade          = 0
+                    insumo.quantidadeConferida = 0
+                    insumo.textValue           = insumo.ins + ' - ' + insumo.nome
+                    return insumo
+                })
+                this.setState({insumosAvailables})
             }
             else{
                 console.log('Nenhum registro encontrado')
@@ -117,31 +149,6 @@ class EntradaInsumos extends Component {
                         this.insertNfValue('', index)
                     }
                 }
-            }
-            else{
-                console.log('Nenhum registro encontrado')
-            }
-        })
-        .catch(error => {
-            console.log(error)
-        })
-    }
-
-    getInsumosAvailables = () => {
-        axios
-        .get(this.props.backEndPoint + '/getInsumosAvailabesToEnter')
-        .then(res => {
-            if(res.data.payload){
-                let insumosAvailables = res.data.payload.map((insumo) => {
-                    insumo.idInsumo            = insumo.id
-                    insumo.insInsumo           = insumo.ins
-                    insumo.nomeInsumo          = insumo.nome
-                    insumo.quantidade          = 0
-                    insumo.quantidadeConferida = 0
-                    insumo.textValue           = insumo.ins + ' - ' + insumo.nome
-                    return insumo
-                })
-                this.setState({insumosAvailables})
             }
             else{
                 console.log('Nenhum registro encontrado')
@@ -207,38 +214,39 @@ class EntradaInsumos extends Component {
         return returnStatus;
     }
 
-    requestGetInsumosConferidos = (idEntrada) => {
+    requestGetEntrada = (idEntrada) => {
         axios
         .get(this.props.backEndPoint + '/getEntradaInsumos?id='+idEntrada)
         .then(res => {
             if(res.data.payload){
                 let entrada = res.data.payload[0];
 
+                // States
+                let itemsValues         = []
+                let nfValues            = []
+                let qtdValues           = []
+                let disabledValues      = []
+                let insumosObjects      = []
+                let pedidoCompraOptions = this.state.pedidoCompraOptions
+                let insumosOptions      = this.state.insumosOptions                
+
                 // Keys
                 let keys = entrada.insumos.map((insumo, index) => {
                     return(index)
                 })
 
-                // States
-                let itemsValues         = []
-                let nfValues            = []
-                let qtdValues           = []
-                let pedidoCompraOptions = []
-                let insumosOptions      = []
-                let disabledValues      = []
-                let insumosObjects      = []
-
-                // Set
+                // Arrays
                 entrada.insumos.forEach((insumo, index) =>{
                     itemsValues.push(insumo.id)
                     nfValues.push(insumo.chaveNF)
-                    qtdValues.push(insumo.quantidade + insumo.quantidadeConferida)
-                    pedidoCompraOptions = this.state.pedidoCompraAvailables
-                    insumosOptions = this.state.insumosAvailables
+                    qtdValues.push(insumo.quantidade - insumo.quantidadeConferida)
                     disabledValues.push(true)
                     insumosObjects.push(insumo)
+                    pedidoCompraOptions.push(this.state.pedidoCompraAvailables)
+                    insumosOptions.push(this.state.insumosAvailables)
                 })
 
+                // State
                 this.setState({
                     itemsValues,
                     nfValues,
@@ -255,11 +263,12 @@ class EntradaInsumos extends Component {
                     hora_entrada: moment(entrada.hora_entrada, 'HH:mm:ss'),
                     usuario: entrada.idUsuario + ' - ' + entrada.nomeUsuario,
                     keys
-                })
+                })                
 
-                // Atualizando id, que é a variável que controla o add e remove de campos
-                id = (this.state.insumos.length)
-
+                // Auxiliar
+                id = (entrada.insumos.length)
+                
+                // Start to rendering items
                 this.setState({dynamicFieldsRendered: true})
             }
             else
@@ -267,12 +276,11 @@ class EntradaInsumos extends Component {
         })
         .catch(error => {
             console.log(error)
-            this.setState({tableLoading: false})
             this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
         })
     }
 
-    loadItemsFields = () => {
+    loadInsumosFields = () => {
         // Default
         let pedidos     = [];
         let insumos     = [];
@@ -290,7 +298,7 @@ class EntradaInsumos extends Component {
             pedidos,
             insumos,
             quantidades
-        })        
+        })          
     }
 
     handleOnChangePedido = (value, event, index) => {
@@ -321,8 +329,18 @@ class EntradaInsumos extends Component {
     }
 
     handleOnChangeQuantidade = (value, event, index) => {
-        console.log('QUANTIDADE')
-        // this.insertQtyValues(0, index);
+        // let qtdValue    = parseFloat(this.state.qtdValues[index])
+        // let qtdeInsumo  = parseFloat(this.state.insumos[index].quantidade)  
+        // let qtdeDisp    = parseFloat(this.state.insumos[index].quantidade) - parseFloat(this.state.insumos[index].quantidadeConferida) 
+        // if(value < qtdValue){
+        //     let diff = qtdeInsumo - value
+        //     this.insertQtyValues(qtdeDisp + diff, index)
+        // } else {
+        //     let diff = value - qtdeInsumo
+        //     if(qtdValue - diff >= 0){
+        //         this.insertQtyValues(qtdeDisp - diff, index) 
+        //     }
+        // }
     }
 
     insertQtyValues = (qtde, index) => {
@@ -459,15 +477,26 @@ class EntradaInsumos extends Component {
     }
 
     componentDidUpdate(prevProps, prevState){
-        if(this.state.dynamicFieldsRendered && this.state.insumos.length > 0){
-            this.loadItemsFields()
-            this.setState({dynamicFieldsRendered: false})
-        }
-
+        // Open Modal
         if(!prevProps.showEntradaModal && this.props.showEntradaModal){
-            if(this.props.idEntrada) this.requestGetInsumosConferidos(this.props.idEntrada)
             this.getInsumosAvailables()
             this.getPedidosCompraAvailables()
+            if(!this.props.idEntrada) {
+                this.setInitialData();
+                this.setState({entradaLoad: true})
+            }
+        }
+
+        // Loading data from Entrada
+        if(!this.state.entradaLoad && this.props.idEntrada && this.state.insumosAvailables.length > 0 && this.state.pedidoCompraAvailables.length > 0){
+            this.requestGetEntrada(this.props.idEntrada)
+            this.setState({entradaLoad: true})
+        }
+
+        // Load items from Entrada (insumos)
+        if(this.state.dynamicFieldsRendered && this.state.insumos.length > 0){
+            this.loadInsumosFields()
+            this.setState({dynamicFieldsRendered: false})
         }
     }
 
@@ -475,9 +504,6 @@ class EntradaInsumos extends Component {
         const { form } = this.props
         const keys = form.getFieldValue('keys')
         const nextKeys = keys.concat(id++)
-        this.props.form.setFieldsValue({
-            keys: nextKeys
-        })
 
         // Default item 
         let itemsValues      = this.state.itemsValues;
@@ -495,6 +521,11 @@ class EntradaInsumos extends Component {
         pedidoCompraOptions[(id-1)] = this.state.pedidoCompraAvailables
         insumosOptions[(id-1)]      = this.state.insumosAvailables
         this.setState({pedidoCompraOptions, insumosOptions})
+
+        // Set new Keys Field
+        this.props.form.setFieldsValue({
+            keys: nextKeys
+        })        
     }
 
     removeEntradaRow = (k) => {
@@ -511,7 +542,6 @@ class EntradaInsumos extends Component {
         id = 0
         this.props.form.resetFields()
         this.setState({
-            idEntrada: null,
             insumosAvailables: [],
             pedidoCompraAvailables: [],
             insumosOptions: [],
@@ -521,7 +551,7 @@ class EntradaInsumos extends Component {
             nfValues: [],
             qtdValues: [],
             insumos: [],
-            tableLoading: false,
+            entradaLoad: false,
             dynamicFieldsRendering: false,
             btnSalvarLoading: false
         })
@@ -532,7 +562,7 @@ class EntradaInsumos extends Component {
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
-
+        console.log(keys);
         const entradaRow = keys.map(k => (
             <Row key={k} style={{marginBottom: '15px'}}>
                 <Col span={24}>
@@ -563,16 +593,19 @@ class EntradaInsumos extends Component {
                                             }
                                         >
                                             {
-                                                this.state.pedidoCompraOptions[k].map((option) => {
-                                                    return (<Select.Option key={option.id} value={option.id} chave_nf={option.chave_nf} data_pedido={option.data_pedido} hora_pedido={option.hora_pedido}>{option.textValue}</Select.Option>)
-                                                })
+                                                this.state.pedidoCompraOptions && this.state.pedidoCompraOptions[k] && this.state.pedidoCompraOptions[k].length > 0 ?
+                                                (
+                                                    this.state.pedidoCompraOptions[k].map((option) => {
+                                                        return (<Select.Option key={option.id} value={option.id} chave_nf={option.chave_nf} data_pedido={option.data_pedido} hora_pedido={option.hora_pedido}>{option.textValue}</Select.Option>)
+                                                    })
+                                                ) : null
                                             }
                                         </Select>
                                     )}
                                 </Form.Item>
                             </Col>
                             {
-                                this.state.nfValues[k] ? (
+                                this.state.nfValues && this.state.nfValues[k] ? (
                                     <Col span={24}>
                                         <Col span={20} id="colChaveNF" style={{position: 'relative'}}>
                                             <Col style={{fontSize: '12px'}}>
@@ -612,16 +645,19 @@ class EntradaInsumos extends Component {
                                             }
                                         >
                                             {
-                                                this.state.insumosOptions[k].map((option) => {
-                                                    return (<Select.Option key={option.id} value={option.idInsumo} qtde={option.quantidade} conferida={option.quantidadeConferida}>{option.textValue}</Select.Option>)
-                                                })
+                                                this.state.insumosOptions && this.state.insumosOptions.length > 0 ?
+                                                (                                                
+                                                    this.state.insumosOptions[k].map((option) => {
+                                                        return (<Select.Option key={option.id} value={option.idInsumo} qtde={option.quantidade} conferida={option.quantidadeConferida}>{option.textValue}</Select.Option>)
+                                                    })
+                                                ) : null
                                             }
                                         </Select>
                                     )}
                                 </Form.Item>
                             </Col>
                             {
-                                this.state.qtdValues[k] ? (   
+                                this.state.qtdValues && typeof this.state.qtdValues[k] !== 'undefined' ? (   
                                     <Col span={24} style={{fontSize: '12px', textAlign: 'right'}}>
                                         <span><strong>Qtd. Disponível:</strong>{this.state.qtdValues[k]}</span>
                                     </Col>
@@ -652,27 +688,21 @@ class EntradaInsumos extends Component {
                             </Form.Item>
                         </Col>
                         <Col span={1} id="colDelete" style={{position: 'relative'}}>
-                        <Form.Item style={{paddingBottom: '0px', marginBottom: '0px', marginTop: '4px', textAlign: 'center'}}>
-                            {keys.length > 1 ? (
-                                <Icon
-                                    className="dynamic-delete-button"
-                                    type="minus-circle-o"
-                                    disabled={keys.length === 1}
-                                    onClick={() => this.removeEntradaRow(k)}
-                                />
-                            ) : null}
-                        </Form.Item>
-                    </Col>                  
-                    </Row>
-                    <Row gutter={3} style={{marginLeft: '1px'}}>
-                        <Col span={10} id="colQuantidadeDetalhe" style={{position: 'relative'}}>
-
-                        </Col>
+                            <Form.Item style={{paddingBottom: '0px', marginBottom: '0px', marginTop: '4px', textAlign: 'center'}}>
+                                {keys.length > 1 ? (
+                                    <Icon
+                                        className="dynamic-delete-button"
+                                        type="minus-circle-o"
+                                        disabled={keys.length === 1}
+                                        onClick={() => this.removeEntradaRow(k)}
+                                    />
+                                ) : null}
+                            </Form.Item>
+                        </Col>                  
                     </Row>
                 </Col>
             </Row>            
         ))
-
         
         return(
             <React.Fragment>
@@ -687,94 +717,101 @@ class EntradaInsumos extends Component {
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
-                    <Form layout="vertical">
-                        <Row>
-                            <Col span={5} id="colDataEntrada" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Data da Entrada"
-                                >
-                                    {getFieldDecorator('data_entrada', {
-                                        initialValue: moment(this.returnNowDate(), 'YYYY-MM-DD'),
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe a data',
-                                            }
-                                        ]
-                                    })(
-                                        <DatePicker
-                                            locale={ptBr}
-                                            format="DD/MM/YYYY"
-                                            placeholder="Selecione a data"
-                                            style={ {width: '100%'} }
-                                            getCalendarContainer={() => document.getElementById('colDataEntrada')}
-                                        />
-                                    )}
-                                </Form.Item>
-                            </Col>
-                            <Col span={5} id="colHoraEntrada" style={{position: 'relative', marginLeft: '5px'}}>
-                                <Form.Item
-                                    label="Hora da Entrada"
-                                >
-                                    {getFieldDecorator('hora_entrada', {
-                                        initialValue: moment(this.returnNowHour(), 'HH:mm:ss'),
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe a hora',
-                                            }
-                                        ]
-                                    })(
-                                        <TimePicker
-                                            locale={ptBr}
-                                            format="HH:mm:ss"
-                                            placeholder="Selecione a hora"
-                                            style={ {width: '100%'} }
-                                            getCalendarContainer={() => document.getElementById('colHoraEntrada')}
-                                        />
-                                    )}
-                                </Form.Item>
-                            </Col> 
-                            <Col span={10} id="colUsuario" style={{position: 'relative', marginLeft: '5px'}}>
-                                <Form.Item
-                                    label="Usuário"
-                                >
-                                    {getFieldDecorator('usuario', {
-                                        initialValue: this.props.session.usuario.id+' - '+this.props.session.usuario.nome,
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe o usuario',
-                                            }
-                                        ]
-                                    })(
-                                        <Input
-                                            id="usuario"
-                                            placeholder="Usuário"
-                                            disabled
-                                        />
-                                    )}
-                                </Form.Item>
-                            </Col>                                                       
-                        </Row>
-
-                        <Divider style={{marginTop: '0px'}} />
-
-                        <Row>
-                            <Col span={24} id="colEntradas" style={{position: 'relative'}}>
-                                <Row className="bold" style={{marginBottom: 10}}>
-                                    <Col span={10}>Pedido de Compra / Fornecedor</Col>
-                                    <Col span={10}>INS / Insumo</Col>
-                                    <Col span={3}>Quantidade</Col>
+                    {
+                        this.props.idEntrada && !this.state.entradaLoad ? 
+                        (
+                            <span>
+                                <Icon type="loading" />&nbsp;Carregando os dados ... 
+                            </span>
+                        ) : 
+                        (
+                            <Form layout="vertical">
+                                <Row>
+                                    <Col span={5} id="colDataEntrada" style={{position: 'relative'}}>
+                                        <Form.Item
+                                            label="Data da Entrada"
+                                        >
+                                            {getFieldDecorator('data_entrada', {
+                                                rules: [
+                                                    {
+                                                        required: true, message: 'Por favor informe a data',
+                                                    }
+                                                ]
+                                            })(
+                                                <DatePicker
+                                                    locale={ptBr}
+                                                    format="DD/MM/YYYY"
+                                                    placeholder="Selecione a data"
+                                                    style={ {width: '100%'} }
+                                                    getCalendarContainer={() => document.getElementById('colDataEntrada')}
+                                                />
+                                            )}
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={5} id="colHoraEntrada" style={{position: 'relative', marginLeft: '5px'}}>
+                                        <Form.Item
+                                            label="Hora da Entrada"
+                                        >
+                                            {getFieldDecorator('hora_entrada', {
+                                                rules: [
+                                                    {
+                                                        required: true, message: 'Por favor informe a hora',
+                                                    }
+                                                ]
+                                            })(
+                                                <TimePicker
+                                                    locale={ptBr}
+                                                    format="HH:mm:ss"
+                                                    placeholder="Selecione a hora"
+                                                    style={ {width: '100%'} }
+                                                    getCalendarContainer={() => document.getElementById('colHoraEntrada')}
+                                                />
+                                            )}
+                                        </Form.Item>
+                                    </Col> 
+                                    <Col span={10} id="colUsuario" style={{position: 'relative', marginLeft: '5px'}}>
+                                        <Form.Item
+                                            label="Usuário"
+                                        >
+                                            {getFieldDecorator('usuario', {
+                                                rules: [
+                                                    {
+                                                        required: true, message: 'Por favor informe o usuario',
+                                                    }
+                                                ]
+                                            })(
+                                                <Input
+                                                    id="usuario"
+                                                    placeholder="Usuário"
+                                                    disabled
+                                                />
+                                            )}
+                                        </Form.Item>
+                                    </Col>                                                       
                                 </Row>
-                            </Col>
-                        </Row>
 
-                        {entradaRow} 
+                                <Divider style={{marginTop: '0px'}} />
 
-                        <Row>
-                            <Col span={24}>
-                                <Button key="primary" title="Nova Entrada" onClick={this.addEntradaRow}><Icon type="plus" /></Button>
-                            </Col>
-                        </Row>
-                    </Form>
+                                <Row>
+                                    <Col span={24} id="colEntradas" style={{position: 'relative'}}>
+                                        <Row className="bold" style={{marginBottom: 10}}>
+                                            <Col span={10}>Pedido de Compra / Fornecedor</Col>
+                                            <Col span={10}>INS / Insumo</Col>
+                                            <Col span={3}>Quantidade</Col>
+                                        </Row>
+                                    </Col>
+                                </Row>
+
+                                {entradaRow} 
+                                
+                                <Row>
+                                    <Col span={24}>
+                                        <Button key="primary" title="Nova Entrada" onClick={this.addEntradaRow}><Icon type="plus" /></Button>                      
+                                    </Col>
+                                </Row>
+                            </Form>
+                        )
+                    }
                 </Modal>
             </React.Fragment>
         )

@@ -817,6 +817,7 @@ class PedidosCompra extends Component {
                                     label="Status"
                                 >
                                     {getFieldDecorator('status', {
+                                        initialValue: 'A',
                                         rules: [
                                             {
                                                 required: true, message: 'Por favor informe o status',
