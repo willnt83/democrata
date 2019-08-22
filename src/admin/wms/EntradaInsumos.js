@@ -476,7 +476,7 @@ class EntradaInsumos extends Component {
                 let qtdeDisponivelOriginal = parseFloat(this.state.insumos[key].quantidadePedido) - parseFloat(this.state.insumos[key].quantidadeConferida)
                 if(qtdeEntrada > qtdeDisponivelOriginal + qtdeOriginal){
                     callback('Quantidade inválida')
-                    this.showNotification('Não é permitida quantidade superior à Disponível', false)
+                    this.showNotification('Não há mais insumos disponíveis', false)
                 }
             } else {
                 if(qtdeEntrada > qtdeDisponivel){
