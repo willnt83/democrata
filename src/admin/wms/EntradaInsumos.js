@@ -101,6 +101,7 @@ class EntradaInsumos extends Component {
                     insumo.nomeInsumo          = insumo.nome
                     insumo.quantidade          = 0
                     insumo.quantidadeConferida = 0
+                    insumo.quantidadePedido    = 0
                     insumo.textValue           = insumo.ins + ' - ' + insumo.nome
                     return insumo
                 })
@@ -183,7 +184,7 @@ class EntradaInsumos extends Component {
                     pedidosInsumos.forEach(pedidoInsumo => {
                         if(parseInt(pedidoInsumo.idInsumo) === idInsumo){
                             valid = true;
-                            this.insertQtyValues(pedidoInsumo.quantidade - pedidoInsumo.quantidadeConferida,index)
+                            this.insertQtyValues(pedidoInsumo.quantidadePedido - pedidoInsumo.quantidadeConferida,index)
                             return;
                         }
                     })
@@ -239,7 +240,7 @@ class EntradaInsumos extends Component {
                 entrada.insumos.forEach((insumo, index) =>{
                     itemsValues.push(insumo.id)
                     nfValues.push(insumo.chaveNF)
-                    qtdValues.push(insumo.quantidade - insumo.quantidadeConferida)
+                    qtdValues.push(insumo.quantidadePedido - insumo.quantidadeConferida)
                     disabledValues.push(true)
                     insumosObjects.push(insumo)
                     pedidoCompraOptions.push(this.state.pedidoCompraAvailables)
@@ -329,23 +330,25 @@ class EntradaInsumos extends Component {
     }
 
     handleOnChangeQuantidade = (value, event, index) => {
-        // let qtdValue    = parseFloat(this.state.qtdValues[index])
-        // let qtdeInsumo  = parseFloat(this.state.insumos[index].quantidade)  
-        // let qtdeDisp    = parseFloat(this.state.insumos[index].quantidade) - parseFloat(this.state.insumos[index].quantidadeConferida) 
-        // if(value < qtdValue){
-        //     let diff = qtdeInsumo - value
-        //     this.insertQtyValues(qtdeDisp + diff, index)
-        // } else {
-        //     let diff = value - qtdeInsumo
-        //     if(qtdValue - diff >= 0){
-        //         this.insertQtyValues(qtdeDisp - diff, index) 
-        //     }
-        // }
+        if(this.props.idEntrada){
+            let qtdValue    = parseFloat(this.state.qtdValues[index])
+            let qtdeInsumo  = parseFloat(this.state.insumos[index].quantidade)
+            let qtdeDisp    = parseFloat(this.state.insumos[index].quantidadePedido) - parseFloat(this.state.insumos[index].quantidadeConferida)
+            if(value < qtdValue){
+                let diff = qtdeInsumo - value
+                this.insertQtyValues(qtdeDisp + diff, index)
+            } else {
+                let diff = value - qtdeInsumo
+                if(qtdValue - diff >= 0){
+                    this.insertQtyValues(qtdeDisp - diff, index) 
+                }
+            }
+        }
     }
 
     insertQtyValues = (qtde, index) => {
         let qtdValues    = this.state.qtdValues
-        qtdValues[index] = qtde
+        qtdValues[index] = qtde >= 0 ? qtde : 0
         this.setState({qtdValues})
     }
 
@@ -465,12 +468,21 @@ class EntradaInsumos extends Component {
     handleQuantidadeValidator = (rule, value, callback) => {
         let key = rule.fullField.replace(/quantidades|\[|\]/gi,'')
         key     = key && !isNaN(key) ? parseInt(key) : null
-        if(key != null && value && !isNaN(value)) {
-            let qtdEntrada      = parseFloat(value)
-            let qtdeDisponivel  = parseFloat(this.state.qtdValues[key])
-            if(qtdEntrada > qtdeDisponivel) {
-                callback('Quantidade inválida')
-                this.showNotification('Não é permitida quantidade superior à Disponível', false)
+        if(key != null && value && !isNaN(value)) {  
+            let qtdeEntrada            = parseFloat(value)
+            let qtdeDisponivel         = parseFloat(this.state.qtdValues[key])
+            if(this.props.idEntrada){
+                let qtdeOriginal           = parseFloat(this.state.insumos[key].quantidade)
+                let qtdeDisponivelOriginal = parseFloat(this.state.insumos[key].quantidadePedido) - parseFloat(this.state.insumos[key].quantidadeConferida)
+                if(qtdeEntrada > qtdeDisponivelOriginal + qtdeOriginal){
+                    callback('Quantidade inválida')
+                    this.showNotification('Não é permitida quantidade superior à Disponível', false)
+                }
+            } else {
+                if(qtdeEntrada > qtdeDisponivel){
+                    callback('Quantidade inválida')
+                    this.showNotification('Não é permitida quantidade superior à Disponível', false)
+                }
             }
         }
         callback()
