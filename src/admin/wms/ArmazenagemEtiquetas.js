@@ -33,8 +33,9 @@ class ArmazenagemEtiquetas extends Component {
                 this.setState({
                     dynamicFieldsRendered: true,
                     insumosArmazenados: res.data.payload.map(insumo => {
+                        console.log(insumo)
                         return({
-                            idPedidoInsumo: insumo.idPedidoInsumo,
+                            idInsumo: insumo.id,
                             codigo: insumo.insumo.ins,
                             nome: insumo.insumo.nome,
                             idAlmoxarifado: insumo.insumo.idAlmoxarifado,
@@ -127,8 +128,8 @@ class ArmazenagemEtiquetas extends Component {
                                             this.state.insumosArmazenados.map((insumo, k) =>{
                                                 console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
                                                 return(
-                                                    <Row className="mt20" key={insumo.idPedidoInsumo}>
-                                                        <Col span={4}>{insumo.idPedidoInsumo}</Col>
+                                                    <Row className="mt20" key={insumo.idInsumo}>
+                                                        <Col span={4}>{insumo.idInsumo}</Col>
                                                         <Col span={5}>{insumo.nome} ({insumo.codigo})</Col>
                                                         <Col span={6}>{insumo.localFisico}</Col>
                                                         <Col span={5}>{insumo.quantidade}</Col>

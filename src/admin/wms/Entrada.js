@@ -60,7 +60,7 @@ class ArmazemEntrada extends Component {
             console.log(error)
             this.setState({tableLoading: false})
             this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
-        })    
+        })
     }
 
     requestGetEntradaInsumosF = () => {
@@ -193,11 +193,11 @@ class ArmazemEntrada extends Component {
                     loading={this.state.tableLoading}
                     rowKey='key'
                 />
-                <EntradaInsumos
-                    idEntrada={this.state.idEntrada}
-                    showEntradaModalF={this.showEntradaModalF}
-                    showEntradaModal={this.state.showEntradaModal}
-                    requestGetEntradaInsumosF={this.requestGetEntradaInsumosF}
+                    <EntradaInsumos
+                        idEntrada={this.state.idEntrada}
+                        showEntradaModalF={this.showEntradaModalF}
+                        showEntradaModal={this.state.showEntradaModal}
+                        requestGetEntradaInsumosF={this.requestGetEntradaInsumosF}
                 />
           </Content>
         )

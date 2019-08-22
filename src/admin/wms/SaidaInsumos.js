@@ -4,6 +4,8 @@ import { connect } from 'react-redux'
 import axios from "axios"
 import cloneDeep from 'lodash/cloneDeep';
 
+import SaidaBarCode from './SaidaBarCode'
+
 let id = 0
 
 class SaidaInsumos extends Component {
@@ -21,8 +23,10 @@ class SaidaInsumos extends Component {
         almoxarifados: [],
         quantidades: [],
         btnSalvarLoading: false,
-        insumosRetirados: []
-
+        showSaidaBarCode: false,
+        insumosData: [],
+        insertingInsumoData: false,
+        insumosRetirados: []        
     }
 
     showNotification = (msg, success) => {
@@ -42,6 +46,24 @@ class SaidaInsumos extends Component {
             duration: 3
         }
         notification.open(args)
+    }
+
+    insertSaidaInsumoF = (insumosData) => {
+        if(insumosData && insumosData.length > 0){
+            var key = id;
+            insumosData = insumosData.map(insumo => {
+                this.addComposicaoRow()
+                return {
+                    ...insumo,
+                    index: key++
+                }
+            })
+            this.setState({insertingInsumoData: true, insumosData: insumosData})
+        }
+    }
+
+    showSaidaBarCodeF = (showSaidaBarCode) => {
+       this.setState({showSaidaBarCode})
     }
 
     requestGetInsumosDisponiveisParaSaida = () => {
@@ -302,6 +324,29 @@ class SaidaInsumos extends Component {
             if(this.props.idSaida) this.requestGetInsumosRetirados(this.props.idSaida)
             this.requestGetInsumosDisponiveisParaSaida()
         }
+
+        // Evento: Retorno do código de barras
+        if(this.state.insertingInsumoData){
+            this.state.insumosData.forEach(insumo => {
+                // Insumo
+                let strObj = '{"insumo['+insumo.index+']": '+insumo.key+'}'
+                let obj  = JSON.parse(strObj)
+                this.props.form.setFieldsValue(obj)
+
+                // Quantidade
+                strObj = '{"quantidade['+insumo.index+']": '+insumo.quantidade+'}'
+                obj  = JSON.parse(strObj)
+                this.props.form.setFieldsValue(obj)
+                
+                // Infos
+                console.log(insumo)
+                this.loadInsumosInfo(insumo.key, insumo.index)
+            })
+          
+            this.setState({insertingInsumoData: false})
+            this.showSaidaBarCodeF(false)
+        }
+        
     }
 
     render(){
@@ -383,6 +428,7 @@ class SaidaInsumos extends Component {
                     onCancel={() => this.props.showSaidaModalF(false)}
                     width={1300}
                     footer={[
+                        <Button key="barcode" type="link" title="Saída por Código de Barras" onClick={() => this.showSaidaBarCodeF(true)} style={{marginLeft: '1px'}}><Icon type="barcode" /> Utilizar Códido de Barras</Button>,
                         <Button key="back" onClick={() => this.props.showSaidaModalF(false)}><Icon type="close" /> Fechar</Button>,
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
@@ -412,6 +458,12 @@ class SaidaInsumos extends Component {
                         </Col>
                     </Row>
                 </Modal>
+                <Row>
+                    <SaidaBarCode 
+                        insertSaidaInsumoF={this.insertSaidaInsumoF}
+                        showSaidaBarCodeF={this.showSaidaBarCodeF}
+                        showSaidaBarCode={this.state.showSaidaBarCode}/>
+                </Row>
             </React.Fragment>
         )
     }
