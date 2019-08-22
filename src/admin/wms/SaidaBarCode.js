@@ -1,23 +1,24 @@
 import React, { Component } from 'react'
-import { Icon, Modal, Button, Row, Col, Form, Input, Popconfirm, Table, notification } from 'antd'
+import { Icon, Modal, Button, Row, Col, Form, Input, Popconfirm, Table, notification, Switch } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import cloneDeep from 'lodash/cloneDeep';
-
-let id = 0
+import BarcodeReader from 'react-barcode-reader'
 
 class SaidaBarCode extends Component {
     constructor(props) {
         super()
         props.setPageTitle('Saída por Código de Barras')
+        this.handleScanInsumosSaida = this.handleScanInsumosSaida.bind(this)
     }
 
     state = {
-        barcode: null,
+        barcodes: [],
         insumosData: [],
         tableLoading: false,
         btnSalvarLoading: false,
         btnSalvarDisabled: true,
+        barcodeReader: true,
         insumosRetirados: []
     }
 
@@ -40,37 +41,81 @@ class SaidaBarCode extends Component {
         notification.open(args)
     }
 
-    returnInsumosArmazenagemByBarCode = () => {
-        if(this.state.barcode){
-            this.setState({tableLoading: true})
-            let arrBarcode = this.state.barcode.split('-')
-            this.loadInsumosData(arrBarcode)
+    handleError(err){
+        console.error(err)
+    }
+
+    handleScanInsumosSaida(data){
+        console.log(data)
+        if(data){
+            this.returnInsumosArmazenagemByBarCode(data)
+        }
+        else{
+            this.showNotification('Erro na operação! Tente novamente', false)
+        }
+    }
+
+    lancamentoManual = () => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if(!err){
+                this.returnInsumosArmazenagemByBarCode(values.codigoDeBarras)
+            }
+        })
+    }
+
+    returnInsumosArmazenagemByBarCode = (barcode) => {
+        if(barcode){            
+            if(!this.state.barcodes.includes(barcode)){
+                this.setState({tableLoading: true})
+                this.loadInsumosData(barcode)
+            } else {
+                this.showNotification('Insumo já inserido na lista', false)
+            }
         } else {
             this.showNotification('Não há insumo selecionado para a saída! Tente novamente', false)
         }      
     }
 
-    loadInsumosData = (arrBarcode) => {
+    loadInsumosData = (barcode) => {
+        let arrBarcode = barcode.split('-')
         axios
         .get(this.props.backEndPoint + '/getInsumosDisponiveisParaSaida?id_insumo='+arrBarcode[0]+'&id_almoxarifado='+arrBarcode[1]+'&id_posicao='+arrBarcode[2])
         .then(res => {
-            if(res.data.payload){
-                let btnSalvarDisabled = false;
-                var insumosData = []
-                res.data.payload.forEach(insumo => {
+            if(res.data.payload && res.data.payload.length > 0){
+                let barcodes      = this.state.barcodes
+                let insumosData   = this.state.insumosData
+                let insumoPayload = res.data.payload[0]
+
+                // Inserting data  
+                let insumosInserted = this.props.returnInsumosInsertedF()                
+                if( typeof insumosInserted === 'undefined' || 
+                    (
+                        typeof insumosInserted !== 'undefined' &&
+                        insumosInserted && insumosInserted.length > 0 &&
+                        !insumosInserted.includes(insumoPayload.idArmazenagemInsumo)
+                    )
+                ){                    
                     insumosData.push({
-                        key: insumo.idArmazenagemInsumo,
-                        idInsumo: insumo.idInsumo,
-                        insumo: insumo.nomeInsumo,
-                        ins: insumo.insInsumo,
-                        idAlmoxarifado: insumo.idAlmoxarifado,
-                        almoxarifado: insumo.nomeAlmoxarifado,
-                        idPosicao: insumosData.idPosicao,
-                        posicao: insumo.nomePosicao,
-                        quantidade: insumo.quantidadeDisponivel
+                        key: insumoPayload.idArmazenagemInsumo,
+                        idInsumo: insumoPayload.idInsumo,
+                        insumo: insumoPayload.nomeInsumo,
+                        ins: insumoPayload.insInsumo,
+                        idAlmoxarifado: insumoPayload.idAlmoxarifado,
+                        almoxarifado: insumoPayload.nomeAlmoxarifado,
+                        idPosicao: insumoPayload.idPosicao,
+                        posicao: insumoPayload.nomePosicao,
+                        quantidade: insumoPayload.quantidadeDisponivel
                     })
+                    barcodes.push(barcode)
+                } else {
+                    this.showNotification('Insumo já inserido na saída')
+                }
+
+                this.setState({
+                    barcodes: barcodes,
+                    insumosData: insumosData,
+                    btnSalvarDisabled: false
                 })
-                this.setState({insumosData, btnSalvarDisabled})                
             }
             else
                 this.showNotification('Nenhum registo encontrado', false)          
@@ -97,14 +142,25 @@ class SaidaBarCode extends Component {
         }
     }
 
+    handleLancamentoManualChange = lancamentoManual => {
+        this.setState({
+            barcodeReader: lancamentoManual ? false : true
+        })
+    };
+    
+    verifyLancamentoManual = () => {
+        return this.state.barcodeReader ? false : true
+    }
+
     componentDidUpdate(prevProps, prevState){    
         if(!prevProps.showSaidaBarCode && this.props.showSaidaBarCode){
             this.setState({
-                barcode: null,
+                barcodes: [],
                 insumosData: [],
                 tableLoading: false,
                 btnSalvarLoading: false,
                 btnSalvarDisabled: true,
+                barcodeReader: true,
                 insumosRetirados: []
             })
         }
@@ -120,6 +176,8 @@ class SaidaBarCode extends Component {
     }
 
     render(){
+        const { getFieldDecorator } = this.props.form
+
         const columns = [{
             title: 'ID',
             dataIndex: 'idInsumo',
@@ -181,20 +239,59 @@ class SaidaBarCode extends Component {
                 >
                     <Row>
                         <Col span={24} id="colSaida" style={{position: 'relative'}}>
+                            <Row>                                
+                                {
+                                    this.state.barcodeReader ?
+                                    (
+                                        <BarcodeReader
+                                            onError={this.handleError}
+                                            onScan={this.handleScanInsumosSaida}/>
+                                    )
+                                    :
+                                    (
+                                        <Col span={24}>
+                                            {/* <Input 
+                                                id="barcode" 
+                                                placeholder=""
+                                                value={this.state.barcode}
+                                                onChange={evt => this.handleOnChangeBarcode(evt)}
+                                            />
+                                            <Button 
+                                                key="primary" 
+                                                title="Novo Porcionamento" 
+                                                onClick={() => this.returnInsumosArmazenagemByBarCode()}
+                                            >
+                                                <Icon type="plus" />
+                                            </Button> */}
+                                            <Form layout="vertical">
+                                                <Form.Item           
+                                                    label="Código de Barras"
+                                                    style={{marginBottom: '2px'}}
+                                                >
+                                                    {getFieldDecorator('codigoDeBarras', {
+                                                        rules: [
+                                                            {
+                                                                required: true, message: 'Por favor informe o código de barras',
+                                                            }
+                                                        ]
+                                                    })(
+                                                        <Input
+                                                            id="nome"
+                                                            placeholder="Digite o código de barras"
+                                                        />
+                                                    )}
+                                                </Form.Item>
+                                                <Form.Item style={{marginBottom: '2px'}}>
+                                                    <Button key="submit" type="primary" onClick={this.lancamentoManual}><Icon type="save" /> Lançar</Button>
+                                                </Form.Item>
+                                            </Form>                                            
+                                        </Col>
+                                    )
+                                }
+                            </Row>
                             <Row>
-                                <Col span={24}>
-                                    <Input 
-                                        id="barcode" 
-                                        placeholder=""
-                                        onChange={evt => this.handleOnChangeBarcode(evt)}
-                                    />
-                                    <Button 
-                                        key="primary" 
-                                        title="Novo Porcionamento" 
-                                        onClick={() => this.returnInsumosArmazenagemByBarCode()}
-                                    >
-                                        <Icon type="plus" />
-                                    </Button>
+                                <Col span={24} style={{textAlign: 'right'}}>
+                                    Lançamento Manual: <Switch size="small" checked={!this.state.barcodeReader} onChange={this.handleLancamentoManualChange} />
                                 </Col>
                             </Row>
                             <Row>

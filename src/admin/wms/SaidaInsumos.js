@@ -48,6 +48,10 @@ class SaidaInsumos extends Component {
         notification.open(args)
     }
 
+    returnInsumosInsertedF = () => {
+        return this.props.form.getFieldValue('insumo')
+    }
+
     insertSaidaInsumoF = (insumosData) => {
         if(insumosData && insumosData.length > 0){
             var key = id;
@@ -71,7 +75,6 @@ class SaidaInsumos extends Component {
         .get(this.props.backEndPoint + '/getInsumosDisponiveisParaSaida')
         .then(res => {
             if(res.data.payload){
-                console.log('response', res.data.payload)
                 var insumosOptions = res.data.payload.map(insumo => {
                     return({
                         id: insumo.idArmazenagemInsumo,
@@ -325,22 +328,39 @@ class SaidaInsumos extends Component {
             this.requestGetInsumosDisponiveisParaSaida()
         }
 
-        // Evento: Retorno do código de barras
+        // Evento: Retorno da inserção por código de barras
         if(this.state.insertingInsumoData){
             this.state.insumosData.forEach(insumo => {
+                var indexInsumo = insumo.index
+
                 // Insumo
-                let strObj = '{"insumo['+insumo.index+']": '+insumo.key+'}'
+                let strObj = '{"insumo['+indexInsumo+']": '+insumo.key+'}'
                 let obj  = JSON.parse(strObj)
                 this.props.form.setFieldsValue(obj)
 
                 // Quantidade
-                strObj = '{"quantidade['+insumo.index+']": '+insumo.quantidade+'}'
+                strObj = '{"quantidade['+indexInsumo+']": '+insumo.quantidade+'}'
                 obj  = JSON.parse(strObj)
                 this.props.form.setFieldsValue(obj)
                 
                 // Infos
-                console.log(insumo)
-                this.loadInsumosInfo(insumo.key, insumo.index)
+                var idArmazenagemInsumo = insumo.key
+                let insumosInfo = this.state.insumosInfo
+                let insumosDisponiveis = cloneDeep(this.state.insumosOptions)
+                insumosDisponiveis.forEach(insumoDisponivel => {
+                    if(insumoDisponivel.id === idArmazenagemInsumo){
+                         let content = {
+                            idArmazenagemInsumo: insumoDisponivel.id,
+                            idAlmoxarifado: insumoDisponivel.idAlmoxarifado,
+                            nomeAlmoxarifado: insumoDisponivel.nomeAlmoxarifado,
+                            idPosicao: insumoDisponivel.idPosicao,
+                            nomePosicao: insumoDisponivel.nomePosicao,
+                            quantidadeDisponivel: insumoDisponivel.quantidadeDisponivel
+                        }
+                        insumosInfo[indexInsumo] = content
+                    }
+                })
+                this.setState({insumosInfo})                         
             })
           
             this.setState({insertingInsumoData: false})
@@ -459,8 +479,9 @@ class SaidaInsumos extends Component {
                     </Row>
                 </Modal>
                 <Row>
-                    <SaidaBarCode 
+                    <SaidaBarCode
                         insertSaidaInsumoF={this.insertSaidaInsumoF}
+                        returnInsumosInsertedF={this.returnInsumosInsertedF}
                         showSaidaBarCodeF={this.showSaidaBarCodeF}
                         showSaidaBarCode={this.state.showSaidaBarCode}/>
                 </Row>
