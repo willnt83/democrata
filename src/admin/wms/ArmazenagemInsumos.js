@@ -148,7 +148,6 @@ class ArmazenagemInsumos extends Component {
         .get(this.props.backEndPoint + '/getInsumosArmazenados?id_armazenagem='+idArmazenagem)
         .then(res => {
             if(res.data.payload){
-                console.log('response', res.data.payload)
                 this.props.form.setFieldsValue({
                     keys: res.data.payload.map((row, index) => {
                         return index
@@ -189,11 +188,6 @@ class ArmazenagemInsumos extends Component {
     }
 
     showQuantidades = (idEntradaInsumo, k, insumosTemp) => {
-        console.log('showQuantidades')
-        console.log()
-        console.log()
-        console.log()
-
         var quantidadeEntrada = 0
         var quantidadeArmazenar = 0
 
@@ -209,7 +203,6 @@ class ArmazenagemInsumos extends Component {
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
                 var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+quantidadeArmazenar
                 var insumosInfo = this.state.insumosInfo
-
                 insumosInfo.splice(row, 1, content)
                 this.setState({insumosInfo})
             }
@@ -219,10 +212,10 @@ class ArmazenagemInsumos extends Component {
 
     // Contabiliza quantidade de insumos que estão sendo armazenados no lançamento e atualiza insumosTemp
     contabilizaQuantidades = (idEntradaInsumo) => {
-        console.log('contabilizaQuantidades - idEntradaInsumo: '+idEntradaInsumo)
         const keys = this.props.form.getFieldValue('keys')
         var somatoriaEntradas = 0
         var quantidadeJaArmazenada = 0
+
         keys.forEach(row => {
             if(this.props.form.getFieldValue(`insumo[${row}]`) === idEntradaInsumo){
                 somatoriaEntradas += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
@@ -235,19 +228,14 @@ class ArmazenagemInsumos extends Component {
                 somatoriaEntradas -= quantidadeJaArmazenada
             }
         })
-        var insumosTemp = cloneDeep(this.state.insumos)
 
-        console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
-        console.log('somatoriaEntradas', somatoriaEntradas)
-        console.log('insumosTemp antes', insumosTemp)
+        var insumosTemp = cloneDeep(this.state.insumos)
 
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idEntradaInsumo === idEntradaInsumo){
                 insumosTemp[index].insumo.quantidadeArmazenar -= somatoriaEntradas
             }
         })
-
-        console.log('insumosTemp depois', insumosTemp)
         return insumosTemp
     }
 
@@ -261,6 +249,23 @@ class ArmazenagemInsumos extends Component {
         var obj  = JSON.parse(strObj)
         this.props.form.setFieldsValue(obj)
         if(value) this.getPosicoesArmazem(value, k)
+    }
+
+    changeQuantidade = (e) => {
+        var pos = e.target.id.replace('quantidade[', '').replace(']', '')
+
+        if(e.target.value > 0){
+            var idEntradaInsumo = this.props.form.getFieldValue(`insumo[${pos}]`)
+            var insumosTemp = this.contabilizaQuantidades(idEntradaInsumo)
+            var result = this.validacaoQuantidade(idEntradaInsumo, pos, insumosTemp)
+            if(result === true){
+                this.showQuantidades(idEntradaInsumo, pos, insumosTemp)
+            }
+            else{
+                insumosTemp = this.contabilizaQuantidades(idEntradaInsumo)
+                this.showQuantidades(idEntradaInsumo, pos, insumosTemp)
+            }
+        }
     }
 
     validacaoQuantidade(idPedidoInsumo, k, insumosTemp){
@@ -282,23 +287,6 @@ class ArmazenagemInsumos extends Component {
         })
         if(valid) return true
         else return quantidadePermitida
-    }
-
-    changeQuantidade = (e) => {
-        var pos = e.target.id.replace('quantidade[', '').replace(']', '')
-
-        if(e.target.value > 0){
-            var idEntradaInsumo = this.props.form.getFieldValue(`insumo[${pos}]`)
-            var insumosTemp = this.contabilizaQuantidades(idEntradaInsumo)
-            var result = this.validacaoQuantidade(idEntradaInsumo, pos, insumosTemp)
-            if(result === true){
-                this.showQuantidades(idEntradaInsumo, pos, insumosTemp)
-            }
-            else{
-                insumosTemp = this.contabilizaQuantidades(idEntradaInsumo)
-                this.showQuantidades(idEntradaInsumo, pos, insumosTemp)
-            }
-        }
     }
 
     handleFormSubmit = () => {
@@ -327,6 +315,7 @@ class ArmazenagemInsumos extends Component {
             else{
                 console.log('erro no formulário')
             }
+            this.setState({btnSalvarLoading: false})
         })
     }
 
@@ -370,6 +359,7 @@ class ArmazenagemInsumos extends Component {
 
     closeModal = () => {
         //Limpeza
+        id = 0
         this.props.form.resetFields()
         this.setState({
             btnSalvarLoading: false,
@@ -426,7 +416,6 @@ class ArmazenagemInsumos extends Component {
             this.props.form.setFieldsValue(obj)
 
             // Percorrendo para contabilizar quantidades
-            console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
             this.state.insumosArmazenados.forEach((insumo, index) => {
                 this.showQuantidades(insumo.idEntradaInsumo, index, this.state.insumosArmazenados)
             })
@@ -455,7 +444,6 @@ class ArmazenagemInsumos extends Component {
     }
 
     render(){
-        console.log('this.state.insumos', this.state.insumos)
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
@@ -570,7 +558,6 @@ class ArmazenagemInsumos extends Component {
             </React.Fragment>
         ))
 
-
         return(
             <React.Fragment>
                 <Modal
@@ -586,19 +573,6 @@ class ArmazenagemInsumos extends Component {
                     <Row>
                         <Col span={24} id="colArmazenagem" style={{position: 'relative'}}>
                             <Form layout="vertical">
-                                {/*
-                                <Row style={{marginBottom: 10}}>
-                                    <Col span={24}>
-                                        Insumo: <span className="bold" >{this.state.nomeInsumo}</span>
-                                    </Col>
-                                    <Col span={24}>
-                                        Quantidade entrada: <span className="bold" >{this.state.quantidadeEntrada}</span>
-                                    </Col>
-                                    <Col span={24}>
-                                        Quantidade a ser armazenada: <span className="bold" >{this.state.quantidadeArmazenar}</span>
-                                    </Col>
-                                </Row>
-                                */}
                                 {
                                     porcionamentos.length > 0 ?
                                     <Row className="bold" style={{marginBottom: 10}}>

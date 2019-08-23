@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Icon, Modal, Button, Row, Col, Form, Input, Popconfirm, Table, notification, Switch } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
-import cloneDeep from 'lodash/cloneDeep';
 import BarcodeReader from 'react-barcode-reader'
 
 class SaidaBarCode extends Component {
