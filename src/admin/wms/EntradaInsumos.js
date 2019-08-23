@@ -330,7 +330,7 @@ class EntradaInsumos extends Component {
     }
 
     handleOnChangeQuantidade = (value, event, index) => {
-        if(this.props.idEntrada){
+        if(this.props.idEntrada && typeof this.state.insumos[index] !== 'undefined' && this.state.insumos[index]){
             let qtdValue    = parseFloat(this.state.qtdValues[index])
             let qtdeInsumo  = parseFloat(this.state.insumos[index].quantidade)
             let qtdeDisp    = parseFloat(this.state.insumos[index].quantidadePedido) - parseFloat(this.state.insumos[index].quantidadeConferida)
@@ -382,7 +382,7 @@ class EntradaInsumos extends Component {
                     })
                     if(entradas && entradas.length > 0) {
                         this.requestCreateUpdateArmazemEntrada({
-                            id          : this.state.entradaId,
+                            id          : (typeof this.props.idEntrada !== 'undefined' && this.props.idEntrada) ? this.props.idEntrada : null,
                             data_entrada: values.data_entrada,
                             hora_entrada: values.hora_entrada,
                             usuario     : this.props.session.usuario.id,
@@ -471,7 +471,7 @@ class EntradaInsumos extends Component {
         if(key != null && value && !isNaN(value)) {  
             let qtdeEntrada            = parseFloat(value)
             let qtdeDisponivel         = parseFloat(this.state.qtdValues[key])
-            if(this.props.idEntrada){
+            if(this.props.idEntrada && typeof this.state.insumos[key] !== 'undefined' && this.state.insumos[key]){
                 let qtdeOriginal           = parseFloat(this.state.insumos[key].quantidade)
                 let qtdeDisponivelOriginal = parseFloat(this.state.insumos[key].quantidadePedido) - parseFloat(this.state.insumos[key].quantidadeConferida)
                 if(qtdeEntrada > qtdeDisponivelOriginal + qtdeOriginal){

@@ -448,7 +448,7 @@ class SaidaInsumos extends Component {
                     onCancel={() => this.props.showSaidaModalF(false)}
                     width={1300}
                     footer={[
-                        <Button key="barcode" type="link" title="Saída por Código de Barras" onClick={() => this.showSaidaBarCodeF(true)} style={{marginLeft: '1px'}}><Icon type="barcode" /> Utilizar Códido de Barras</Button>,
+                        <Button key="barcode" type="link" title="Saída por Código de Barras" onClick={() => this.showSaidaBarCodeF(true)} style={{marginLeft: '1px'}}><Icon type="barcode" /> Utilizar Código de Barras</Button>,
                         <Button key="back" onClick={() => this.props.showSaidaModalF(false)}><Icon type="close" /> Fechar</Button>,
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
