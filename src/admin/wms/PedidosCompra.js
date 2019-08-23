@@ -148,6 +148,7 @@ class PedidosCompra extends Component {
                             value: insumo.id,
                             description: insumo.nome,
                             ins: insumo.ins,
+                            textValue: insumo.ins + ' - ' + insumo.nome,
                             unidadeUnidademedida: insumo.unidadeUnidadeMedida,
                             unidademedida: insumo.unidadeUnidadeMedida
                         })
@@ -517,7 +518,7 @@ class PedidosCompra extends Component {
                                     >
                                         {
                                             this.state.insumosOptions.map((option) => {
-                                                return (<Select.Option key={option.value} value={option.value} ins={option.ins} unidademedida={option.unidademedida}>{option.description}</Select.Option>)
+                                                return (<Select.Option key={option.value} value={option.value} ins={option.ins} unidademedida={option.unidademedida}>{option.textValue}</Select.Option>)
                                             })
                                         }
                                     </Select>
@@ -841,7 +842,7 @@ class PedidosCompra extends Component {
                             </Col>                            
                         </Row>
                         <Divider />
-                        <h4>Insumos (Matérias-Primas)</h4>  
+                        <h4>INS / Insumos (Matérias-Primas)</h4>  
                         {composicaoItems}
                         <Row>
                             <Col span={24}>
