@@ -84,7 +84,7 @@ class SaidaInsumos extends Component {
                         nomeAlmoxarifado: insumo.nomeAlmoxarifado,
                         idPosicao: insumo.idPosicao,
                         nomePosicao: insumo.nomePosicao,
-                        quantidadeDisponivel: insumo.quantidadeDisponivel
+                        quantidadeDisponivel: parseFloat(insumo.quantidadeDisponivel).toFixed(2)
                     })
                 })
                 this.setState({insumosOptions, insumos: res.data.payload})
@@ -142,12 +142,12 @@ class SaidaInsumos extends Component {
         var somatoriaEntradas = 0
         keys.forEach(row => {
             if(this.props.form.getFieldValue(`insumo[${row}]`) === idPedidoInsumo)
-                somatoriaEntradas += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
+                somatoriaEntradas += parseFloat(this.props.form.getFieldValue(`quantidade[${row}]`)).toFixed(2)
         })
         var insumosTemp = cloneDeep(this.state.insumos)
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idPedidoInsumo === idPedidoInsumo){
-                insumosTemp[index].insumo.quantidadeArmazenar -= somatoriaEntradas
+                insumosTemp[index].insumo.quantidadeArmazenar -= parseFloat(somatoriaEntradas).toFixed(2)
             }
         })
         return insumosTemp
@@ -165,7 +165,7 @@ class SaidaInsumos extends Component {
                     nomeAlmoxarifado: insumo.nomeAlmoxarifado,
                     idPosicao: insumo.idPosicao,
                     nomePosicao: insumo.nomePosicao,
-                    quantidadeDisponivel: insumo.quantidadeDisponivel
+                    quantidadeDisponivel: parseFloat(insumo.quantidadeDisponivel).toFixed(2)
                 }
                 insumosInfo.splice(k, 1, content)
             }
@@ -188,7 +188,7 @@ class SaidaInsumos extends Component {
             if(insumo.idPedidoInsumo === idPedidoInsumo){
                 if(insumosTemp[index].insumo.quantidadeArmazenar < 0){
                     quantidadeInformada = this.props.form.getFieldValue(`quantidade[${k}]`)
-                    quantidadePermitida = parseInt(quantidadeInformada) + parseInt(insumosTemp[index].insumo.quantidadeArmazenar)
+                    quantidadePermitida = (parseFloat(quantidadeInformada) + parseFloat(insumosTemp[index].insumo.quantidadeArmazenar)).toFixed(2)
 
                     var strObj = '{"quantidade['+k+']": '+quantidadePermitida+'}'
                     var obj  = JSON.parse(strObj)
@@ -229,7 +229,7 @@ class SaidaInsumos extends Component {
                         idArmazenagemInsumos: values.insumo[i],
                         idAlmoxarifado: this.state.insumosInfo[i].idAlmoxarifado,
                         idPosicao: this.state.insumosInfo[i].idPosicao,
-                        quantidade: parseInt(values.quantidade[i])
+                        quantidade: parseFloat(values.quantidade[i]).toFixed(2)
                     })
                 })
                 .filter(row => {
@@ -272,12 +272,12 @@ class SaidaInsumos extends Component {
         var quantidadeAtualizada = 0
         keys.forEach(row => {
             if(row !== k && this.props.form.getFieldValue(`insumo[${row}]`) === idPedidoInsumo)
-                quantidadeAtualizada += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
+                quantidadeAtualizada += parseFloat(this.props.form.getFieldValue(`quantidade[${row}]`)).toFixed(2)
         })
 
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idPedidoInsumo === idPedidoInsumo){
-                insumosTemp[index].insumo.quantidadeArmazenar -= quantidadeAtualizada
+                insumosTemp[index].insumo.quantidadeArmazenar -= parseFloat(quantidadeAtualizada).toFixed(2)
             }
         })
         //this.showQuantidades(idPedidoInsumo, k, insumosTemp)
@@ -355,7 +355,7 @@ class SaidaInsumos extends Component {
                             nomeAlmoxarifado: insumoDisponivel.nomeAlmoxarifado,
                             idPosicao: insumoDisponivel.idPosicao,
                             nomePosicao: insumoDisponivel.nomePosicao,
-                            quantidadeDisponivel: insumoDisponivel.quantidadeDisponivel
+                            quantidadeDisponivel: parseFloat(insumoDisponivel.quantidadeDisponivel).toFixed(2)
                         }
                         insumosInfo[indexInsumo] = content
                     }

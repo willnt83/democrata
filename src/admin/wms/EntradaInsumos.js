@@ -240,7 +240,7 @@ class EntradaInsumos extends Component {
                 entrada.insumos.forEach((insumo, index) =>{
                     itemsValues.push(insumo.id)
                     nfValues.push(insumo.chaveNF)
-                    qtdValues.push(insumo.quantidadePedido - insumo.quantidadeConferida)
+                    qtdValues.push(parseFloat(insumo.quantidadePedido - insumo.quantidadeConferida).toFixed(2))
                     disabledValues.push(true)
                     insumosObjects.push(insumo)
                     pedidoCompraOptions.push(this.state.pedidoCompraAvailables)
@@ -331,14 +331,15 @@ class EntradaInsumos extends Component {
 
     handleOnChangeQuantidade = (value, event, index) => {
         if(this.props.idEntrada && typeof this.state.insumos[index] !== 'undefined' && this.state.insumos[index]){
+            value           = parseFloat(value)
             let qtdValue    = parseFloat(this.state.qtdValues[index])
             let qtdeInsumo  = parseFloat(this.state.insumos[index].quantidade)
             let qtdeDisp    = parseFloat(this.state.insumos[index].quantidadePedido) - parseFloat(this.state.insumos[index].quantidadeConferida)
             if(value < qtdValue){
-                let diff = qtdeInsumo - value
+                let diff = parseFloat(qtdeInsumo - value).toFixed(2)
                 this.insertQtyValues(qtdeDisp + diff, index)
             } else {
-                let diff = value - qtdeInsumo
+                let diff = parseFloat(value - qtdeInsumo).toFixed(2)
                 if(qtdValue - diff >= 0){
                     this.insertQtyValues(qtdeDisp - diff, index) 
                 }
@@ -348,7 +349,7 @@ class EntradaInsumos extends Component {
 
     insertQtyValues = (qtde, index) => {
         let qtdValues    = this.state.qtdValues
-        qtdValues[index] = qtde >= 0 ? qtde : 0
+        qtdValues[index] = qtde >= 0 ? parseFloat(qtde).toFixed(2) : 0
         this.setState({qtdValues})
     }
 
@@ -374,7 +375,7 @@ class EntradaInsumos extends Component {
                             id        : this.state.itemsValues[index] ? parseInt(this.state.itemsValues[index]): null,
                             idPedido  : parseInt(values.pedidos[index]),
                             idInsumo  : parseInt(values.insumos[index]),
-                            quantidade: parseInt(values.quantidades[index])
+                            quantidade: parseFloat(values.quantidades[index]).toFixed(2)
                         })
                     })
                     .filter(entrada => {

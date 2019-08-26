@@ -284,6 +284,8 @@ class PedidosCompra extends Component {
         axios
         .get(this.props.backEndPoint + '/deletePedidoCompra?id='+id)
         .then(res => {
+            if(typeof res.data.msg !== 'undefined' && res.data.msg)
+                this.showNotification(res.data.msg, false)
             this.requestGetPedidosCompra()
         })
         .catch(error => {
@@ -404,7 +406,7 @@ class PedidosCompra extends Component {
                         return ({
                             item: this.state.itemsValues[index] ? parseInt(this.state.itemsValues[index]) : null,
                             idInsumo: insumo,
-                            quantidade: parseInt(values.quantidades[index]),
+                            quantidade: parseFloat(values.quantidades[index]).toFixed(2),
                             statusInsumo: values.statusInsumos[index]
                         })
                     })
