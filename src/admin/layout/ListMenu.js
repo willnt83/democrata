@@ -212,6 +212,12 @@ class ListMenu extends Component{
                                 <span>Geral de Lançamento de Produção</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item key="192">
+                            <Link to="/admin/relatorios/nao-produzidos">
+                                <Icon type="right-square" />
+                                <span>Não Produzidos</span>
+                            </Link>
+                        </Menu.Item>
                     </SubMenu>
                     <Menu.Item key="20">
                         <Link to="/admin/configuracoes">

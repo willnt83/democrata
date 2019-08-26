@@ -24,7 +24,9 @@ class ArmazenagemInsumos extends Component {
         posicoes: [],
         quantidades: [],
         btnSalvarLoading: false,
-        insumosArmazenados: []
+        insumosArmazenados: [],
+        addBtnDisabled: false,
+        prevKeys: []
 
     }
 
@@ -188,9 +190,14 @@ class ArmazenagemInsumos extends Component {
     }
 
     showQuantidades = (idEntradaInsumo, k, insumosTemp) => {
+        console.log('---===showQuantidades===---')
+        console.log('idEntradaInsumo', idEntradaInsumo)
+        console.log('k', k)
+
         var quantidadeEntrada = 0
         var quantidadeArmazenar = 0
 
+        console.log('insumosTemp', insumosTemp)
         insumosTemp.forEach(insumo => {
             if(insumo.idEntradaInsumo === idEntradaInsumo){
                 quantidadeEntrada = insumo.insumo.quantidadeEntrada
@@ -199,11 +206,17 @@ class ArmazenagemInsumos extends Component {
         })
         
         const keys = this.props.form.getFieldValue('keys')
+        console.log('keys', keys)
         keys.forEach(row => {
+            console.log('-')
+            console.log('insumo row', this.props.form.getFieldValue(`insumo[${row}]`))
+            console.log('insumo k', this.props.form.getFieldValue(`insumo[${k}]`))
+
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
                 var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+quantidadeArmazenar
                 var insumosInfo = this.state.insumosInfo
                 insumosInfo.splice(row, 1, content)
+                console.log('insumosInfo', insumosInfo)
                 this.setState({insumosInfo})
             }
         })
@@ -212,15 +225,27 @@ class ArmazenagemInsumos extends Component {
 
     // Contabiliza quantidade de insumos que estão sendo armazenados no lançamento e atualiza insumosTemp
     contabilizaQuantidades = (idEntradaInsumo) => {
+        console.log('---===contabilizaQuantidades===---')
         const keys = this.props.form.getFieldValue('keys')
         var somatoriaEntradas = 0
         var quantidadeJaArmazenada = 0
 
+        console.log('keys', keys)
+        console.log('idEntradaInsumo', idEntradaInsumo)
+        
+
+
         keys.forEach(row => {
+            console.log('---')
+            console.log('row insumo', this.props.form.getFieldValue(`insumo[${row}]`))
             if(this.props.form.getFieldValue(`insumo[${row}]`) === idEntradaInsumo){
-                somatoriaEntradas += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
+                //Se houver valor de quantidade para a linha
+                if(this.props.form.getFieldValue(`quantidade[${row}]`))
+                    somatoriaEntradas += parseInt(this.props.form.getFieldValue(`quantidade[${row}]`))
+                console.log('somatoriaEntradas antes', somatoriaEntradas)
 
                 // Se já houver quantidade de insumo já armazenado
+                console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
                 this.state.insumosArmazenados.forEach(insumo => {
                     if(insumo.idEntradaInsumo === idEntradaInsumo)
                         quantidadeJaArmazenada += (insumo.insumo.quantidadeEntrada - insumo.insumo.quantidadeArmazenar)
@@ -228,14 +253,17 @@ class ArmazenagemInsumos extends Component {
                 somatoriaEntradas -= quantidadeJaArmazenada
             }
         })
+        console.log('somatoriaEntradas depois', somatoriaEntradas)
 
         var insumosTemp = cloneDeep(this.state.insumos)
+        console.log('insumosTemp antes', insumosTemp)
 
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idEntradaInsumo === idEntradaInsumo){
                 insumosTemp[index].insumo.quantidadeArmazenar -= somatoriaEntradas
             }
         })
+        console.log('insumosTemp depois', insumosTemp)
         return insumosTemp
     }
 
@@ -322,6 +350,7 @@ class ArmazenagemInsumos extends Component {
     addComposicaoRow = () => {
         const keys = this.props.form.getFieldValue('keys')
         const nextKeys = keys.concat(id++)
+        this.setState({prevKeys: nextKeys})
         this.props.form.setFieldsValue({
             keys: nextKeys
         })
@@ -441,9 +470,26 @@ class ArmazenagemInsumos extends Component {
             this.requestGetInsumosArmazenar()
             this.getAlmoxarifados()
         }
+
+        // Disable do botão +
+       
+        
+        if(this.state.prevKeys.length !== prevState.prevKeys.length){
+            const keys = this.props.form.getFieldValue('keys')
+            /*
+            if(keys.length > this.state.insumosTemp.length)
+                this.setState({addBtnDisabled: true})
+            else
+                this.setState({addBtnDisabled: false})
+            */
+        }
     }
 
     render(){
+        /*
+        console.log('this.state.insumos', this.state.insumos)
+        console.log('this.state.insumosInfo', this.state.insumosInfo)
+        */
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
@@ -459,10 +505,12 @@ class ArmazenagemInsumos extends Component {
                                 }],
                             })(
                                 <Select
+                                    showSearch
+                                    optionFilterProp="children"
                                     style={{ width: '100%' }}
                                     getPopupContainer={() => document.getElementById('colArmazenagem')}
                                     allowClear={true}
-                                    onChange={(value) => this.changeInsumo(value, k)}
+                                    onBlur={(value) => this.changeInsumo(value, k)}
                                 >
                                     {
                                         this.state.insumosOptions.map((option) => {
@@ -481,6 +529,8 @@ class ArmazenagemInsumos extends Component {
                                 }],
                             })(
                                 <Select
+                                    showSearch
+                                    optionFilterProp="children"
                                     style={{ width: '100%' }}
                                     getPopupContainer={() => document.getElementById('colArmazenagem')}
                                     allowClear={true}
@@ -503,6 +553,8 @@ class ArmazenagemInsumos extends Component {
                                 }],
                             })(
                                 <Select
+                                    showSearch
+                                    optionFilterProp="children"
                                     style={{ width: '100%' }}
                                     getPopupContainer={() => document.getElementById('colArmazenagem')}
                                     allowClear={true}
@@ -587,7 +639,7 @@ class ArmazenagemInsumos extends Component {
                                 {porcionamentos}
                                 <Row>
                                     <Col span={24}>
-                                        <Button key="primary" title="Novo Porcionamento" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
+                                        <Button key="primary" title="Novo Porcionamento" onClick={this.addComposicaoRow} disabled={this.state.addBtnDisabled}><Icon type="plus" /></Button>
                                     </Col>
                                 </Row>
                             </Form>

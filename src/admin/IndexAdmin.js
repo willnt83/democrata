@@ -41,6 +41,8 @@ import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastra
 import RelatorioProducoes from "./relatorios/RelatorioProducoes"
 import RelatorioFuncionariosPontuacoes from "./relatorios/RelatorioFuncionariosPontuacoes"
 import RelatorioGeralProducao from "./relatorios/RelatorioGeralProducao"
+import RelatorioNaoProduzidos from "./relatorios/RelatorioNaoProduzidos"
+
 
 const { Header, Sider, Footer } = Layout
 const { Content } = Layout
@@ -206,6 +208,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Relatórios/Geral de Lançamento de Produção</div>,
 		main: () => <RelatorioGeralProducao />
+	},
+	{
+		path: "/admin/relatorios/nao-produzidos",
+		exact: true,
+		sidebar: () => <div>Relatórios/Geral de Lançamento de Produção</div>,
+		main: () => <RelatorioNaoProduzidos />
 	}
 ];
 
