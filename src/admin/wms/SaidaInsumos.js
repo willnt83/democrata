@@ -385,6 +385,8 @@ class SaidaInsumos extends Component {
                                 }],
                             })(
                                 <Select
+                                    showSearch
+                                    optionFilterProp="children"
                                     style={{ width: '100%' }}
                                     allowClear={true}
                                     onChange={(value) => this.changeInsumo(value, k)}

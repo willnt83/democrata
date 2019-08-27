@@ -213,7 +213,7 @@ class ArmazenagemInsumos extends Component {
             console.log('insumo k', this.props.form.getFieldValue(`insumo[${k}]`))
 
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
-                var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+parseFloat(quantidadeArmazenar).toFixed(2)
+                var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+parseFloat(quantidadeArmazenar)
                 var insumosInfo = this.state.insumosInfo
                 insumosInfo.splice(row, 1, content)
                 console.log('insumosInfo', insumosInfo)
@@ -232,35 +232,35 @@ class ArmazenagemInsumos extends Component {
 
         console.log('keys', keys)
         console.log('idEntradaInsumo', idEntradaInsumo)
-        
 
-
+        // Calculando somatória informadas nos campos quantidades para o insumo em questão
         keys.forEach(row => {
-            console.log('---')
-            console.log('row insumo', this.props.form.getFieldValue(`insumo[${row}]`))
             if(this.props.form.getFieldValue(`insumo[${row}]`) === idEntradaInsumo){
+                console.log('insumo encontrado na linha '+row)
                 //Se houver valor de quantidade para a linha
                 if(this.props.form.getFieldValue(`quantidade[${row}]`))
                     somatoriaEntradas += parseFloat(this.props.form.getFieldValue(`quantidade[${row}]`))
-                console.log('somatoriaEntradas antes', somatoriaEntradas)
-
-                // Se já houver quantidade de insumo já armazenado
-                console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
-                this.state.insumosArmazenados.forEach(insumo => {
-                    if(insumo.idEntradaInsumo === idEntradaInsumo)
-                        quantidadeJaArmazenada += parseFloat(insumo.insumo.quantidadeEntrada - insumo.insumo.quantidadeArmazenar).toFixed(2)
-                })
-                somatoriaEntradas -= quantidadeJaArmazenada
             }
         })
-        console.log('somatoriaEntradas depois', somatoriaEntradas)
+        console.log('somatoriaEntradas', somatoriaEntradas)
+
+        // Verifica se o insumo em questão já foi armazenado e subtrai a quantidade
+        console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
+        this.state.insumosArmazenados.forEach(insumo => {
+            if(insumo.idEntradaInsumo === idEntradaInsumo)
+                quantidadeJaArmazenada += parseFloat(insumo.insumo.quantidadeEntrada - insumo.insumo.quantidadeArmazenar)
+        })
+        console.log('quantidadeJaArmazenada', quantidadeJaArmazenada)
+        somatoriaEntradas -= quantidadeJaArmazenada
+
+        console.log('somatoriaEntradas final', somatoriaEntradas)
 
         var insumosTemp = cloneDeep(this.state.insumos)
         console.log('insumosTemp antes', insumosTemp)
 
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idEntradaInsumo === idEntradaInsumo){
-                insumosTemp[index].insumo.quantidadeArmazenar -= parseFloat(somatoriaEntradas).toFixed(2)
+                insumosTemp[index].insumo.quantidadeArmazenar -= parseFloat(somatoriaEntradas)
             }
         })
         console.log('insumosTemp depois', insumosTemp)
@@ -304,7 +304,7 @@ class ArmazenagemInsumos extends Component {
             if(insumo.idPedidoInsumo === idPedidoInsumo){
                 if(insumosTemp[index].insumo.quantidadeArmazenar < 0){
                     quantidadeInformada = this.props.form.getFieldValue(`quantidade[${k}]`)
-                    quantidadePermitida = (parseFloat(quantidadeInformada) + parseFloat(insumosTemp[index].insumo.quantidadeArmazenar)).toFixed(2)
+                    quantidadePermitida = (parseFloat(quantidadeInformada) + parseFloat(insumosTemp[index].insumo.quantidadeArmazenar))
 
                     var strObj = '{"quantidade['+k+']": '+quantidadePermitida+'}'
                     var obj  = JSON.parse(strObj)
@@ -326,7 +326,7 @@ class ArmazenagemInsumos extends Component {
                         idEntradaInsumo: values.insumo[i],
                         idAlmoxarifado: values.almoxarifado[i],
                         idPosicao: values.posicao[i],
-                        quantidade: parseFloat(values.quantidade[i]).toFixed(2)
+                        quantidade: parseFloat(values.quantidade[i])
                     })
                 })
                 .filter(row => {
@@ -371,12 +371,12 @@ class ArmazenagemInsumos extends Component {
         var quantidadeAtualizada = 0
         keys.forEach(row => {
             if(row !== k && this.props.form.getFieldValue(`insumo[${row}]`) === idPedidoInsumo)
-                quantidadeAtualizada += parseFloat(this.props.form.getFieldValue(`quantidade[${row}]`)).toFixed(2)
+                quantidadeAtualizada += parseFloat(this.props.form.getFieldValue(`quantidade[${row}]`))
         })
 
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idPedidoInsumo === idPedidoInsumo){
-                insumosTemp[index].insumo.quantidadeArmazenar -= parseFloat(quantidadeAtualizada).toFixed(2)
+                insumosTemp[index].insumo.quantidadeArmazenar -= parseFloat(quantidadeAtualizada)
             }
         })
         this.showQuantidades(idPedidoInsumo, k, insumosTemp)

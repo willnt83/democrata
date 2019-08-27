@@ -218,6 +218,24 @@ class ListMenu extends Component{
                                 <span>Não Produzidos</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item key="193">
+                            <Link to="/admin/relatorios/entrada-insumos">
+                                <Icon type="right-square" />
+                                <span>Entrada Insumos</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item key="194">
+                            <Link to="/admin/relatorios/armazenagem-insumos">
+                                <Icon type="right-square" />
+                                <span>Armazenagem Insumos</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item key="195">
+                            <Link to="/admin/relatorios/saida-insumos">
+                                <Icon type="right-square" />
+                                <span>Saída Insumos</span>
+                            </Link>
+                        </Menu.Item>
                     </SubMenu>
                     <Menu.Item key="20">
                         <Link to="/admin/configuracoes">
