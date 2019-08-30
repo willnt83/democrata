@@ -74,6 +74,7 @@ class Produtos extends Component {
                         key: produto.id,
                         nome: produto.nome,
                         codigo: produto.codigo,
+                        sku: produto.sku,
                         ativoDescription: ativo,
                         ativoValue: produto.ativo,
                         cor: produto.cor,
@@ -253,6 +254,7 @@ class Produtos extends Component {
             this.props.form.setFieldsValue({
                 nome: record.nome,
                 codigo: record.codigo,
+                sku: record.sku,
                 ativo: record.ativoValue,
                 cor: record.cor.id,
                 linhaDeProducao: record.linhaDeProducao.id,
@@ -301,6 +303,7 @@ class Produtos extends Component {
                     id: id,
                     nome: values.nome,
                     codigo: values.codigo,
+                    sku: values.sku,
                     cor: values.cor,
                     ativo: values.ativo,
                     idLinhaDeProducao: values.linhaDeProducao,
@@ -542,6 +545,20 @@ class Produtos extends Component {
                                         <Input
                                             id="codigo"
                                             placeholder="Digite o código do produto"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="SKU">
+                                    {getFieldDecorator('sku', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o SKU do produto',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="codigo"
+                                            placeholder="Digite o SKU do produto"
                                         />
                                     )}
                                 </Form.Item>

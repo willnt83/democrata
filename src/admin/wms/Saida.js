@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Button, Row, Col } from 'antd'
+import { Layout, Table, Icon, Button, Row, Col, Popconfirm, notification } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
@@ -29,6 +29,25 @@ class Saida extends Component {
         return 0
     }
 
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 3
+        }
+        notification.open(args)
+    }
+
     requestGetSaidas = () => {
         axios
         .get(this.props.backEndPoint + '/getSaidas')
@@ -51,6 +70,18 @@ class Saida extends Component {
             else{
                 console.log('Nenhum registro encontrado')
             }
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }
+
+    handleDeleteSaida = (key) => {
+        axios
+        .get(this.props.backEndPoint + '/deleteSaida?id='+key)
+        .then(res => {
+            this.showNotification(res.data.msg, res.data.success)
+            this.requestGetSaidas()
         })
         .catch(error => {
             console.log(error)
@@ -98,6 +129,9 @@ class Saida extends Component {
                 return(
                     <React.Fragment>
                         <Icon type="edit" style={{cursor: 'pointer'}} title="Editar saída" onClick={() => this.showSaidaModalF(true, record.idSaida)} />
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteSaida(record.idSaida)}>
+                            <a href="/admin/wms/armazem/saida" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
+                        </Popconfirm>
                     </React.Fragment>
                 )
             }
@@ -130,6 +164,7 @@ class Saida extends Component {
                     idSaida={this.state.idSaida}
                     showSaidaModalF={this.showSaidaModalF}
                     showSaidaModal={this.state.showSaidaModal}
+                    requestGetSaidas={this.requestGetSaidas}
                 />
           </Content>
         )

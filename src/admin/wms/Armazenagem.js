@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Button, Row, Col } from 'antd'
+import { Layout, Table, Icon, Button, Row, Col, Popconfirm, notification } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
@@ -31,6 +31,25 @@ class Armazenagem extends Component {
         return 0
     }
 
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 3
+        }
+        notification.open(args)
+    }
+
     requestGetArmazenagens = () => {
         axios
         .get(this.props.backEndPoint + '/getArmazenagens')
@@ -53,6 +72,18 @@ class Armazenagem extends Component {
             else{
                 console.log('Nenhum registro encontrado')
             }
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }
+
+    handleDeleteArmazenagem = (key) => {
+        axios
+        .get(this.props.backEndPoint + '/deleteArmazenagem?id='+key)
+        .then(res => {
+            this.showNotification(res.data.msg, res.data.success)
+            this.requestGetArmazenagens()
         })
         .catch(error => {
             console.log(error)
@@ -104,6 +135,9 @@ class Armazenagem extends Component {
                 return(
                     <React.Fragment>
                         <Icon type="edit" style={{cursor: 'pointer'}} title="Editar armazenagem" onClick={() => this.showArmazenagemModalF(true, record.idArmazenagem)} />
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteArmazenagem(record.idArmazenagem)}>
+                            <a href="/admin/wms/armazem/armazenagem" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
+                        </Popconfirm>
                         <Icon type="barcode" style={{cursor: 'pointer', marginLeft: 20}} title="Gerar etiquetas" onClick={() => this.showArmazenagemEtiquetasModalF(true, record.idArmazenagem)} />
                     </React.Fragment>
                 )

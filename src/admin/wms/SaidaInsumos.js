@@ -129,6 +129,7 @@ class SaidaInsumos extends Component {
                 btnSalvarLoading: false
             })
             this.props.showSaidaModalF(false)
+            this.props.requestGetSaidas()
         })
         .catch(error =>{
             this.setState({btnSalvarLoading: false})
