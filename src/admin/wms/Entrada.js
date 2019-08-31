@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Button, Row, Col, Tooltip, Form, notification } from 'antd'
+import { Layout, Table, Icon, Button, Row, Col, Tooltip, Form, Popconfirm, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import moment from 'moment'
@@ -29,28 +29,18 @@ class ArmazemEntrada extends Component {
         .get(this.props.backEndPoint + '/getEntradaInsumos')
         .then(res => {
             if(res.data.payload){
-                var tableData = []
-                res.data.payload.forEach(entrada => {
-                    var data_entrada = moment(entrada.data_entrada, 'YYYY-MM-DD')
-                    entrada.insumos.forEach((insumo, index) =>{
-                        tableData.push({
-                            key: insumo.id,
+                this.setState({
+                    tableData: res.data.payload.map(entrada => {
+                        return({
                             id: entrada.id,
-                            data_entrada: data_entrada.format('DD/MM/YYYY'),
-                            hora_entrada: entrada.hora_entrada,
-                            idPedido: insumo.idPedido,
-                            idPedidoInsumo: insumo.idPedidoInsumo,
-                            chaveNF: insumo.chaveNF,
-                            idfornecedor: insumo.idFornecedor,
-                            nomeFornecedor: insumo.nomeFornecedor,
-                            idInsumo: insumo.idInsumo,
-                            nomeInsumo: insumo.nomeInsumo,
-                            insInsumo: insumo.insInsumo,
-                            quantidade: insumo.quantidade,
+                            usuario: {
+                                id: entrada.idUsuario,
+                                nome: entrada.nomeUsuario
+                            },
+                            dthr_entrada: moment(entrada.data_entrada+' '+entrada.hora_entrada).format('DD/MM/YYYY H:mm:ss')
                         })
                     })
-                })
-                this.setState({tableData})                
+                })              
             }
             else
                 console.log('Nenhum registro encontrado')            
@@ -60,6 +50,18 @@ class ArmazemEntrada extends Component {
             console.log(error)
             this.setState({tableLoading: false})
             this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
+        })
+    }
+
+    handleDeleteEntrada = (key) => {
+        axios
+        .get(this.props.backEndPoint + '/deleteEntrada?id='+key)
+        .then(res => {
+            this.showNotification(res.data.msg, res.data.success)
+            this.requestGetEntradaInsumos()
+        })
+        .catch(error => {
+            console.log(error)
         })
     }
 
@@ -118,43 +120,17 @@ class ArmazemEntrada extends Component {
             sorter: (a, b) => a.id - b.id,
         },
         {
-            title: 'Data',
-            dataIndex: 'data_entrada',
-            sorter: (a, b) => this.compareByAlph(a.data_entrada, b.data_entrada)
+            title: 'Data da Entrada',
+            dataIndex: 'dthr_entrada',
+            align: 'center',
+            sorter: (a, b) => this.compareByAlph(a.dthr_entrada, b.dthr_entrada)
         },
         {
-            title: 'Hora',
-            dataIndex: 'hora_entrada',
-            sorter: (a, b) => this.compareByAlph(a.hora_entrada, b.hora_entrada)
-        },
-        {
-            title: 'Pedido',
-            dataIndex: 'idPedido',
-            sorter: (a, b) => this.compareByAlph(a.idPedido, b.idPedido)
-        },   
-        {
-            title: 'Fornecedor',
-            dataIndex: 'nomeFornecedor',
-            sorter: (a, b) => this.compareByAlph(a.nomeFornecedor, b.nomeFornecedor)
-        },           
-        {
-            title: 'Insumo',
-            dataIndex: 'idInsumo',
+            title: 'Usuario',
+            dataIndex: 'usuario.nome',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.idInsumo, b.idInsumo)
-        },
-        {
-            title: 'INS',
-            dataIndex: 'insInsumo',
-            align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.insInsumo, b.insInsumo)
-        },        
-        {
-            title: 'Quantidade',
-            dataIndex: 'quantidade',
-            align: 'center',
-            sorter: (a, b) => a.quantidade - b.quantidade,
-        },      
+            sorter: (a, b) => this.compareByAlph(a.usuario.nome, b.usuario.nome)
+        },    
         {
             title: 'Operação',
             colSpan: 2,
@@ -165,6 +141,9 @@ class ArmazemEntrada extends Component {
                 return(
                     <React.Fragment>
                         <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Entrada" onClick={() => this.showEntradaModalF(true, record.id)} />
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteEntrada(record.id)}>
+                            <a href="/admin/wms/armazem/entrada" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} title="Excluir Entrada" /></a>
+                        </Popconfirm>
                     </React.Fragment>
                 )
             }
@@ -191,7 +170,7 @@ class ArmazemEntrada extends Component {
                     columns={columns}
                     dataSource={this.state.tableData}
                     loading={this.state.tableLoading}
-                    rowKey='key'
+                    rowKey='id'
                 />
                     <EntradaInsumos
                         idEntrada={this.state.idEntrada}

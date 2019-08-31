@@ -15,7 +15,8 @@ class EntradaInsumos extends Component {
     }
 
     state = {
-        insumosConferidos: [],
+        insumosEntrada: [],
+        pedidosEntrada: [],
         insumosAvailables: [],
         pedidoCompraAvailables: [],
         insumosOptions: [],
@@ -25,6 +26,8 @@ class EntradaInsumos extends Component {
         nfValues: [],
         qtdValues: [],
         insumos: [],
+        insumosAvailablesLoad: false,
+        pedidoCompraAvailablesLoad: false,
         entradaLoad: false,
         dynamicFieldsRendering: false,
         btnSalvarLoading: false
@@ -72,13 +75,15 @@ class EntradaInsumos extends Component {
         .get(this.props.backEndPoint + '/getPedidosCompra?status=A')
         .then(res => {
             if(res.data.payload){
+                let pedidoCompraAvailables = res.data.payload.map(pedido => {
+                    return {
+                        ...pedido,
+                        textValue: pedido.id + ' - ' + pedido.nomeFornecedor
+                    }
+                })
                 this.setState({
-                    pedidoCompraAvailables: res.data.payload.map(pedido => {
-                        return {
-                            ...pedido,
-                            textValue: pedido.id + ' - ' + pedido.nomeFornecedor
-                        }
-                    })
+                    pedidoCompraAvailables: pedidoCompraAvailables,
+                    pedidoCompraAvailablesLoad: true
                 })
             }
             else{
@@ -105,7 +110,10 @@ class EntradaInsumos extends Component {
                     insumo.textValue           = insumo.ins + ' - ' + insumo.nome
                     return insumo
                 })
-                this.setState({insumosAvailables})
+                this.setState({
+                    insumosAvailables: insumosAvailables,
+                    insumosAvailablesLoad: true
+                })
             }
             else{
                 console.log('Nenhum registro encontrado')
@@ -223,13 +231,15 @@ class EntradaInsumos extends Component {
                 let entrada = res.data.payload[0];
 
                 // States
-                let itemsValues         = []
-                let nfValues            = []
-                let qtdValues           = []
-                let disabledValues      = []
-                let insumosObjects      = []
-                let pedidoCompraOptions = this.state.pedidoCompraOptions
-                let insumosOptions      = this.state.insumosOptions                
+                let itemsValues            = []
+                let nfValues               = []
+                let qtdValues              = []
+                let disabledValues         = []
+                let insumosObjects         = []
+                let pedidosCompraEntrada   = []
+                let insumosEntrada         = []
+                let pedidoCompraOptions    = this.state.pedidoCompraOptions
+                let insumosOptions         = this.state.insumosOptions
 
                 // Keys
                 let keys = entrada.insumos.map((insumo, index) => {
@@ -238,13 +248,34 @@ class EntradaInsumos extends Component {
 
                 // Arrays
                 entrada.insumos.forEach((insumo, index) =>{
+                    // Pedido da EntradaInsumos
+                    pedidosCompraEntrada = []
+                    pedidosCompraEntrada.push({
+                        id       : insumo.idPedido,
+                        chave_nf : insumo.chaveNF,
+                        textValue: insumo.idPedido + ' - ' + insumo.nomeFornecedor
+                    })
+                    
+                    // Insumo da EntradaInsumos
+                    insumosEntrada = []
+                    insumosEntrada.push({
+                        id                  : insumo.idInsumo,
+                        idInsumo            : insumo.idInsumo,
+                        insInsumo           : insumo.insInsumo,
+                        nomeInsumo          : insumo.nomeInsumo,
+                        quantidade          : insumo.quantidade,
+                        quantidadeConferida : insumo.quantidadeConferida,
+                        quantidadePedido    : insumo.quantidadePedido,
+                        textValue           : insumo.insInsumo + ' - ' + insumo.nomeInsumo
+                    })
+
                     itemsValues.push(insumo.id)
                     nfValues.push(insumo.chaveNF)
                     qtdValues.push(parseFloat(insumo.quantidadePedido - insumo.quantidadeConferida).toFixed(2))
                     disabledValues.push(true)
                     insumosObjects.push(insumo)
-                    pedidoCompraOptions.push(this.state.pedidoCompraAvailables)
-                    insumosOptions.push(this.state.insumosAvailables)
+                    pedidoCompraOptions.push(pedidosCompraEntrada)
+                    insumosOptions.push(insumosEntrada)
                 })
 
                 // State
@@ -366,6 +397,7 @@ class EntradaInsumos extends Component {
     }
 
     handleFormSubmit = () => {
+        this.setState({btnSalvarLoading: true})
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
                 if(values.keys){
@@ -390,13 +422,16 @@ class EntradaInsumos extends Component {
                             entradas    : entradas
                         })
                     } else {
+                        this.setState({btnSalvarLoading: false})
                         this.showNotification('Não há entrada válida para inserir! Tente novamente', false);
                     }                
                 } else {
+                    this.setState({btnSalvarLoading: false})
                     this.showNotification('Não há entrada válida para inserir! Tente novamente', false);
                 }
             }
             else{
+                this.setState({btnSalvarLoading: false})
                 console.log('erro no formulário')
                 console.log(err);
             }
@@ -405,7 +440,6 @@ class EntradaInsumos extends Component {
 
     requestCreateUpdateArmazemEntrada = (request) => {
         this.setState({btnSalvarLoading: true})
-        this.setState({btnSalvarLoading: false})
         axios.post(this.props.backEndPoint + '/createUpdateEntradaInsumos', request)
         .then(res => {
             if(res.data.success){
@@ -501,7 +535,7 @@ class EntradaInsumos extends Component {
         }
 
         // Loading data from Entrada
-        if(!this.state.entradaLoad && this.props.idEntrada && this.state.insumosAvailables.length > 0 && this.state.pedidoCompraAvailables.length > 0){
+        if(!this.state.entradaLoad && this.props.idEntrada && this.state.insumosAvailablesLoad && this.state.pedidoCompraAvailablesLoad){
             this.requestGetEntrada(this.props.idEntrada)
             this.setState({entradaLoad: true})
         }
@@ -565,6 +599,8 @@ class EntradaInsumos extends Component {
             qtdValues: [],
             insumos: [],
             entradaLoad: false,
+            insumosAvailablesLoad: false,
+            pedidoCompraAvailablesLoad: false,
             dynamicFieldsRendering: false,
             btnSalvarLoading: false
         })
@@ -575,7 +611,6 @@ class EntradaInsumos extends Component {
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
-        console.log(keys);
         const entradaRow = keys.map(k => (
             <Row key={k} style={{marginBottom: '15px'}}>
                 <Col span={24}>
@@ -609,7 +644,7 @@ class EntradaInsumos extends Component {
                                                 this.state.pedidoCompraOptions && this.state.pedidoCompraOptions[k] && this.state.pedidoCompraOptions[k].length > 0 ?
                                                 (
                                                     this.state.pedidoCompraOptions[k].map((option) => {
-                                                        return (<Select.Option key={option.id} value={option.id} chave_nf={option.chave_nf} data_pedido={option.data_pedido} hora_pedido={option.hora_pedido}>{option.textValue}</Select.Option>)
+                                                        return (<Select.Option key={option.id} value={option.id} chave_nf={option.chave_nf}>{option.textValue}</Select.Option>)
                                                     })
                                                 ) : null
                                             }
@@ -815,8 +850,8 @@ class EntradaInsumos extends Component {
                                     </Col>
                                 </Row>
 
-                                {entradaRow} 
-                                
+                                {entradaRow}
+
                                 <Row>
                                     <Col span={24}>
                                         <Button key="primary" title="Nova Entrada" onClick={this.addEntradaRow}><Icon type="plus" /></Button>                      
