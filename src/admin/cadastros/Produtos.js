@@ -438,6 +438,11 @@ class Produtos extends Component {
             sorter: (a, b) => a.key - b.key,
         },
         {
+            title: 'SKU',
+            dataIndex: 'sku',
+            sorter: (a, b) => a.sku - b.sku,
+        },
+        {
             title: 'Descrição',
             dataIndex: 'nome',
             sorter: (a, b) => this.compareByAlph(a.nome, b.nome)
