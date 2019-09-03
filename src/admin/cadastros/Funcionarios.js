@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, notification } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
@@ -25,6 +25,25 @@ class Funcionarios extends Component {
         buttonSalvarFuncionario: false,
     }
 
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 3
+        }
+        notification.open(args)
+    }
+
     requestGetFuncionarios = () => {
         this.setState({tableLoading: true})
         axios
@@ -38,6 +57,8 @@ class Funcionarios extends Component {
                         nome: funcionario.nome,
                         matricula: funcionario.matricula,
                         salario: funcionario.salario,
+                        salarioBase: funcionario.salarioBase,
+                        setor: funcionario.setor,
                         ativo: ativo,
                         ativoValue: funcionario.ativo
                     })
@@ -62,6 +83,7 @@ class Funcionarios extends Component {
             this.showFuncionariosModal(false)
             this.requestGetFuncionarios()
             this.setState({buttonSalvarFuncionario: false})
+            this.showNotification(res.data.msg, res.data.success)
         })
         .catch(error =>{
             console.log(error)
@@ -86,6 +108,8 @@ class Funcionarios extends Component {
                 nome: record.nome,
                 matricula: record.matricula,
                 salario: record.salario,
+                salarioBase: record.salarioBase,
+                setor: record.setor,
                 ativo: record.ativoValue
             })
             this.setState({funcionarioId: record.key})
@@ -119,6 +143,8 @@ class Funcionarios extends Component {
                     nome: values.nome,
                     matricula: values.matricula,
                     salario: values.salario,
+                    salarioBase: values.salarioBase,
+                    setor: values.setor,
                     ativo: values.ativo
                 }
                 this.requestCreateUpdateFuncionario(request)
@@ -226,6 +252,7 @@ class Funcionarios extends Component {
                         <Button key="back" onClick={() => this.showFuncionariosModal(false)}><Icon type="close" /> Cancelar</Button>,
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarFuncionario} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
+                    maskClosable={false}
                 >
                     <Row>
                         <Col span={24} id="colCadastroDeFuncionarios" style={{position: 'relative'}}>
@@ -269,6 +296,38 @@ class Funcionarios extends Component {
                                         <Input
                                             id="salario"
                                             placeholder="Informe o valor salarial"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item
+                                    label="Salário Base"
+                                >
+                                    {getFieldDecorator('salarioBase', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o salário base',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="salario"
+                                            placeholder="Informe o salário base"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item
+                                    label="Setor"
+                                >
+                                    {getFieldDecorator('setor', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe o setor',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="salario"
+                                            placeholder="Informe o setor"
                                         />
                                     )}
                                 </Form.Item>
