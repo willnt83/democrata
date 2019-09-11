@@ -354,6 +354,7 @@ class Producao extends Component {
                         })(
                             <Select
                                 showSearch
+                                optionFilterProp="children"
                                 style={{ width: '100%' }}
                                 placeholder={this.state.produtosSelectStatus.placeholder}
                                 disabled={this.state.produtosSelectStatus.disabled}
@@ -528,6 +529,8 @@ class Producao extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById('colCadastroPCP')}

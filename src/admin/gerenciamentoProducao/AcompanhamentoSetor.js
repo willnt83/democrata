@@ -224,6 +224,8 @@ class AcompanhamentoSetor extends Component {
                                     initialValue: moment().format('YYYY-MM-DD')
                                 })(
                                     <Select
+                                        showSearch
+                                        optionFilterProp="children"
                                         style={{ width: '100%' }}
                                         onChange={this.handleChangeDataAcompanhamento}
                                         getPopupContainer={() => document.getElementById('contentAcompanhamento')}

@@ -618,6 +618,7 @@ class EntradaInsumos extends Component {
                                     })(
                                         <Select
                                             showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione o Pedido de Compra"
                                             getPopupContainer={() => document.getElementById('colPedidoCompra')}
@@ -670,6 +671,7 @@ class EntradaInsumos extends Component {
                                     })(
                                         <Select
                                             showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione o Insumo"
                                             getPopupContainer={() => document.getElementById('colPedidoCompra')}

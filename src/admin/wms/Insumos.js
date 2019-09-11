@@ -408,6 +408,8 @@ class Insumos extends Component {
                                 <Form.Item label="Unidade">
                                     {getFieldDecorator('unidade', {})(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder={this.state.unidadeSelectStatus.placeholder}
                                             disabled={this.state.unidadeSelectStatus.disabled}
@@ -431,6 +433,8 @@ class Insumos extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder={this.state.unidadeMedidaSelectStatus.placeholder}
                                             disabled={this.state.unidadeMedidaSelectStatus.disabled}
@@ -454,6 +458,8 @@ class Insumos extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById('colCadastroDeInsumos')}

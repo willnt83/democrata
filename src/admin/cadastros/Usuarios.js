@@ -398,6 +398,8 @@ class Usuarios extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder={this.state.perfisSelectStatus.placeholder}
                                             disabled={this.state.perfisSelectStatus.disabled}
@@ -421,6 +423,8 @@ class Usuarios extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById('colCadastroDeUsuarios')}
