@@ -72,7 +72,7 @@ class EntradaInsumos extends Component {
 
     getPedidosCompraAvailables = () => {
         axios
-        .get(this.props.backEndPoint + '/getPedidosCompra?status=A')
+        .get(this.props.backEndPoint + '/getPedidosCompraAvailabes')
         .then(res => {
             if(res.data.payload){
                 let pedidoCompraAvailables = res.data.payload.map(pedido => {
@@ -97,7 +97,7 @@ class EntradaInsumos extends Component {
 
     getInsumosAvailables = () => {
         axios
-        .get(this.props.backEndPoint + '/getInsumosAvailabesToEnter')
+        .get(this.props.backEndPoint + '/getPedidosInsumosAvailabes')
         .then(res => {
             if(res.data.payload){
                 let insumosAvailables = res.data.payload.map((insumo) => {
@@ -126,7 +126,7 @@ class EntradaInsumos extends Component {
 
     getPedidosCompraInsumo = (idInsumo,index) => {
         axios
-        .get(this.props.backEndPoint + '/getPedidosInsumos?statusPedido=A&idInsumo='+idInsumo+'&fullPedido=S')
+        .get(this.props.backEndPoint + '/getPedidosCompraAvailabes?idInsumo='+idInsumo)
         .then(res => {
             if(res.data.payload){
                 let pedidosInsumos = res.data.payload.map((pedido) => {
@@ -170,7 +170,7 @@ class EntradaInsumos extends Component {
 
     getInsumosPedidoCompra = (idPedido,index) => {
         axios
-        .get(this.props.backEndPoint + '/getPedidosInsumos?status=S,E&idPedido='+idPedido)
+        .get(this.props.backEndPoint + '/getPedidosCompraAvailabes?idPedido='+idPedido)
         .then(res => {
             let pedidosInsumos = res.data.payload;
             if(pedidosInsumos){
@@ -209,18 +209,6 @@ class EntradaInsumos extends Component {
         .catch(error => {
             console.log(error)
         })
-    }
-
-    returnStatusDescription = (status, object) => {
-        var returnStatus = '';
-        if(object){
-            object.forEach(objStatus => {
-                if(objStatus.value === status) {
-                    returnStatus = objStatus.description
-                }
-            });
-        }
-        return returnStatus;
     }
 
     requestGetEntrada = (idEntrada) => {

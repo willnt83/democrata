@@ -12,17 +12,6 @@ const { Content } = Layout
 
 let id = 0
 
-const statusOption = [
-    {value: 'A', description: 'Aberto'},
-    {value: 'F', description: 'Finalizado'}
-]
-
-const statusInsumoOption = [
-    {value: 'S', description: 'Solicitado'},
-    {value: 'E', description: 'Entregue'},
-    {value: 'C', description: 'Conferido'}
-]
-
 class PedidosCompra extends Component {
     constructor(props) {
         super()
@@ -87,9 +76,7 @@ class PedidosCompra extends Component {
                         hora_pedido: pedidocompra.hora_pedido,
                         data_prevista: data_previsao.format('DD/MM/YYYY'),
                         fornecedorValue: pedidocompra.idFornecedor,
-                        fornecedorDescription: pedidocompra.nomeFornecedor,
-                        statusDescription: this.returnStatusDescription(pedidocompra.status,statusOption),
-                        status: pedidocompra.status,
+                        fornecedorDescription: pedidocompra.nomeFornecedor
                     })
                 })
                 this.setState({tableData})
@@ -220,7 +207,6 @@ class PedidosCompra extends Component {
                         hora_pedido: moment(pedidocompra[0].hora_pedido, 'HH:mm:ss'),
                         chave_nf: pedidocompra[0].chave_nf,
                         data_prevista: moment(pedidocompra[0].data_prevista, 'YYYY-MM-DD'),
-                        status: pedidocompra[0].status,
                         keys
                     })
         
@@ -254,12 +240,10 @@ class PedidosCompra extends Component {
         if(this.state.dynamicFieldsRendered){            
             var insumos = []
             var quantidades = []
-            var statusInsumos = []
 
             this.state.insumos.forEach(insumo => {
                 insumos.push(insumo.id)
                 quantidades.push(insumo.quantidade)
-                statusInsumos.push(insumo.statusInsumo)
                 this.state.itemsValues.push(insumo.item)
                 this.state.insValues.push(insumo.ins)
                 this.state.unidademedidaValues.push(insumo.unidademedida)
@@ -271,8 +255,7 @@ class PedidosCompra extends Component {
 
             this.props.form.setFieldsValue({
                 insumos,
-                quantidades,
-                statusInsumos
+                quantidades
             })
 
             this.setState({dynamicFieldsRendered: false})
@@ -302,18 +285,6 @@ class PedidosCompra extends Component {
             unidademedida: event.props.unidademedida,
             qtde: event.props.quantidade_conferida
         })
-    }
-
-    returnStatusDescription = (status, object) => {
-        if(object){
-            object.forEach(objStatus => {
-                if(objStatus.value === status) {
-                    status = objStatus.description
-                    return;
-                }
-            });
-        }
-        return status
     }
 
     screenTitleDescription = () => {
@@ -406,8 +377,7 @@ class PedidosCompra extends Component {
                         return ({
                             item: this.state.itemsValues[index] ? parseInt(this.state.itemsValues[index]) : null,
                             idInsumo: insumo,
-                            quantidade: parseFloat(values.quantidades[index]).toFixed(2),
-                            statusInsumo: values.statusInsumos[index]
+                            quantidade: parseFloat(values.quantidades[index]).toFixed(2)
                         })
                     })
                     .filter(insumo => {
@@ -422,7 +392,6 @@ class PedidosCompra extends Component {
                     data_prevista: values.data_prevista,
                     chave_nf: values.chave_nf,
                     idFornecedor: values.fornecedor,
-                    status: values.status,
                     insumos: insumos
                 }
 
@@ -493,7 +462,7 @@ class PedidosCompra extends Component {
         const composicaoItems = keys.map((k, index) => (
             <Row key={k} style={{marginBottom: '15px'}}>                
                 <Col span={24}>
-                    <Col span={15} id="colInsumos" style={{position: 'relative'}}>
+                    <Col span={20} id="colInsumos" style={{position: 'relative'}}>
                         <Col span={24}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`insumos[${k}]`, {
@@ -548,55 +517,30 @@ class PedidosCompra extends Component {
                             ) : null
                         }
                     </Col>
-                    <Col span={3} id="colQtde" style={{position: 'relative'}}>
-                        <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
-                            {getFieldDecorator(`quantidades[${k}]`, {
-                                rules: [
-                                    {
-                                        required: true, message: 'Informe a quantidade',
-                                    },
-                                    {
-                                        validator: this.handleQuantidadeValidator
-                                    }
-                                ]
-                            })(
-                                <Input
-                                    id="quantidade"
-                                    placeholder="Quantidade"
-                                />
-                            )}
-                        </Form.Item>
-                    </Col> 
-                    <Col span={5} id="colStatus" style={{position: 'relative'}}>
+                    <Col span={4} id="colQtde" style={{position: 'relative'}}>
                         <Col span={24}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
-                                {getFieldDecorator(`statusInsumos[${k}]`, {
-                                    initialValue: 'S',
+                                {getFieldDecorator(`quantidades[${k}]`, {
                                     rules: [
                                         {
-                                            required: true, message: "Informe o status"
-                                        }
-                                    ],
-                                })(
-                                    <Select
-                                        style={{ width: '100%' }}
-                                        placeholder="Selecione"
-                                        getPopupContainer={() => document.getElementById('colStatus')}
-                                        allowClear={true}
-                                    >
+                                            required: true, message: 'Informe a quantidade',
+                                        },
                                         {
-                                            statusInsumoOption.map((option) => {
-                                                return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                            })
+                                            validator: this.handleQuantidadeValidator
                                         }
-                                    </Select>
+                                    ]
+                                })(
+                                    <Input
+                                        id="quantidade"
+                                        placeholder="Quantidade"
+                                    />
                                 )}
                             </Form.Item>
                         </Col>
                         <Col span={24} style={{paddingLeft: '2px', fontSize: '12px'}}>
                             <span><strong>Conferido:</strong>{this.state.qtdeConferidaValues[k]}</span>
                         </Col>
-                    </Col>                        
+                    </Col>                     
                     <Col span={1} id="colDelete" style={{position: 'relative'}}>
                         <Form.Item style={{paddingBottom: '0px', marginBottom: '0px', marginTop: '4px', textAlign: 'center'}}>
                             {keys.length > 1 && this.state.qtdeConferidaValues[k] <= 0 ? (
@@ -642,12 +586,6 @@ class PedidosCompra extends Component {
             align: 'center',
             sorter: (a, b) => this.compareByAlph(a.data_prevista, b.data_prevista)
         },                
-        {
-            title: 'Status',
-            dataIndex: 'statusDescription',
-            align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.insumos, b.insumos)
-        }, 
         {
             title: 'Operação',
             colSpan: 2,
@@ -814,34 +752,7 @@ class PedidosCompra extends Component {
                                         />
                                     )}
                                 </Form.Item>
-                            </Col>
-                            <Col span={5} id="colStatusPedido" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Status"
-                                >
-                                    {getFieldDecorator('status', {
-                                        initialValue: 'A',
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe o status',
-                                            }
-                                        ]
-                                    })(
-                                        <Select
-                                            style={{ width: '100%' }}
-                                            placeholder="Selecione"
-                                            getPopupContainer={() => document.getElementById('colStatusPedido')}
-                                            allowClear={true}
-                                        >
-                                            {
-                                                statusOption.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
-                                    )}
-                                </Form.Item>
-                            </Col>                            
+                            </Col>                         
                         </Row>
                         <Divider />
                         <h4>INS / Insumos (Matérias-Primas)</h4>  
