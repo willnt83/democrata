@@ -22,11 +22,10 @@ class RelatorioFuncionariosPontuacoes extends Component {
     }
 
     generateReport = () => {
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if(!err){
+        
                 this.setState({buttonLoading: true})
                 axios
-                .get(this.props.backEndPoint + '/reportArmazenagemInsumos?dataInicial='+values.dataInicial.format('YYYY-MM-DD')+'&dataFinal='+values.dataFinal.format('YYYY-MM-DD'))
+                .get(this.props.backEndPoint + '/reportArmazenagemInsumos')
                 .then(res => {
                     if(res.data.success){
                         this.setState({reportUrl: res.data.payload.url, buttonLoading: false})
@@ -37,8 +36,6 @@ class RelatorioFuncionariosPontuacoes extends Component {
                     console.log(error)
                     this.setState({buttonLoading: false})
                 })
-            }
-        })
     }
 
     resetButton = () => {
@@ -79,43 +76,6 @@ class RelatorioFuncionariosPontuacoes extends Component {
                     minHeight: 280
                 }}
             >
-                <Row>
-                    <Col span={24} id="colFiltroData" style={{position: 'relative'}}>
-                        <Form layout="vertical">
-                            <Form.Item
-                                label="Data Inicial"
-                            >
-                                {getFieldDecorator('dataInicial', {
-                                    rules: [{ required: true, message: 'Campo Data Inicial obrigatório' }]
-                                })(
-                                    <DatePicker
-                                        locale={ptBr}
-                                        format="DD/MM/YYYY"
-                                        placeholder="Selecione a data inicial"
-                                        style={ {width: '100%'} }
-                                        getCalendarContainer={() => document.getElementById('colFiltroData')}
-                                    />
-                                )}
-                            </Form.Item>
-                            <Form.Item
-                                label="Data Final"
-                            >
-                                {getFieldDecorator('dataFinal', {
-                                    rules: [{ required: true, message: 'Campo Data Final obrigatório' }]
-                                })(
-                                    <DatePicker
-                                        locale={ptBr}
-                                        format="DD/MM/YYYY"
-                                        placeholder="Selecione a data final"
-                                        style={ {width: '100%'} }
-                                        getCalendarContainer={() => document.getElementById('colFiltroData')}
-                                    />
-                                )}
-                            </Form.Item>
-                        </Form>
-                    </Col>
-                </Row>
-
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="middle">
                         {buttonReport}

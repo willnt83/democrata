@@ -28,7 +28,7 @@ class Setores extends Component {
     requestGetSetores = () => {
         this.setState({tableLoading: true})
         axios
-        .get(this.props.backEndPoint + '/getSetores?param1=09320')
+        .get(this.props.backEndPoint + '/getSetores')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(setor => {
@@ -237,6 +237,8 @@ class Setores extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById('colCadastroDeSetores')}

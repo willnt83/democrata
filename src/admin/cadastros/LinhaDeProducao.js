@@ -263,6 +263,8 @@ class LinhasDeProducao extends Component {
                                 }],
                             })(
                                 <Select
+                                    showSearch
+                                    optionFilterProp="children"
                                     style={{ width: '100%' }}
                                     placeholder={this.state.setoresSelectStatus.placeholder}
                                     disabled={this.state.setoresSelectStatus.disabled}
@@ -406,6 +408,8 @@ class LinhasDeProducao extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById("colCadastroLinhasDeProducao")}

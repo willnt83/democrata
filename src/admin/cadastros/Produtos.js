@@ -410,6 +410,8 @@ class Produtos extends Component {
                                 ]
                             })(
                                 <Select
+                                    showSearch
+                                    optionFilterProp="children"
                                     style={{ width: '100%' }}
                                     placeholder="Informe o conjunto"
                                     getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
@@ -574,6 +576,8 @@ class Produtos extends Component {
                                         }],
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder={this.state.coresSelectStatus.placeholder}
                                             disabled={this.state.coresSelectStatus.disabled}
@@ -595,6 +599,8 @@ class Produtos extends Component {
                                         }],
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
@@ -617,6 +623,8 @@ class Produtos extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder={this.state.linhasDeProducaoSelectStatus.placeholder}
                                             disabled={this.state.linhasDeProducaoSelectStatus.disabled}

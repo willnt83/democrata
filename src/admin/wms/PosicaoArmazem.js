@@ -291,6 +291,8 @@ class PosicaoArmazem extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder={this.state.almoxarifadoSelectStatus.placeholder}
                                             disabled={this.state.almoxarifadoSelectStatus.disabled}
@@ -314,6 +316,8 @@ class PosicaoArmazem extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById('colCadastroDePosicaoArmazem')}

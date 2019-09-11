@@ -127,9 +127,11 @@ class ArmazenagemInsumos extends Component {
         .get(this.props.backEndPoint + '/getInsumosArmazenar')
         .then(res => {
             if(res.data.payload){
+                console.log('res.data.payload', res.data.payload)
                 var insumosOptions = res.data.payload.map(insumo => {
                     return({
                         id: insumo.idEntradaInsumo,
+                        ins: insumo.insumo.ins,
                         description: insumo.insumo.nome,
                         idPedido: insumo.idPedido
                     })
@@ -514,7 +516,7 @@ class ArmazenagemInsumos extends Component {
                                 >
                                     {
                                         this.state.insumosOptions.map((option) => {
-                                            return (<Select.Option key={option.id} value={option.id}>Pedido: {option.idPedido} - {option.description}</Select.Option>)
+                                            return (<Select.Option key={option.id} value={option.id}>{option.ins} - {option.description}</Select.Option>)
                                         })
                                     }
                                 </Select>
@@ -628,7 +630,7 @@ class ArmazenagemInsumos extends Component {
                                 {
                                     porcionamentos.length > 0 ?
                                     <Row className="bold" style={{marginBottom: 10}}>
-                                        <Col span={10}>Insumo</Col>
+                                        <Col span={10}>INS - Insumo</Col>
                                         <Col span={5}>Almoxarifado</Col>
                                         <Col span={5}>Posição</Col>
                                         <Col span={4}>Quantidade</Col>

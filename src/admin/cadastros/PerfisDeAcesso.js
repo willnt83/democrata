@@ -293,6 +293,8 @@ class PerfisDeAcesso extends Component {
                         ]
                     })(
                         <Select
+                            showSearch
+                            optionFilterProp="children"
                             mode="multiple"
                             style={{ width: '100%' }}
                             placeholder={this.state.setoresSelectStatus.placeholder}
@@ -373,6 +375,8 @@ class PerfisDeAcesso extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             onChange={this.handleAdministrativoChange}
@@ -397,6 +401,8 @@ class PerfisDeAcesso extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById('colCadastroDePerfis')}

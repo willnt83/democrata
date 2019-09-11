@@ -508,6 +508,7 @@ class PedidosCompra extends Component {
                                 })(
                                     <Select
                                         showSearch
+                                        optionFilterProp="children"
                                         style={{ width: '100%' }}
                                         placeholder={this.state.insumosSelectStatus.placeholder}
                                         disabled={this.state.insumosSelectStatus.disabled}
@@ -579,6 +580,8 @@ class PedidosCompra extends Component {
                                     ],
                                 })(
                                     <Select
+                                        showSearch
+                                        optionFilterProp="children"
                                         style={{ width: '100%' }}
                                         placeholder="Selecione"
                                         getPopupContainer={() => document.getElementById('colStatus')}
@@ -714,6 +717,7 @@ class PedidosCompra extends Component {
                                     })(
                                         <Select
                                             showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder={this.state.fornecedoresSelectStatus.placeholder}
                                             disabled={this.state.fornecedoresSelectStatus.disabled}
@@ -828,6 +832,8 @@ class PedidosCompra extends Component {
                                         ]
                                     })(
                                         <Select
+                                            showSearch
+                                            optionFilterProp="children"
                                             style={{ width: '100%' }}
                                             placeholder="Selecione"
                                             getPopupContainer={() => document.getElementById('colStatusPedido')}
