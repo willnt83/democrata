@@ -462,7 +462,7 @@ class PedidosCompra extends Component {
         const composicaoItems = keys.map((k, index) => (
             <Row key={k} style={{marginBottom: '15px'}}>                
                 <Col span={24}>
-                    <Col span={20} id="colInsumos" style={{position: 'relative'}}>
+                    <Col span={19} id="colInsumos" style={{position: 'relative'}}>
                         <Col span={24}>
                             <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`insumos[${k}]`, {
@@ -524,26 +524,11 @@ class PedidosCompra extends Component {
                                 {getFieldDecorator(`quantidades[${k}]`, {
                                     rules: [
                                         {
-<<<<<<< HEAD
-                                            required: true, message: 'Informe a quantidade',
+                                            required: true, message: "Informe a quantidade"
                                         },
-=======
-                                            required: true, message: "Informe o status"
-                                        }
-                                    ],
-                                })(
-                                    <Select
-                                        showSearch
-                                        optionFilterProp="children"
-                                        style={{ width: '100%' }}
-                                        placeholder="Selecione"
-                                        getPopupContainer={() => document.getElementById('colStatus')}
-                                        allowClear={true}
-                                    >
->>>>>>> 438c830940565177c81a37a238f124068e6edd95
                                         {
                                             validator: this.handleQuantidadeValidator
-                                        }
+                                        }                                        
                                     ]
                                 })(
                                     <Input
@@ -769,40 +754,7 @@ class PedidosCompra extends Component {
                                         />
                                     )}
                                 </Form.Item>
-<<<<<<< HEAD
-                            </Col>                         
-=======
                             </Col>
-                            <Col span={5} id="colStatusPedido" style={{position: 'relative'}}>
-                                <Form.Item
-                                    label="Status"
-                                >
-                                    {getFieldDecorator('status', {
-                                        initialValue: 'A',
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe o status',
-                                            }
-                                        ]
-                                    })(
-                                        <Select
-                                            showSearch
-                                            optionFilterProp="children"
-                                            style={{ width: '100%' }}
-                                            placeholder="Selecione"
-                                            getPopupContainer={() => document.getElementById('colStatusPedido')}
-                                            allowClear={true}
-                                        >
-                                            {
-                                                statusOption.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
-                                    )}
-                                </Form.Item>
-                            </Col>                            
->>>>>>> 438c830940565177c81a37a238f124068e6edd95
                         </Row>
                         <Divider />
                         <h4>INS / Insumos (Matérias-Primas)</h4>  

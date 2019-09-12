@@ -78,9 +78,11 @@ class EntradaInsumos extends Component {
                 let pedidoCompraAvailables = res.data.payload.map(pedido => {
                     return {
                         ...pedido,
-                        textValue: pedido.id + ' - ' + pedido.nomeFornecedor
+                        id: pedido.idPedido,
+                        textValue: pedido.idPedido + ' - ' + pedido.nomeFornecedor
                     }
                 })
+                
                 this.setState({
                     pedidoCompraAvailables: pedidoCompraAvailables,
                     pedidoCompraAvailablesLoad: true
@@ -170,7 +172,7 @@ class EntradaInsumos extends Component {
 
     getInsumosPedidoCompra = (idPedido,index) => {
         axios
-        .get(this.props.backEndPoint + '/getPedidosCompraAvailabes?idPedido='+idPedido)
+        .get(this.props.backEndPoint + '/getPedidosCompraInsumosAvailabes?idPedido='+idPedido)
         .then(res => {
             let pedidosInsumos = res.data.payload;
             if(pedidosInsumos){
