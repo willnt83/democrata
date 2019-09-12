@@ -150,7 +150,7 @@ class EntradaInsumos extends Component {
                 if(typeof idPedidoCompra !== 'undefined' && idPedidoCompra){
                     var valid = false;
                     pedidosInsumos.forEach(pedidoInsumo => {
-                        if(parseInt(pedidoInsumo.idPedido) === idPedidoCompra){
+                        if(parseInt(pedidoInsumo.idPedido) === parseInt(idPedidoCompra)){
                             valid = true;
                             return;
                         }
@@ -192,9 +192,9 @@ class EntradaInsumos extends Component {
                 if(typeof idInsumo !== 'undefined' && idInsumo){
                     var valid = false;
                     pedidosInsumos.forEach(pedidoInsumo => {
-                        if(parseInt(pedidoInsumo.idInsumo) === idInsumo){
+                        if(parseInt(pedidoInsumo.idInsumo) === parseInt(idInsumo)){
                             valid = true;
-                            this.insertQtyValues(pedidoInsumo.quantidadePedido - pedidoInsumo.quantidadeConferida,index)
+                            this.insertQtyValues(pedidoInsumo.quantidade - pedidoInsumo.quantidadeConferida,index)
                             return;
                         }
                     })
