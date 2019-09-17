@@ -42,6 +42,7 @@ import RelatorioProducoes from "./relatorios/RelatorioProducoes"
 import RelatorioFuncionariosPontuacoes from "./relatorios/RelatorioFuncionariosPontuacoes"
 import RelatorioGeralProducao from "./relatorios/RelatorioGeralProducao"
 import RelatorioNaoProduzidos from "./relatorios/RelatorioNaoProduzidos"
+import RelatorioEstoqueProdutos from "./relatorios/RelatorioEstoqueProdutos"
 import RelatorioEntradaInsumos from "./relatorios/RelatorioEntradaInsumos"
 import RelatorioArmazenagemInsumos from "./relatorios/RelatorioArmazenagemInsumos"
 import RelatorioSaidaInsumos from "./relatorios/RelatorioSaidaInsumos"
@@ -216,6 +217,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Relatórios/Geral de Lançamento de Produção</div>,
 		main: () => <RelatorioNaoProduzidos />
+	},
+	{
+		path: "/admin/relatorios/estoque-de-produtos",
+		exact: true,
+		sidebar: () => <div>Estoque de Produtos</div>,
+		main: () => <RelatorioEstoqueProdutos />
 	},
 	{
 		path: "/admin/relatorios/entrada-insumos",

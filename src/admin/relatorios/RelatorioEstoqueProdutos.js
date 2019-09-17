@@ -10,10 +10,10 @@ moment.locale('pt-br')
 const { Content } = Layout
 
 
-class RelatorioArmazenagemInsumos extends Component {
+class RelatorioEstoqueProdutos extends Component {
     constructor(props) {
         super()
-        props.setPageTitle('Relatório - Armazenagem de Insumos')
+        props.setPageTitle('Relatório - Estoque de Produtos')
     }
 
     state = {
@@ -22,20 +22,19 @@ class RelatorioArmazenagemInsumos extends Component {
     }
 
     generateReport = () => {
-        
-                this.setState({buttonLoading: true})
-                axios
-                .get(this.props.backEndPoint + '/reportArmazenagemInsumos')
-                .then(res => {
-                    if(res.data.success){
-                        this.setState({reportUrl: res.data.payload.url, buttonLoading: false})
-                        this.showNotification(res.data.msg, true)
-                    }
-                })
-                .catch(error => {
-                    console.log(error)
-                    this.setState({buttonLoading: false})
-                })
+        this.setState({buttonLoading: true})
+        axios
+        .get(this.props.backEndPoint + '/reportEstoqueProdutos')
+        .then(res => {
+            if(res.data.success){
+                this.setState({reportUrl: res.data.payload.url, buttonLoading: false})
+                this.showNotification(res.data.msg, true)
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            this.setState({buttonLoading: false})
+        })
     }
 
     resetButton = () => {
@@ -97,4 +96,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(RelatorioArmazenagemInsumos))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(RelatorioEstoqueProdutos))

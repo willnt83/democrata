@@ -475,16 +475,16 @@ class ArmazenagemInsumos extends Component {
 
         // Disable do botão +
        
-        
+        /*
         if(this.state.prevKeys.length !== prevState.prevKeys.length){
+            
             const keys = this.props.form.getFieldValue('keys')
-            /*
             if(keys.length > this.state.insumosTemp.length)
                 this.setState({addBtnDisabled: true})
             else
                 this.setState({addBtnDisabled: false})
-            */
         }
+        */
     }
 
     render(){

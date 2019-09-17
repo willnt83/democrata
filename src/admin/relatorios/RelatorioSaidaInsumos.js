@@ -10,7 +10,7 @@ moment.locale('pt-br')
 const { Content } = Layout
 
 
-class RelatorioFuncionariosPontuacoes extends Component {
+class RelatorioSaidaInsumos extends Component {
     constructor(props) {
         super()
         props.setPageTitle('Relatório - Saída de Insumos')
@@ -138,4 +138,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(RelatorioFuncionariosPontuacoes))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(RelatorioSaidaInsumos))

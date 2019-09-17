@@ -129,7 +129,6 @@ class EstornoProducao extends Component{
     }
 
     render(){
-        console.log('this.state.tableData', this.state.tableData)
         const { getFieldDecorator } = this.props.form
 
         const columns = [{

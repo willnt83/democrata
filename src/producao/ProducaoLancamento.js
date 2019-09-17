@@ -138,21 +138,6 @@ class ProducaoLancamento extends Component{
         })
     }
 
-    /*
-    handleChangeQuantidadeRealizado = (element) => {
-        if(element.target.value !== ''){
-            var idAcompanhamento = element.target.id.replace('realizadoQuantidade_', '')
-
-            var request = {
-                idAcompanhamento: parseInt(idAcompanhamento),
-                realizadoQuantidade: parseInt(element.target.value)
-            }
-            this.requestUpdateRealizadoQuantidade(request)
-        }
-    }
-    */
-
-
     handleQuantityChangeClick = (op, id) => {
         var value =  this.props.form.getFieldValue(id)
         if(op === 'sub'){
@@ -164,16 +149,6 @@ class ProducaoLancamento extends Component{
         var strObj = '{"'+id+'": '+value+'}';
         var obj  = JSON.parse(strObj)
         this.props.form.setFieldsValue(obj)
-
-        /*
-
-        var idAcompanhamento = id.replace('realizadoQuantidade_', '')
-        var request = {
-            idAcompanhamento: parseInt(idAcompanhamento),
-            realizadoQuantidade: parseInt(value)
-        }
-        this.requestUpdateRealizadoQuantidade(request)
-        */
     }
 
 

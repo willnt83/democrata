@@ -72,6 +72,18 @@
     border-color: #f3a449
 }
 
+.buttonPurple {
+    color: #fff;
+    background-color: #8c03fc;
+    border-color: #8c03fc
+}
+
+.buttonPurple:hover, .buttonPurple:focus {
+    color: #fff;
+    background-color: #a375c9;
+    border-color: #a375c9
+}
+
 .gridTitle {
     font-weight: 800
 }

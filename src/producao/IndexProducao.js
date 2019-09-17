@@ -9,9 +9,8 @@ import PageTitle from "./layout/PageTitle"
 import LancamentoProducao from './lancamentoCodigoDeBarras/LancamentoProducao'
 import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
 import EstornoProducao from './lancamentoCodigoDeBarras/EstornoProducao'
-
-
-import ProducaoLancamento from './ProducaoLancamento'
+import Expedicao from './lancamentoCodigoDeBarras/Expedicao'
+//import ProducaoLancamento from './ProducaoLancamento'
 
 const {
 	Header, Content, Footer, Sider,
@@ -24,7 +23,8 @@ class IndexProducao extends Component {
 		btnConfirmarLoading: false,
 		showModalLancamentoProducao: false,
 		showModalConferenciaProducao: false,
-		showModalEstornoProducao: false
+		showModalEstornoProducao: false,
+		showModalExpedicao: false,
 	};
 
 	toggle = () => {
@@ -70,7 +70,11 @@ class IndexProducao extends Component {
 
     showModalEstornoProducaoF = (bool) => {
         this.setState({showModalEstornoProducao: bool})
-    }
+	}
+	
+	showModalExpedicaoF = (bool) => {
+        this.setState({showModalExpedicao: bool})
+	}
 
 	componentWillMount(){
 		if(this.props.session.administrador !== 'N'){
@@ -80,14 +84,24 @@ class IndexProducao extends Component {
 	}
 
 	render() {
-		console.log('this.props.session.setores', this.props.session.setores)
 		var routes = null
+		/*
 		if(this.props.session.setores.id !== null){
 			routes = this.props.session.setores.map(setor => {
 				return({
 					path: setor.slug,
 					extact: true,
 					main: () => <ProducaoLancamento idSetor={setor.id} nomeSetor={setor.nome} />
+				})
+			})
+		}
+		*/
+		if(this.props.session.setores.id !== null){
+			routes = this.props.session.setores.map(setor => {
+				return({
+					path: setor.slug,
+					extact: true,
+					main: () => ''
 				})
 			})
 		}
@@ -149,6 +163,7 @@ class IndexProducao extends Component {
 											<Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
 											<Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>
 											<Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /></Button>
+											<Button className="buttonPurple" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="export" /></Button>
 										</Col>
 									</Row>
 								</div>
@@ -201,6 +216,11 @@ class IndexProducao extends Component {
                 <EstornoProducao
                     showModalEstornoProducao={this.state.showModalEstornoProducao}
                     showModalEstornoProducaoF={this.showModalEstornoProducaoF}
+                    showNotification={this.showNotification}
+                />
+				<Expedicao
+                    showModalExpedicao={this.state.showModalExpedicao}
+                    showModalExpedicaoF={this.showModalExpedicaoF}
                     showNotification={this.showNotification}
                 />
 			</React.Fragment>
