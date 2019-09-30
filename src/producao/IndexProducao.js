@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { Layout, Menu, Icon, Row, Col, Modal, Button } from "antd"
+import { Layout, Menu, Icon, Row, Col, Modal, Button, notification } from "antd"
 import { BrowserRouter as Router, Route, withRouter, Link } from "react-router-dom"
 import { connect } from 'react-redux'
 import moment from 'moment'
@@ -7,6 +7,7 @@ import "antd/dist/antd.css"
 import axios from "axios"
 import PageTitle from "./layout/PageTitle"
 import LancamentoProducao from './lancamentoCodigoDeBarras/LancamentoProducao'
+import LancamentoAgrupado from './lancamentoCodigoDeBarras/LancamentoAgrupado'
 import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
 import EstornoProducao from './lancamentoCodigoDeBarras/EstornoProducao'
 import Expedicao from './lancamentoCodigoDeBarras/Expedicao'
@@ -22,10 +23,30 @@ class IndexProducao extends Component {
 		showModalLogout: false,
 		btnConfirmarLoading: false,
 		showModalLancamentoProducao: false,
+		showModalLancamentoAgrupado: false,
 		showModalConferenciaProducao: false,
 		showModalEstornoProducao: false,
 		showModalExpedicao: false,
 	};
+
+	showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 1
+        }
+        notification.open(args)
+    }
 
 	toggle = () => {
 		this.setState({
@@ -63,6 +84,10 @@ class IndexProducao extends Component {
 	showModalLancamentoProducaoF = (bool) => {
         this.setState({showModalLancamentoProducao: bool})
 	}
+
+	showModalLancamentoAgrupadoF = (bool) => {
+        this.setState({showModalLancamentoAgrupado: bool})
+	}
 	
 	showModalConferenciaProducaoF = (bool) => {
         this.setState({showModalConferenciaProducao: bool})
@@ -85,17 +110,7 @@ class IndexProducao extends Component {
 
 	render() {
 		var routes = null
-		/*
-		if(this.props.session.setores.id !== null){
-			routes = this.props.session.setores.map(setor => {
-				return({
-					path: setor.slug,
-					extact: true,
-					main: () => <ProducaoLancamento idSetor={setor.id} nomeSetor={setor.nome} />
-				})
-			})
-		}
-		*/
+
 		if(this.props.session.setores.id !== null){
 			routes = this.props.session.setores.map(setor => {
 				return({
@@ -117,8 +132,6 @@ class IndexProducao extends Component {
 						<Sider
 							breakpoint="lg"
 							collapsedWidth="0"
-							/*onBreakpoint={(broken) => { console.log(broken); }}
-							onCollapse={(collapsed, type) => { console.log(collapsed, type); }}*/
 						>
 							<div className="logo">Produção</div>
 							<Menu theme="dark" mode="inline" defaultSelectedKeys={[this.props.session.setores[0].id]}>
@@ -161,6 +174,7 @@ class IndexProducao extends Component {
 									<Row>
 										<Col xs={24}>
 											<Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
+											<Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
 											<Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>
 											<Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /></Button>
 											<Button className="buttonPurple" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="export" /></Button>
@@ -206,6 +220,11 @@ class IndexProducao extends Component {
 				<LancamentoProducao
                     showModalLancamentoProducao={this.state.showModalLancamentoProducao}
                     showModalLancamentoProducaoF={this.showModalLancamentoProducaoF}
+                    showNotification={this.showNotification}
+                />
+				<LancamentoAgrupado
+                    showModalLancamentoAgrupado={this.state.showModalLancamentoAgrupado}
+                    showModalLancamentoAgrupadoF={this.showModalLancamentoAgrupadoF}
                     showNotification={this.showNotification}
                 />
                 <ConferenciaProducao

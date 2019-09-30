@@ -259,6 +259,7 @@ class ConferenciaProducao extends Component{
                     <Button type="primary" key="back" onClick={this.closeModal}><Icon type="close" /> Fechar</Button>,
                 ]}
                 width={1200}
+                maskClosable={false}
             >
                 <Row>
                     <Col span={24} id="colConferenciaProducao" style={{position: 'relative'}}>

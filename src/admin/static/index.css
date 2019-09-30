@@ -72,6 +72,18 @@
     border-color: #f3a449
 }
 
+.buttonYellow {
+    color: #fff;
+    background-color: #b2b410;
+    border-color: #b2b410
+}
+
+.buttonYellow:hover, .buttonYellow:focus {
+    color: #fff;
+    background-color: #bdb113;
+    border-color: #bdb113
+}
+
 .buttonPurple {
     color: #fff;
     background-color: #8c03fc;

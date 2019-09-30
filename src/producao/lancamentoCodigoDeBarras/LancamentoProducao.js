@@ -247,6 +247,7 @@ class LancamentoProducao extends Component{
                     <Button type="primary" key="back" onClick={this.closeModal}> Fechar</Button>,
                 ]}
                 width={1200}
+                maskClosable={false}
             >
                 <Row>
                     <Col span={24} id="colLancamentoProducao" style={{position: 'relative'}}>

@@ -57,7 +57,6 @@ class EstornoProducao extends Component{
         axios
         .get(this.props.backEndPoint + '/getCodigosDeBarrasEstornados?idProducao='+idProducao)
         .then(res => {
-            console.log('response', res.data.payload)
             this.setState({
                 tableData: res.data.payload
             })
@@ -85,7 +84,6 @@ class EstornoProducao extends Component{
     }
 
     producaoChange = (value, e) => {
-        console.log('-producaoChange-')
         this.setState({
             nomeProducao: e.props.children
         })
@@ -129,7 +127,6 @@ class EstornoProducao extends Component{
     }
 
     render(){
-        console.log('this.state.tableData', this.state.tableData)
         const { getFieldDecorator } = this.props.form
 
         const columns = [{

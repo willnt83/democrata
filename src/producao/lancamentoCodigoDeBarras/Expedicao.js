@@ -29,6 +29,7 @@ class Expedicao extends Component{
             barcodeReader: false,
             lancamentoManual: false
         }
+        this.handleScanExpedicao = this.handleScanExpedicao.bind(this)
     }
 
     showNotification = (msg, success) => {
@@ -50,12 +51,14 @@ class Expedicao extends Component{
         notification.open(args)
     }
 
-    handleScanLancamento(data){
+    handleScanExpedicao(data){
+        console.log('data', data)
         const idProducaoArr = data.split('-')
         if(idProducaoArr.length !== 6){
             this.showNotification('Código de barras inválido', false)
         }
         else{
+            console.log('scan: ', data)
             const idProducao = idProducaoArr[0]
             var request = {
                 idProducao: idProducao,
@@ -132,8 +135,7 @@ class Expedicao extends Component{
     }
 
     componentWillReceiveProps(nextProps){
-        if(!this.props.showModalLancamentoProducao && nextProps.showModalLancamentoProducao){
-            this.requestGetFuncionarios()
+        if(!this.props.showModalExpedicao && nextProps.showModalExpedicao){
             this.setState({barcodeReader: true})
         }
     }
@@ -213,6 +215,7 @@ class Expedicao extends Component{
                     <Button type="primary" key="back" onClick={this.closeModal}> Fechar</Button>,
                 ]}
                 width={1200}
+                maskClosable={false}
             >
                 <Row>
                     <Col span={24} id="colLancamentoProducao" style={{position: 'relative'}}>
@@ -220,7 +223,7 @@ class Expedicao extends Component{
                             this.state.barcodeReader ?
                             <BarcodeReader
                                 onError={this.handleError}
-                                onScan={this.handleScanLancamento}
+                                onScan={this.handleScanExpedicao}
                             />
                             :null
                         }

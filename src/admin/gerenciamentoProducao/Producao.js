@@ -7,6 +7,7 @@ import { withRouter } from "react-router-dom"
 import ptBr from 'antd/lib/locale-provider/pt_BR'
 import moment from 'moment'
 import LancamentoProducao from './LancamentoProducao'
+import LancamentoAgrupado from './LancamentoAgrupado'
 import ConferenciaProducao from './ConferenciaProducao'
 import EstornoProducao from './EstornoProducao'
 import 'moment/locale/pt-br'
@@ -40,6 +41,7 @@ class Producao extends Component {
         dynamicFieldsRendered: false,
         produtos: [],
         showModalLancamentoProducao: false,
+        showModalLancamentoAgrupado: false,
         showModalConferenciaProducao: false,
         showModalEstornoProducao: false
     }
@@ -305,6 +307,10 @@ class Producao extends Component {
         this.setState({showModalLancamentoProducao: bool})
     }
 
+    showModalLancamentoAgrupadoF = (bool) => {
+        this.setState({showModalLancamentoAgrupado: bool})
+    }
+
     showModalConferenciaProducaoF = (bool) => {
         this.setState({showModalConferenciaProducao: bool})
     }
@@ -459,7 +465,8 @@ class Producao extends Component {
 
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={14}>
-                        <Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /> Lançamento Código de Barras</Button>
+                        <Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /> Lançamento</Button>
+                        <Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10}}><Icon type="barcode" /> Lançamento Agrupado</Button>
                         <Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /> Conferência</Button>
                         <Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /> Estorno</Button>
                     </Col>
@@ -559,6 +566,11 @@ class Producao extends Component {
                 <LancamentoProducao
                     showModalLancamentoProducao={this.state.showModalLancamentoProducao}
                     showModalLancamentoProducaoF={this.showModalLancamentoProducaoF}
+                    showNotification={this.showNotification}
+                />
+                <LancamentoAgrupado
+                    showModalLancamentoAgrupado={this.state.showModalLancamentoAgrupado}
+                    showModalLancamentoAgrupadoF={this.showModalLancamentoAgrupadoF}
                     showNotification={this.showNotification}
                 />
                 <ConferenciaProducao

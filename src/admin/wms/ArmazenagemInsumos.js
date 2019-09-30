@@ -122,12 +122,16 @@ class ArmazenagemInsumos extends Component {
         })
     }
 
+    requestGetPedidosComInsumosArmazenar = () => {
+
+    }
+
     requestGetInsumosArmazenar = () => {
         axios
         .get(this.props.backEndPoint + '/getInsumosArmazenar')
         .then(res => {
             if(res.data.payload){
-                console.log('res.data.payload', res.data.payload)
+                //console.log('res.data.payload', res.data.payload)
                 var insumosOptions = res.data.payload.map(insumo => {
                     return({
                         id: insumo.idEntradaInsumo,
@@ -192,14 +196,16 @@ class ArmazenagemInsumos extends Component {
     }
 
     showQuantidades = (idEntradaInsumo, k, insumosTemp) => {
+        /*
         console.log('---===showQuantidades===---')
         console.log('idEntradaInsumo', idEntradaInsumo)
         console.log('k', k)
+        */
 
         var quantidadeEntrada = 0
         var quantidadeArmazenar = 0
 
-        console.log('insumosTemp', insumosTemp)
+        //console.log('insumosTemp', insumosTemp)
         insumosTemp.forEach(insumo => {
             if(insumo.idEntradaInsumo === idEntradaInsumo){
                 quantidadeEntrada = insumo.insumo.quantidadeEntrada
@@ -208,17 +214,19 @@ class ArmazenagemInsumos extends Component {
         })
         
         const keys = this.props.form.getFieldValue('keys')
-        console.log('keys', keys)
+        //console.log('keys', keys)
         keys.forEach(row => {
+            /*
             console.log('-')
             console.log('insumo row', this.props.form.getFieldValue(`insumo[${row}]`))
             console.log('insumo k', this.props.form.getFieldValue(`insumo[${k}]`))
+            */
 
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
                 var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+parseFloat(quantidadeArmazenar)
                 var insumosInfo = this.state.insumosInfo
                 insumosInfo.splice(row, 1, content)
-                console.log('insumosInfo', insumosInfo)
+                //console.log('insumosInfo', insumosInfo)
                 this.setState({insumosInfo})
             }
         })
@@ -227,45 +235,46 @@ class ArmazenagemInsumos extends Component {
 
     // Contabiliza quantidade de insumos que estão sendo armazenados no lançamento e atualiza insumosTemp
     contabilizaQuantidades = (idEntradaInsumo) => {
-        console.log('---===contabilizaQuantidades===---')
+        //console.log('---===contabilizaQuantidades===---')
         const keys = this.props.form.getFieldValue('keys')
         var somatoriaEntradas = 0
         var quantidadeJaArmazenada = 0
-
+        /*
         console.log('keys', keys)
         console.log('idEntradaInsumo', idEntradaInsumo)
+        */
 
         // Calculando somatória informadas nos campos quantidades para o insumo em questão
         keys.forEach(row => {
             if(this.props.form.getFieldValue(`insumo[${row}]`) === idEntradaInsumo){
-                console.log('insumo encontrado na linha '+row)
+                //console.log('insumo encontrado na linha '+row)
                 //Se houver valor de quantidade para a linha
                 if(this.props.form.getFieldValue(`quantidade[${row}]`))
                     somatoriaEntradas += parseFloat(this.props.form.getFieldValue(`quantidade[${row}]`))
             }
         })
-        console.log('somatoriaEntradas', somatoriaEntradas)
+        //console.log('somatoriaEntradas', somatoriaEntradas)
 
         // Verifica se o insumo em questão já foi armazenado e subtrai a quantidade
-        console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
+        //console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
         this.state.insumosArmazenados.forEach(insumo => {
             if(insumo.idEntradaInsumo === idEntradaInsumo)
                 quantidadeJaArmazenada += parseFloat(insumo.insumo.quantidadeEntrada - insumo.insumo.quantidadeArmazenar)
         })
-        console.log('quantidadeJaArmazenada', quantidadeJaArmazenada)
+        //console.log('quantidadeJaArmazenada', quantidadeJaArmazenada)
         somatoriaEntradas -= quantidadeJaArmazenada
 
-        console.log('somatoriaEntradas final', somatoriaEntradas)
+        //console.log('somatoriaEntradas final', somatoriaEntradas)
 
         var insumosTemp = cloneDeep(this.state.insumos)
-        console.log('insumosTemp antes', insumosTemp)
+        //console.log('insumosTemp antes', insumosTemp)
 
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idEntradaInsumo === idEntradaInsumo){
                 insumosTemp[index].insumo.quantidadeArmazenar -= parseFloat(somatoriaEntradas)
             }
         })
-        console.log('insumosTemp depois', insumosTemp)
+        //console.log('insumosTemp depois', insumosTemp)
         return insumosTemp
     }
 
