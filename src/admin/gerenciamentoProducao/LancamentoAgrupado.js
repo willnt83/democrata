@@ -42,7 +42,6 @@ class LancamentoAgrupado extends Component{
     }
 
     handleScanFuncionario(data){
-        data = 'H17-10'
         var dataArr = data.split('-')
         var idFuncionario = dataArr[1]
         this.requestGetFuncionarios(idFuncionario)
@@ -50,7 +49,6 @@ class LancamentoAgrupado extends Component{
     }
 
     handleScanLancamento = (data) => {
-        data = '17-161-32-2-28-1'
         var request = {
             idFuncionario: this.state.funcionarioSelecionado.id,
             barcode: data
@@ -107,6 +105,16 @@ class LancamentoAgrupado extends Component{
             if(res.data.success){
                 this.props.showNotification(res.data.msg, res.data.success)
                 this.requestGetCodigoDeBarrasInfo(request.barcode)
+                this.setState({
+                    funcionarioSelecionado: {
+                        id: null,
+                        descricao: null
+                    },
+                    lancamentoManualFuncionario: false,
+                    lancamentoManualProducao: false,
+                    barcodeReaderFuncionario: false,
+                    barcodeReaderLancamento: false
+                })
             }
             else{
                 this.props.showNotification(res.data.msg, res.data.success)
