@@ -38,6 +38,7 @@ import Saida from "./wms/Saida"
 //import Armazem from "./wms/Armazem"
 
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
+import RelatorioFuncionariosCadastrados from "./relatorios/RelatorioFuncionariosCadastrados"
 import RelatorioProducoes from "./relatorios/RelatorioProducoes"
 import RelatorioFuncionariosPontuacoes from "./relatorios/RelatorioFuncionariosPontuacoes"
 import RelatorioGeralProducao from "./relatorios/RelatorioGeralProducao"
@@ -193,6 +194,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Relatórios/Produtos Cadastrados</div>,
 		main: () => <RelatorioProdutosCadastrados />
+	},
+	{
+		path: "/admin/relatorios/funcionarios-cadastrados",
+		exact: true,
+		sidebar: () => <div>Relatórios/Funcionários Cadastrados</div>,
+		main: () => <RelatorioFuncionariosCadastrados />
 	},
 	{
 		path: "/admin/relatorios/producoes",

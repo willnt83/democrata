@@ -194,6 +194,12 @@ class ListMenu extends Component{
                                 <span>Produtos Cadastrados</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item key="171">
+                            <Link to="/admin/relatorios/funcionarios-cadastrados">
+                                <Icon type="right-square" />
+                                <span>Funcionários Cadastrados</span>
+                            </Link>
+                        </Menu.Item>
                         <Menu.Item key="18">
                             <Link to="/admin/relatorios/producoes">
                                 <Icon type="right-square" />
