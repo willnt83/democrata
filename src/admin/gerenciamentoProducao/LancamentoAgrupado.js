@@ -49,6 +49,7 @@ class LancamentoAgrupado extends Component{
     }
 
     handleScanLancamento = (data) => {
+        console.log('handleScanLancamento', data)
         var request = {
             idFuncionario: this.state.funcionarioSelecionado.id,
             barcode: data
@@ -85,8 +86,6 @@ class LancamentoAgrupado extends Component{
             tableData.push(res.data.payload)
             this.setState({
                 tableData,
-                barcodeReaderFuncionario: false,
-                barcodeReaderLancamento: false,
                 funcionarioSelecionado: {
                     id: null,
                     descricao: null
@@ -105,6 +104,8 @@ class LancamentoAgrupado extends Component{
             if(res.data.success){
                 this.props.showNotification(res.data.msg, res.data.success)
                 this.requestGetCodigoDeBarrasInfo(request.barcode)
+
+                console.log('lançado...')
                 this.setState({
                     funcionarioSelecionado: {
                         id: null,
@@ -112,7 +113,7 @@ class LancamentoAgrupado extends Component{
                     },
                     lancamentoManualFuncionario: false,
                     lancamentoManualProducao: false,
-                    barcodeReaderFuncionario: false,
+                    barcodeReaderFuncionario: true,
                     barcodeReaderLancamento: false
                 })
             }
@@ -215,6 +216,9 @@ class LancamentoAgrupado extends Component{
     }
 
     render(){
+        console.log('--------------------------------------------')
+        console.log('barcodeReaderFuncionario', this.state.barcodeReaderFuncionario)
+        console.log('barcodeReaderLancamento', this.state.barcodeReaderLancamento)
         const { getFieldDecorator } = this.props.form
 
         const columns = [
