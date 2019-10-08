@@ -11,11 +11,17 @@ import LancamentoAgrupado from './lancamentoCodigoDeBarras/LancamentoAgrupado'
 import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
 import EstornoProducao from './lancamentoCodigoDeBarras/EstornoProducao'
 import Expedicao from './lancamentoCodigoDeBarras/Expedicao'
+
+import Entrada from './wms-producao/Entrada'
+import Armazenagem from './wms-producao/Armazenagem'
+import Saida from './wms-producao/Saida'
 //import ProducaoLancamento from './ProducaoLancamento'
 
 const {
 	Header, Content, Footer, Sider,
 } = Layout;
+
+const { SubMenu } = Menu
 
 class IndexProducao extends Component {
 	state = {
@@ -112,16 +118,41 @@ class IndexProducao extends Component {
 		var routes = null
 
 		if(this.props.session.setores.id !== null){
-			routes = this.props.session.setores.map(setor => {
-				return({
-					path: setor.slug,
-					extact: true,
-					main: () => ''
-				})
-			})
+			
+			routes = [
+				{
+					path: '/producao/',
+					exact: true,
+					main: () => <Content style={{ margin: '0 16px 0', flex: 'initial'}}>
+									<div style={{ padding: 24, background: '#fff'}}>
+										<h3>Lançamento por Código de Barras</h3>
+										<Row>
+											<Col xs={24}>
+												<Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
+												<Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
+												<Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>
+												<Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /></Button>
+												<Button className="buttonPurple" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="export" /></Button>
+											</Col>
+										</Row>
+									</div>
+								</Content>
+				},
+				{
+					path: '/producao/wms-producao/entrada',
+					main: () => <Entrada />
+				},
+				{
+					path: 'producao/wms-producao/armazenagem',
+					main: () => <Armazenagem />
+				},
+				{
+					path: 'producao/wms-producao/saida',
+					main: () => <Saida />
+				}
+			]
 		}
 		else{
-			console.log('volta pra login')
 			window.location.replace("/")
 		}
 
@@ -135,18 +166,33 @@ class IndexProducao extends Component {
 						>
 							<div className="logo">Produção</div>
 							<Menu theme="dark" mode="inline" defaultSelectedKeys={[this.props.session.setores[0].id]}>
-								{
-									this.props.session.setores.map(setor => {
-										return(
-											<Menu.Item key={setor.id}>
-												<Link to={setor.slug}>
-													<Icon type="right-square" />
-													<span className="nav-text">{setor.nome}</span>
-												</Link>
-											</Menu.Item>
-										)
-									})
-								}
+
+								<Menu.Item key="1">
+									<Link to="/producao/">
+										<Icon type="right-square" />
+										<span className="nav-text">Produção</span>
+									</Link>
+								</Menu.Item>
+								<SubMenu key="sub1" title={<span><Icon type="bars" /><span>WMS Produção</span></span>}>
+									<Menu.Item key="2">
+										<Link to="/producao/wms-producao/entrada">
+											<Icon type="right-square" />
+											<span className="nav-text">Entrada</span>
+										</Link>
+									</Menu.Item>
+									<Menu.Item key="3">
+										<Link to="/producao/wms-producao/armazenagem">
+											<Icon type="right-square" />
+											<span className="nav-text">Armazenagem</span>
+										</Link>
+									</Menu.Item>
+									<Menu.Item key="4">
+										<Link to="/producao/wms-producao/saida">
+											<Icon type="right-square" />
+											<span className="nav-text">Saida</span>
+										</Link>
+									</Menu.Item>
+								</SubMenu>
 
 								<Menu.Item key="999" onClick={() => this.logout()}>
 									<Icon type="export" />
@@ -156,34 +202,15 @@ class IndexProducao extends Component {
 							</Menu>
 						</Sider>
 						<Layout>
-							<Header style={{ background: '#fff', padding: 0 }}>
+							{/*<Header style={{ background: '#fff', padding: 0 }}>
 								<Row>
 									<Col xs={12}>
 										<PageTitle pageTitle={this.props.pageTitle} />
 									</Col>
-									{/*
-									<Col xs={5}>
-										<h4><Icon type="user" style={{marginRight: '8px'}} />{this.props.session.usuario.nome} / {this.props.session.perfil.nome}</h4> 
-									</Col>
-									*/}
 								</Row>
-							</Header>
-							<Content style={{ margin: '24px 16px 0', flex: 'initial'}}>
-								<div style={{ padding: 24, background: '#fff'}}>
-									<h3>Lançamento por Código de Barras</h3>
-									<Row>
-										<Col xs={24}>
-											<Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
-											<Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
-											<Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>
-											<Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /></Button>
-											<Button className="buttonPurple" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="export" /></Button>
-										</Col>
-									</Row>
-								</div>
-							</Content>
-							
-							<Content style={{ margin: '24px 16px 0'}}>
+							</Header>*/}
+
+							<Content style={{ margin: '0'}}>
 								<div style={{ padding: 24, background: '#fff', minHeight: '100%'}}>
 								{
 									routes.map((route, index) => (
