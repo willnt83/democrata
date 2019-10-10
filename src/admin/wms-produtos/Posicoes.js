@@ -144,8 +144,7 @@ class WMSProdPosicoes extends Component {
 
     handleDeletePosicaoArmazem = (id) => {
         this.setState({tableLoading: true})
-        axios
-        .get(this.props.backEndPoint + '/wms-produtos/deletePosicaoArmazem?id='+id)
+        axios.get(this.props.backEndPoint + '/wms-produtos/deletePosicao?id='+id)
         .then(res => {
             this.requestGetPosicaoArmazem()
         })
