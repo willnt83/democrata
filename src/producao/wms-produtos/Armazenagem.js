@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Row, Col, Form, Icon, Button, Table, Popconfirm, notification } from 'antd'
+import { Layout, Row, Col, Form, Icon, Button, Table, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -7,7 +7,7 @@ import ModalEntrada from './ModalEntrada'
 
 const { Content } = Layout
 
-class Entrada extends Component{
+class Armazenagem extends Component{
     constructor(props){
         super(props)
         this.state = {
@@ -155,4 +155,4 @@ const mapDispatchToProps = (dispatch) => {
     return {}
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(withRouter(Entrada)))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(withRouter(Armazenagem)))

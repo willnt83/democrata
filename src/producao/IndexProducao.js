@@ -12,9 +12,9 @@ import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
 import EstornoProducao from './lancamentoCodigoDeBarras/EstornoProducao'
 import Expedicao from './lancamentoCodigoDeBarras/Expedicao'
 
-import Entrada from './wms-producao/Entrada'
-import Armazenagem from './wms-producao/Armazenagem'
-import Saida from './wms-producao/Saida'
+import Entrada from './wms-produtos/Entrada'
+import Armazenagem from './wms-produtos/Armazenagem'
+import Saida from './wms-produtos/Saida'
 //import ProducaoLancamento from './ProducaoLancamento'
 
 const {
