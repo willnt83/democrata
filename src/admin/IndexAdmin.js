@@ -25,6 +25,7 @@ import DiasNaoUteis from "./cadastros/DiasNaoUteis"
 import Producao from "./gerenciamentoProducao/Producao"
 import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
 
+//WMS
 import Insumos	 from "./wms/Insumos"
 import UnidadesMedida	 from "./wms/UnidadesMedida"
 import Almoxarifados from "./wms/Almoxarifados"
@@ -35,7 +36,11 @@ import Entrada from "./wms/Entrada"
 import Armazenagem from "./wms/Armazenagem"
 import Saida from "./wms/Saida"
 
-//import Armazem from "./wms/Armazem"
+//WMS - Produtos
+import WMSProdAlmoxarifados from "./wms-produtos/Almoxarifados"
+import WMSProdPosicoes from "./wms-produtos/Posicoes"
+
+
 
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
 import RelatorioFuncionariosCadastrados from "./relatorios/RelatorioFuncionariosCadastrados"
@@ -189,6 +194,38 @@ const routes = [
 		sidebar: () => <div>Saída</div>,
 		main: () => <Saida />
 	},
+	{
+		path: "/admin/wms-produto/cadastro/almoxarifado",
+		exact: true,
+		sidebar: () => <div>Almoxarifado</div>,
+		main: () => <WMSProdAlmoxarifados />
+	},
+	{
+		path: "/admin/wms-produto/cadastro/posicao",
+		exact: true,
+		sidebar: () => <div>Posição</div>,
+		main: () => <WMSProdPosicoes />
+	},
+	/*
+	{
+		path: "/admin/wms-produto/armazem/entrada",
+		exact: true,
+		sidebar: () => <div>Entrada</div>,
+		main: () => <WMSProdEntrada />
+	},
+	{
+		path: "/admin/wms-produto/armazem/armazenagem",
+		exact: true,
+		sidebar: () => <div>Armazenagem</div>,
+		main: () => <WMSProdArmazenagem />
+	},
+	{
+		path: "/admin/wms-produto/armazem/saida",
+		exact: true,
+		sidebar: () => <div>Saída</div>,
+		main: () => <WMSProdSaida />
+	},
+	*/
 	{
 		path: "/admin/relatorios/produtos-cadastrados",
 		exact: true,

@@ -186,7 +186,43 @@ class ListMenu extends Component{
                             </Menu.Item>
                         </SubMenu>
                     </SubMenu>
-                    
+                    <SubMenu key="wmsPro01" title={<span><Icon type="solution" /><span>WMS Produtos</span></span>}>
+                        <SubMenu key="wmsProCadastro" title={<span><Icon type="bars" /><span>Cadastros</span></span>}>
+                            <Menu.Item key="wmsProAlmoxarifado">
+                                <Link to="/admin/wms-produto/cadastro/almoxarifado">
+                                    <Icon type="right-square" />
+                                    <span>Almoxarifado</span>
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key="wmsProPosicao">
+                                <Link to="/admin/wms-produto/cadastro/posicao">
+                                    <Icon type="right-square" />
+                                    <span>Posição</span>
+                                </Link>
+                            </Menu.Item>
+                        </SubMenu>
+                        <SubMenu key="wmsProArmazem" title={<span><Icon type="bars" /><span>Armazém</span></span>}>
+                            <Menu.Item key="wmsProEntrada">
+                                <Link to="/admin/wms-produto/armazem/entrada">
+                                    <Icon type="right-square" />
+                                    <span>Entrada</span>
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key="wmsProArmazem">
+                                <Link to="/admin/wms-produto/armazem/armazenagem">
+                                    <Icon type="right-square" />
+                                    <span>Armazenagem</span>
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key="wmsProSaida">
+                                <Link to="/admin/wms-produto/armazem/saida">
+                                    <Icon type="right-square" />
+                                    <span>Saída</span>
+                                </Link>
+                            </Menu.Item>
+                        </SubMenu>
+                    </SubMenu>
+
                     <SubMenu key="sub3" title={<span><Icon type="bar-chart" /><span>Relatórios</span></span>}>
                         <Menu.Item key="17">
                             <Link to="/admin/relatorios/produtos-cadastrados">
