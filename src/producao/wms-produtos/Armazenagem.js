@@ -3,7 +3,7 @@ import { Layout, Row, Col, Form, Icon, Button, Table, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
-import ModalEntrada from './ModalEntrada'
+import ModalArmazenagem from './ModalArmazenagem'
 
 const { Content } = Layout
 
@@ -11,16 +11,16 @@ class Armazenagem extends Component{
     constructor(props){
         super(props)
         this.state = {
-            showModalEntrada: false,
-            idEntrada: null,
+            showModalArmazenagem: false,
+            idArmazenagem: null,
             tableData: []
         }
         this.handleScanLancamento = this.handleScanLancamento.bind(this)
     }
 
-    requestGetEntradas = () => {
+    requestGetArmazenagens = () => {
         axios
-        .get(this.props.backEndPoint + '/getEntradas')
+        .get(this.props.backEndPoint + '/getArmazenagens')
         .then(res => {
             if(res.data.payload){
                 this.setState({tableData: res.data.payload})
@@ -67,12 +67,12 @@ class Armazenagem extends Component{
         }
     }
 
-    showModalEntradaF = (bool, idEntrada = null) => {
-        this.setState({showModalEntrada: bool, idEntrada})
+    showModalArmazenagemF = (bool, idArmazenagem = null) => {
+        this.setState({showModalArmazenagem: bool, idArmazenagem})
     }
 
     componentDidMount(){
-        this.requestGetEntradas()
+        this.requestGetArmazenagens()
     }
 
     render(){
@@ -83,10 +83,10 @@ class Armazenagem extends Component{
             sorter: (a, b) => a.id - b.id,
         },
         {
-            title: 'Data da Entrada',
-            dataIndex: 'dataEntrada',
+            title: 'Data da Armazenagem',
+            dataIndex: 'dataArmazenagem',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.dataEntrada, b.dataEntrada)
+            sorter: (a, b) => this.compareByAlph(a.dataArmazenagem, b.dataArmazenagem)
         },
         {
             title: 'Usuario',
@@ -103,9 +103,9 @@ class Armazenagem extends Component{
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Entrada" onClick={() => this.showModalEntradaF(true, record.id)} />
-                        {/*<Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteEntrada(record.id)}>
-                            <a href="/admin/wms/armazem/entrada" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} title="Excluir Entrada" /></a>
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Armazenagem" onClick={() => this.showModalArmazenagemF(true, record.id)} />
+                        {/*<Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteArmazenagem(record.id)}>
+                            <a href="/admin/wms/armazem/armazenagem" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} title="Excluir Armazenagem" /></a>
                         </Popconfirm>*/}
                     </React.Fragment>
                 )
@@ -123,7 +123,7 @@ class Armazenagem extends Component{
             >
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
-                        <Button className="buttonGreen" onClick={() => this.showModalEntradaF(true)}><Icon type="plus" /> Nova Entrada</Button>
+                        <Button className="buttonGreen" onClick={() => this.showModalArmazenagemF(true)}><Icon type="plus" /> Nova Armazenagem</Button>
                     </Col>
                 </Row>
 
@@ -134,11 +134,11 @@ class Armazenagem extends Component{
                     rowKey='id'
                 />
 
-                <ModalEntrada
+                <ModalArmazenagem
                     showNotification={this.showNotification}
-                    idEntrada={this.state.idEntrada}
-                    showModalEntrada={this.state.showModalEntrada}
-                    showModalEntradaF={this.showModalEntradaF}
+                    idArmazenagem={this.state.idArmazenagem}
+                    showModalArmazenagem={this.state.showModalArmazenagem}
+                    showModalArmazenagemF={this.showModalArmazenagemF}
                 />
             </Content>
         )

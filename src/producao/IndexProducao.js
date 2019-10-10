@@ -5,7 +5,6 @@ import { connect } from 'react-redux'
 import moment from 'moment'
 import "antd/dist/antd.css"
 import axios from "axios"
-import PageTitle from "./layout/PageTitle"
 import LancamentoProducao from './lancamentoCodigoDeBarras/LancamentoProducao'
 import LancamentoAgrupado from './lancamentoCodigoDeBarras/LancamentoAgrupado'
 import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
@@ -15,10 +14,9 @@ import Expedicao from './lancamentoCodigoDeBarras/Expedicao'
 import Entrada from './wms-produtos/Entrada'
 import Armazenagem from './wms-produtos/Armazenagem'
 import Saida from './wms-produtos/Saida'
-//import ProducaoLancamento from './ProducaoLancamento'
 
 const {
-	Header, Content, Footer, Sider,
+	Content, Footer, Sider,
 } = Layout;
 
 const { SubMenu } = Menu
@@ -143,11 +141,11 @@ class IndexProducao extends Component {
 					main: () => <Entrada />
 				},
 				{
-					path: 'producao/wms-producao/armazenagem',
+					path: '/producao/wms-producao/armazenagem',
 					main: () => <Armazenagem />
 				},
 				{
-					path: 'producao/wms-producao/saida',
+					path: '/producao/wms-producao/saida',
 					main: () => <Saida />
 				}
 			]
@@ -276,7 +274,6 @@ class IndexProducao extends Component {
 
 const MapStateToProps = (state) => {
 	return {
-		pageTitle: state.pageTitle,
 		session: state.session,
 		backEndPoint: state.backEndPoint
 	}

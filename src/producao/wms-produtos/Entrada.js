@@ -19,8 +19,7 @@ class Entrada extends Component{
     }
 
     requestGetEntradas = () => {
-        axios
-        .get(this.props.backEndPoint + '/getEntradas')
+        axios.get(this.props.backEndPoint + '/wms-produtos/getEntradas')
         .then(res => {
             if(res.data.payload){
                 this.setState({tableData: res.data.payload})

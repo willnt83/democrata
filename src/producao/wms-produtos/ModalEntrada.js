@@ -39,8 +39,7 @@ class ModalEntrada extends Component{
     }
 
     requestGetEntradaprodutos = (idEntrada) => {
-        axios
-        .get(this.props.backEndPoint + '/getEntradaProdutos?id_entrada_produtos='+idEntrada)
+        axios.get(this.props.backEndPoint + '/wms-produtos/getEntradaProdutos?id_entrada_produtos='+idEntrada)
         .then(res => {
             this.setState({tableData: res.data.payload})
         })
@@ -50,8 +49,7 @@ class ModalEntrada extends Component{
     }
 
     requestGetCodigoDeBarrasInfo = (codigo) => {
-        axios
-        .get(this.props.backEndPoint + '/getCodigoDeBarrasInfo?codigo='+codigo)
+        axios.get(this.props.backEndPoint + '/getCodigoDeBarrasInfo?codigo='+codigo)
         .then(res => {
             this.updateTableData(res.data.payload)
         })
@@ -61,8 +59,7 @@ class ModalEntrada extends Component{
     }
 
     requestLancamentoEntradaProdutos = (request) => {
-        axios
-        .post(this.props.backEndPoint + '/lancamentoEntradaProdutos', request)
+        axios.post(this.props.backEndPoint + '/wms-produtos/lancamentoEntradaProdutos', request)
         .then(res => {
             if(res.data.success){
                 this.props.showNotification(res.data.msg, res.data.success)
