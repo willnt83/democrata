@@ -54,7 +54,7 @@ class SignIn extends Component {
 						var setores = null
 						if(res.data.payload.setores.length > 0){
 							setores = res.data.payload.setores.map(setor => {
-								var slug = '/producao/'+this.convertToSlug(setor.nome)
+								var slug = '/producao'
 								return({
 									...setor,
 									slug
@@ -137,11 +137,11 @@ class SignIn extends Component {
 									)}
 								</Form.Item>
 								<Form.Item>
-								{getFieldDecorator('senha', {
-									rules: [{ required: true, message: 'Informe a senha' }],
-								})(
-									<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Senha" />
-								)}
+									{getFieldDecorator('senha', {
+										rules: [{ required: true, message: 'Informe a senha' }],
+									})(
+										<Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Senha" />
+									)}
 								</Form.Item>
 								<Form.Item style={{padding: 10}}>
 									<Button type="primary" htmlType="submit" className="login-form-button" loading={this.state.entrarButtonLoading}>Entrar</Button>

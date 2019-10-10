@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Tooltip, Row, Col, Form, Modal, Icon, Button, Divider, Table, Popconfirm, notification } from 'antd'
+import { Layout, Row, Col, Form, Icon, Button, Table, Popconfirm, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -11,9 +11,28 @@ class Entrada extends Component{
     constructor(props){
         super(props)
         this.state = {
-            showModalEntrada: false
+            showModalEntrada: false,
+            idEntrada: null,
+            tableData: []
         }
         this.handleScanLancamento = this.handleScanLancamento.bind(this)
+    }
+
+    requestGetEntradas = () => {
+        axios
+        .get(this.props.backEndPoint + '/getEntradas')
+        .then(res => {
+            if(res.data.payload){
+                this.setState({tableData: res.data.payload})
+            }
+            else{
+                console.log('Nenhum registro encontrado')
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
+        
     }
 
     showNotification = (msg, success) => {
@@ -30,7 +49,7 @@ class Entrada extends Component{
         const args = {
             message: msg,
             icon:  <Icon type={type} style={style} />,
-            duration: 1
+            duration: 3
         }
         notification.open(args)
     }
@@ -48,13 +67,15 @@ class Entrada extends Component{
         }
     }
 
-    showModalEntradaF = (bool) => {
-        this.setState({showModalEntrada: bool})
+    showModalEntradaF = (bool, idEntrada = null) => {
+        this.setState({showModalEntrada: bool, idEntrada})
+    }
+
+    componentDidMount(){
+        this.requestGetEntradas()
     }
 
     render(){
-        const { getFieldDecorator } = this.props.form
-
         const columns = [{
             title: 'ID',
             dataIndex: 'id',
@@ -63,15 +84,15 @@ class Entrada extends Component{
         },
         {
             title: 'Data da Entrada',
-            dataIndex: 'dthr_entrada',
+            dataIndex: 'dataEntrada',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.dthr_entrada, b.dthr_entrada)
+            sorter: (a, b) => this.compareByAlph(a.dataEntrada, b.dataEntrada)
         },
         {
             title: 'Usuario',
-            dataIndex: 'usuario.nome',
+            dataIndex: 'nomeUsuario',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.usuario.nome, b.usuario.nome)
+            sorter: (a, b) => this.compareByAlph(a.nomeUsuario, b.nomeUsuario)
         },    
         {
             title: 'Operação',
@@ -82,10 +103,10 @@ class Entrada extends Component{
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Entrada" onClick={() => this.showEntradaModalF(true, record.id)} />
-                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteEntrada(record.id)}>
+                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Entrada" onClick={() => this.showModalEntradaF(true, record.id)} />
+                        {/*<Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteEntrada(record.id)}>
                             <a href="/admin/wms/armazem/entrada" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} title="Excluir Entrada" /></a>
-                        </Popconfirm>
+                        </Popconfirm>*/}
                     </React.Fragment>
                 )
             }
@@ -114,6 +135,8 @@ class Entrada extends Component{
                 />
 
                 <ModalEntrada
+                    showNotification={this.showNotification}
+                    idEntrada={this.state.idEntrada}
                     showModalEntrada={this.state.showModalEntrada}
                     showModalEntradaF={this.showModalEntradaF}
                 />
@@ -124,6 +147,7 @@ class Entrada extends Component{
 
 const MapStateToProps = (state) => {
 	return {
+        backEndPoint: state.backEndPoint
 	}
 }
 
