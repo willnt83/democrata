@@ -33,8 +33,7 @@ class WMSProdPosicoes extends Component {
 
     requestGetPosicaoArmazem = () => {
         this.setState({tableLoading: true})
-        axios
-        .get(this.props.backEndPoint + '/wms-produtos/getPosicoes')
+        axios.get(this.props.backEndPoint + '/wms-produtos/getPosicoes')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(posicaoarmazem => {
@@ -63,8 +62,7 @@ class WMSProdPosicoes extends Component {
 
     loadAlmoxarifadosOptions = () => {
         this.setState({tableLoading: true})
-        axios
-        .get(this.props.backEndPoint + '/wms-produtos/getAlmoxarifados?ativo=Y')
+        axios.get(this.props.backEndPoint + '/wms-produtos/getAlmoxarifados?ativo=Y')
         .then(res => {
             if(res.data.payload){
                 this.setState({

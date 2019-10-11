@@ -191,13 +191,13 @@ class ListMenu extends Component{
                             <Menu.Item key="wmsProAlmoxarifado">
                                 <Link to="/admin/wms-produto/cadastro/almoxarifado">
                                     <Icon type="right-square" />
-                                    <span>Almoxarifado</span>
+                                    <span>Almoxarifados</span>
                                 </Link>
                             </Menu.Item>
                             <Menu.Item key="wmsProPosicao">
                                 <Link to="/admin/wms-produto/cadastro/posicao">
                                     <Icon type="right-square" />
-                                    <span>Posição</span>
+                                    <span>Posições</span>
                                 </Link>
                             </Menu.Item>
                         </SubMenu>

@@ -20,7 +20,7 @@ class Armazenagem extends Component{
 
     requestGetArmazenagens = () => {
         axios
-        .get(this.props.backEndPoint + '/getArmazenagens')
+        .get(this.props.backEndPoint + '/wms-produtos/getArmazenagens')
         .then(res => {
             if(res.data.payload){
                 this.setState({tableData: res.data.payload})
@@ -69,6 +69,8 @@ class Armazenagem extends Component{
 
     showModalArmazenagemF = (bool, idArmazenagem = null) => {
         this.setState({showModalArmazenagem: bool, idArmazenagem})
+        if(!bool)
+            this.requestGetArmazenagens()
     }
 
     componentDidMount(){
