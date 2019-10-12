@@ -10,41 +10,64 @@ class ModalSaida extends Component{
         super(props)
         this.state = {
             idSaida: null,
+            idSaidaProduto: null,
             barcodeReader: false,
+            barcode: null,
             lancamentoManual: false,
             tableData: []
         }
         this.handleScan = this.handleScan.bind(this)
     }
 
-
     handleScan = (data) => {
-        var dataArr = data.split('-')
-        
-        if(parseInt(dataArr[3]) !== 8 || dataArr.length < 6){
-            this.props.showNotification('Código de barras inválido para produto finalizado', false)
-        }
-        else{
-            var request = {
-                idSaida: this.state.idSaida,
-                idUsuario: this.props.session.usuario.id,
-                barcode: data
+        this.readingBarcode(data);
+    }
+
+    lancamentoManual = (bool) => {
+        this.setState({lancamentoManual: bool})
+    }
+
+    lancarManual = () => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if(!err){
+                this.readingBarcode(values.produtoBarcode)
+            } else {
+                console.log(err)
+                this.props.showNotification('Código de barras inválido para produto finalizado', false)
             }
-            this.requestLancamentoSaidaProdutos(request)
+        })
+    }
+
+    readingBarcode = (barcode = null) => {
+        var request = {
+            idSaida: this.state.idSaida,
+            idUsuario: this.props.session.usuario.id,
+            barcode: barcode
         }
+        this.requestLancamentoSaidaProdutos(request)
     }
 
     handleError(err){
         console.error(err)
     }
 
-    requestGetSaidaprodutos = (idSaida) => {
-        axios.get(this.props.backEndPoint + '/wms-produtos/getSaidaProdutos?id_saida_produtos='+idSaida)
+    requestGetSaidaProdutos = (idSaida, idSaidaProduto) => {
+        var parameters = [];
+        if(idSaida) parameters.push('id_saida_produtos='+idSaida);
+        if(idSaidaProduto) parameters.push('id='+idSaidaProduto);
+        axios.get(this.props.backEndPoint + '/wms-produtos/getSaidaProdutos?'+parameters.join('&'))
         .then(res => {
-            this.setState({tableData: res.data.payload})
+            console.log(res);
+            if(res.data.success)
+                this.updateTableData(res.data.payload);
+            else {
+                console.log(res.error)
+                this.props.showNotification(res.data.msg, false)
+            }
         })
         .catch(error => {
-            console.log(error)
+            console.log(error);
+            this.props.showNotification('Erro ao buscar informações.', false)
         })
     }
 
@@ -63,8 +86,8 @@ class ModalSaida extends Component{
         .then(res => {
             if(res.data.success){
                 this.props.showNotification(res.data.msg, res.data.success)
-                this.setState({idSaida: res.data.payload.idSaida})
-                this.requestGetCodigoDeBarrasInfo(request.barcode)
+                this.setState({idSaida: res.data.payload.idSaida, idSaidaProduto: res.data.payload.idSaidaProduto})
+                this.requestGetSaidaProdutos(res.data.payload.idSaida, res.data.payload.idSaidaProduto)
             }
             else{
                 this.props.showNotification(res.data.msg, res.data.success)
@@ -75,45 +98,32 @@ class ModalSaida extends Component{
         })
     }
 
-    lancamentoManual = (bool) => {
-        this.setState({lancamentoManual: bool})
-    }
-
-    lancarManual = () => {
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if(!err){
-                var dataArr = values.produtoBarcode.split('-')
-        
-                if(parseInt(dataArr[3]) !== 8 || dataArr.length < 6){
-                    this.props.showNotification('Código de barras inválido para produto finalizado', false)
-                }
-                else{
-                    var request = {
-                        idSaida: this.state.idSaida,
-                        idUsuario: this.props.session.usuario.id,
-                        barcode: values.produtoBarcode
-                    }
-
-                    this.props.form.setFieldsValue({produtoBarcode: null})
-                    this.requestLancamentoSaidaProdutos(request)
-                }
-            }
-        })
-    }
-
     updateTableData = (data) => {
-        var tableData = this.state.tableData
-        tableData.push(data)
-        this.setState({tableData})
+        if(data && data.length > 0) {
+            let saidaProdutos = data.map((produto) => {
+                produto.produto.produtoText = produto.produto.nome + '(' + produto.produto.cor + ')';
+                return produto;
+            }); 
+            if(saidaProdutos){
+                var tableData = this.state.tableData
+                if(tableData.length > 0)
+                    tableData.concat(saidaProdutos);
+                else
+                    tableData = saidaProdutos;
+                console.log(tableData);
+                this.setState({tableData})
+            }
+        }
     }
 
     closeModal = () => {
         this.setState({
             idSaida: null,
+            idSaidaProduto: null,
             barcodeReader: false,
+            barcode: null,
             lancamentoManual: false,
             tableData: []
-
         })
         this.props.showModalSaidaF(false)
     }
@@ -125,8 +135,10 @@ class ModalSaida extends Component{
         }
 
         if(this.props.idSaida !== nextProps.idSaida){
-            if(nextProps.idSaida)
-                this.requestGetSaidaprodutos(nextProps.idSaida)
+            if(nextProps.idSaida){
+                this.setState({idSaida: nextProps.idSaida})
+                this.requestGetSaidaProdutos(nextProps.idSaida, null);
+            }
         }
     }
 
@@ -135,20 +147,20 @@ class ModalSaida extends Component{
 
         const columns = [
             {
-                title: 'Produção',
-                dataIndex: 'producao.nome',
-                sorter: (a, b) => this.compareByAlph(a.producao.nome, b.producao.nome)
-            },
-            {
                 title: 'Produto',
-                dataIndex: 'produto.nome',
-                sorter: (a, b) => this.compareByAlph(a.produto.nome, b.produto.nome)
+                dataIndex: 'produto.produtoText',
+                sorter: (a, b) => this.compareByAlph(a.produto.produtoText, b.produto.produtoText)
             },
             {
-                title: 'Cor',
-                dataIndex: 'produto.cor',
-                sorter: (a, b) => this.compareByAlph(a.produto.cor, b.produto.cor)
-            }
+                title: 'Almoxarifado',
+                dataIndex: 'almoxarifado.descricao',
+                sorter: (a, b) => this.compareByAlph(a.almoxarifado.descricao, b.almoxarifado.descricao)
+            },            
+            {
+                title: 'Posição',
+                dataIndex: 'posicao.descricao',
+                sorter: (a, b) => this.compareByAlph(a.posicao.descricao, b.posicao.descricao)
+            },
         ]
 
         const inputLancamentoManual =
@@ -160,7 +172,7 @@ class ModalSaida extends Component{
                         />
                     )}
                 </Form.Item>
-                <Button onClick={this.lancarManual}>Lançar Saida do Produto</Button>
+                <Button key="submit" onClick={this.lancarManual}>Lançar Saida do Produto</Button>
             </React.Fragment>
 
         return(
@@ -218,7 +230,7 @@ class ModalSaida extends Component{
                         <Table
                             columns={columns}
                             dataSource={this.state.tableData}
-                            rowKey='codigo'
+                            rowKey='id'
                             pagination={false}
                         />
                         : null
