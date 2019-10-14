@@ -68,6 +68,8 @@ class Saida extends Component{
 
     showModalSaidaF = (bool, idSaida = null) => {
         this.setState({showModalSaida: bool, idSaida})
+        if(!bool)
+            this.requestGetSaidas()
     }
 
     componentDidMount(){
@@ -89,9 +91,9 @@ class Saida extends Component{
         },
         {
             title: 'Usuario',
-            dataIndex: 'nomeUsuario',
+            dataIndex: 'usuario.nome',
             align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.nomeUsuario, b.nomeUsuario)
+            sorter: (a, b) => this.compareByAlph(a.usuario.nome, b.usuario.nome)
         },    
         {
             title: 'Operação',
