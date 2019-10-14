@@ -25,7 +25,6 @@ class ModalArmazenagem extends Component{
 
 
     handleScan = (data) => {
-        data = '26-68-43-8-13-1'
         var dataArr = data.split('-')
         var hit = false
         this.state.tableData.forEach(reg => {
@@ -86,7 +85,6 @@ class ModalArmazenagem extends Component{
     requestGetArmazenagemProdutos = (idArmazenagem) => {
         axios.get(this.props.backEndPoint + '/wms-produtos/getArmazenagemProdutos?id_armazenagem='+idArmazenagem)
         .then(res => {
-            console.log('resp', res.data.payload)
             this.setState({tableData: res.data.payload})
         })
         .catch(error => {
@@ -148,7 +146,6 @@ class ModalArmazenagem extends Component{
 
     lancarManual = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
-            console.log('values', values)
             if(!err){
                 var dataArr = values.produtoBarcode.split('-')
                 var hit = false
@@ -212,7 +209,6 @@ class ModalArmazenagem extends Component{
     }
 
     render(){
-        console.log('this.state.idArmazenagem', this.state.idArmazenagem)
         const { getFieldDecorator } = this.props.form
 
         const columns = [
