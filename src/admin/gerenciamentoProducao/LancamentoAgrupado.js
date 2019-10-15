@@ -49,7 +49,6 @@ class LancamentoAgrupado extends Component{
     }
 
     handleScanLancamento = (data) => {
-        console.log('handleScanLancamento', data)
         var request = {
             idFuncionario: this.state.funcionarioSelecionado.id,
             barcode: data
