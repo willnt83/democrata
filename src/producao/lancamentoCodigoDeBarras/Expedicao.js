@@ -142,6 +142,7 @@ class Expedicao extends Component{
 
     render(){
         const todayDT = moment();
+        console.log('todayDT', todayDT.format('M'))
         const { getFieldDecorator } = this.props.form
 
         const columns = [{
@@ -230,7 +231,7 @@ class Expedicao extends Component{
 
                         <Row>
                             <Col span={24}>
-                                <span className="bold">Mês: {mesLancamentoOptions[todayDT.format('M')].description}</span>
+                                <span className="bold">Mês: {mesLancamentoOptions[parseInt(todayDT.format('M'))-1].description}</span>
                             </Col>
                             <Col span={24}>
                                 <span className="bold">Funcionário: {this.props.session.usuario.id} - {this.props.session.usuario.nome}</span>
