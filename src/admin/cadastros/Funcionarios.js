@@ -58,6 +58,7 @@ class Funcionarios extends Component {
                         matricula: funcionario.matricula,
                         salario: funcionario.salario,
                         salarioBase: funcionario.salarioBase,
+                        linha: funcionario.linha,
                         setor: funcionario.setor,
                         ativo: ativo,
                         ativoValue: funcionario.ativo
@@ -109,6 +110,7 @@ class Funcionarios extends Component {
                 matricula: record.matricula,
                 salario: record.salario,
                 salarioBase: record.salarioBase,
+                linha: record.linha,
                 setor: record.setor,
                 ativo: record.ativoValue
             })
@@ -144,6 +146,7 @@ class Funcionarios extends Component {
                     matricula: values.matricula,
                     salario: values.salario,
                     salarioBase: values.salarioBase,
+                    linha: values.linha,
                     setor: values.setor,
                     ativo: values.ativo
                 }
@@ -310,8 +313,24 @@ class Funcionarios extends Component {
                                         ]
                                     })(
                                         <Input
-                                            id="salario"
+                                            id="salarioBase"
                                             placeholder="Informe o salário base"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item
+                                    label="Linha"
+                                >
+                                    {getFieldDecorator('linha', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a linha',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="linha"
+                                            placeholder="Informe a linha"
                                         />
                                     )}
                                 </Form.Item>

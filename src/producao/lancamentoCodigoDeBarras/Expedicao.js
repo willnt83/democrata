@@ -52,13 +52,11 @@ class Expedicao extends Component{
     }
 
     handleScanExpedicao(data){
-        console.log('data', data)
         const idProducaoArr = data.split('-')
         if(idProducaoArr.length !== 6){
             this.showNotification('Código de barras inválido', false)
         }
         else{
-            console.log('scan: ', data)
             const idProducao = idProducaoArr[0]
             var request = {
                 idProducao: idProducao,
@@ -142,7 +140,6 @@ class Expedicao extends Component{
 
     render(){
         const todayDT = moment();
-        console.log('todayDT', todayDT.format('M'))
         const { getFieldDecorator } = this.props.form
 
         const columns = [{
