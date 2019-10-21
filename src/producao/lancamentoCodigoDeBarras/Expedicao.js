@@ -206,7 +206,7 @@ class Expedicao extends Component{
 
         return(
             <Modal
-                title="Expedição de Produtos"
+                title="Conferência de Produtos"
                 visible={this.props.showModalExpedicao}
                 onCancel={this.closeModal}
                 footer={[

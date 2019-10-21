@@ -7,11 +7,11 @@ import "antd/dist/antd.css"
 import axios from "axios"
 import LancamentoProducao from './lancamentoCodigoDeBarras/LancamentoProducao'
 import LancamentoAgrupado from './lancamentoCodigoDeBarras/LancamentoAgrupado'
-import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
+//import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
 import EstornoProducao from './lancamentoCodigoDeBarras/EstornoProducao'
 import Expedicao from './lancamentoCodigoDeBarras/Expedicao'
 
-import Entrada from './wms-produtos/Entrada'
+//import Entrada from './wms-produtos/Entrada'
 import Armazenagem from './wms-produtos/Armazenagem'
 import Saida from './wms-produtos/Saida'
 
@@ -128,18 +128,19 @@ class IndexProducao extends Component {
 											<Col xs={24}>
 												<Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
 												<Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
-												<Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>
+												{/*<Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>*/}
+												<Button className="buttonGreen" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>
 												<Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /></Button>
-												<Button className="buttonPurple" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="export" /></Button>
+												{/*<Button className="buttonPurple" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="export" /></Button>*/}
 											</Col>
 										</Row>
 									</div>
 								</Content>
 				},
-				{
+				/*{
 					path: '/producao/wms-producao/entrada',
 					main: () => <Entrada />
-				},
+				},*/
 				{
 					path: '/producao/wms-producao/armazenagem',
 					main: () => <Armazenagem />
@@ -172,12 +173,12 @@ class IndexProducao extends Component {
 									</Link>
 								</Menu.Item>
 								<SubMenu key="sub1" title={<span><Icon type="bars" /><span>WMS Produção</span></span>}>
-									<Menu.Item key="2">
+									{/*<Menu.Item key="2">
 										<Link to="/producao/wms-producao/entrada">
 											<Icon type="right-square" />
 											<span className="nav-text">Entrada</span>
 										</Link>
-									</Menu.Item>
+									</Menu.Item>*/}
 									<Menu.Item key="3">
 										<Link to="/producao/wms-producao/armazenagem">
 											<Icon type="right-square" />
@@ -252,11 +253,12 @@ class IndexProducao extends Component {
                     showModalLancamentoAgrupadoF={this.showModalLancamentoAgrupadoF}
                     showNotification={this.showNotification}
                 />
+				{/*
                 <ConferenciaProducao
                     showModalConferenciaProducao={this.state.showModalConferenciaProducao}
                     showModalConferenciaProducaoF={this.showModalConferenciaProducaoF}
                     showNotification={this.showNotification}
-                />
+                />*/}
                 <EstornoProducao
                     showModalEstornoProducao={this.state.showModalEstornoProducao}
                     showModalEstornoProducaoF={this.showModalEstornoProducaoF}

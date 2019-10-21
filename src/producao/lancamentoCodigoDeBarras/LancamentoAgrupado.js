@@ -213,9 +213,11 @@ class LancamentoAgrupado extends Component{
     }
 
     render(){
+        /*
         console.log('--------------------------------------------')
         console.log('barcodeReaderFuncionario', this.state.barcodeReaderFuncionario)
         console.log('barcodeReaderLancamento', this.state.barcodeReaderLancamento)
+        */
         const { getFieldDecorator } = this.props.form
 
         const columns = [
