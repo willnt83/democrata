@@ -126,7 +126,7 @@ class ModalArmazenagem extends Component{
         this.props.form.validateFieldsAndScroll((err, values) => {
             if(!err){
                 var codigoArr = this.state.tempCodigo.split('-')
-                var idProduto = codigoArr[0]
+                var idProduto = codigoArr[1]
                 var request = {
                     idArmazenagem: this.state.idArmazenagem,
                     idUsuario: this.props.session.usuario.id,
