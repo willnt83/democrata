@@ -100,19 +100,12 @@ class ModalSaida extends Component{
 
     updateTableData = (data) => {
         if(data && data.length > 0) {
-            let saidaProdutos = data.map((produto) => {
-                produto.produto.produtoText = produto.produto.nome + '(' + produto.produto.cor + ')';
-                return produto;
-            }); 
-            if(saidaProdutos){
-                var tableData = this.state.tableData
-                if(tableData.length > 0)
-                    tableData.concat(saidaProdutos);
-                else
-                    tableData = saidaProdutos;
-                console.log(tableData);
-                this.setState({tableData})
-            }
+            var tableData = this.state.tableData
+            if(tableData.length > 0)
+                tableData.concat(data);
+            else
+                tableData = data;
+            this.setState({tableData})
         }
     }
 
@@ -147,20 +140,20 @@ class ModalSaida extends Component{
 
         const columns = [
             {
+                title: 'SKU',
+                dataIndex: 'produto.sku',
+                sorter: (a, b) => this.compareByAlph(a.produto.sku, b.produto.sku)
+            },
+            {
                 title: 'Produto',
-                dataIndex: 'produto.produtoText',
-                sorter: (a, b) => this.compareByAlph(a.produto.produtoText, b.produto.produtoText)
+                dataIndex: 'produto.nome',
+                sorter: (a, b) => this.compareByAlph(a.produto.nome, b.produto.nome)
             },
             {
-                title: 'Almoxarifado',
-                dataIndex: 'almoxarifado.descricao',
-                sorter: (a, b) => this.compareByAlph(a.almoxarifado.descricao, b.almoxarifado.descricao)
-            },            
-            {
-                title: 'Posição',
-                dataIndex: 'posicao.descricao',
-                sorter: (a, b) => this.compareByAlph(a.posicao.descricao, b.posicao.descricao)
-            },
+                title: 'Cor',
+                dataIndex: 'cor.descricao',
+                sorter: (a, b) => this.compareByAlph(a.cor.descricao, b.cor.descricao)
+            }
         ]
 
         const inputLancamentoManual =
