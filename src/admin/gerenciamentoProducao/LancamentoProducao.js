@@ -71,6 +71,20 @@ class LancamentoProducao extends Component{
         })
     }
 
+    requestGetCodigoDeBarrasInfo = (codigo) => {
+        axios
+        .get(this.props.backEndPoint + '/getCodigoDeBarrasInfo?codigo='+codigo)
+        .then(res => {
+            console.log('response', res.data.payload)
+            var tableData = this.state.tableData
+            tableData.push(res.data.payload)
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }
+
+    /*
     getCodigosDeBarrasLancados = (idFuncionario, dtInicial, dtFinal) => {
         axios
         .get(this.props.backEndPoint + '/getCodigosDeBarrasLancados?idFuncionario='+idFuncionario+'&dataInicial='+dtInicial+'&dataFinal='+dtFinal)
@@ -84,6 +98,7 @@ class LancamentoProducao extends Component{
             console.log(error)
         })
     }
+    */
 
     requestLancamentoProducao = (request) => {
         axios
@@ -92,7 +107,11 @@ class LancamentoProducao extends Component{
             if(res.data.success){
                 this.props.showNotification(res.data.msg, res.data.success)
                 var range = this.getMonthDateRange(2019, this.state.mesSelecionado)
-                this.getCodigosDeBarrasLancados(this.state.idFuncionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
+                //this.getCodigosDeBarrasLancados(this.state.idFuncionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
+
+                //Atualizará aqui
+                this.requestGetCodigoDeBarrasInfo(request.barcode)
+
                 if(this.state.lancamentoManual){
                     this.props.form.setFieldsValue({
                         codigoDeBarras: ''

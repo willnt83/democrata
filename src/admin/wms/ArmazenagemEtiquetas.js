@@ -29,13 +29,11 @@ class ArmazenagemEtiquetas extends Component {
         .get(this.props.backEndPoint + '/getInsumosArmazenados?id_armazenagem='+idArmazenagem)
         .then(res => {
             if(res.data.payload){
-                console.log('response', res.data.payload)
                 this.setState({
                     dynamicFieldsRendered: true,
                     insumosArmazenados: res.data.payload.map(insumo => {
-                        console.log(insumo)
                         return({
-                            idInsumo: insumo.id,
+                            idInsumo: insumo.insumo.id,
                             codigo: insumo.insumo.ins,
                             nome: insumo.insumo.nome,
                             idAlmoxarifado: insumo.insumo.idAlmoxarifado,
@@ -126,7 +124,6 @@ class ArmazenagemEtiquetas extends Component {
                                         </Row>
                                         {
                                             this.state.insumosArmazenados.map((insumo, k) =>{
-                                                console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
                                                 return(
                                                     <Row className="mt20" key={insumo.idInsumo}>
                                                         <Col span={4}>{insumo.idInsumo}</Col>
