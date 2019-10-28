@@ -1,12 +1,12 @@
 const initState = {
-    backEndPoint: 'http://localhost', //localhost
+    //backEndPoint: 'http://localhost', //localhost
     //backEndPoint: 'https://hmback.democratadecor.tk', // homolog
-    //backEndPoint: 'https://back.democratadecor.tk', // producao
+    backEndPoint: 'https://back.democratadecor.tk', // producao
     pageTitle: null,
     session: {
         idSession: null,
         usuario: {
-            id: null,
+             id: null,
             nome: null
         },
         perfil: {
@@ -21,7 +21,7 @@ const initState = {
         administrador: null
     },
     producaoMainData: [],
-    producaoAcompanhamento: []
+    producaoA   companhamento: []
 }
 
 const RootReducer = (state = initState, action) => {
@@ -33,9 +33,9 @@ const RootReducer = (state = initState, action) => {
     }
     else if(action.type === 'RESET_ALL'){
         return {
-            backEndPoint: 'http://localhost', //localhost
+            //backEndPoint: 'http://localhost', //localhost
             //backEndPoint: 'https://hmback.democratadecor.tk', // homolog
-            //backEndPoint: 'https://back.democratadecor.tk', // producao
+            backEndPoint: 'https://back.democratadecor.tk', // producao
             pageTitle: null,
             session: {
                 idSession: null,
