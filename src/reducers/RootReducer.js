@@ -6,7 +6,7 @@ const initState = {
     session: {
         idSession: null,
         usuario: {
-             id: null,
+            id: null,
             nome: null
         },
         perfil: {
@@ -21,7 +21,7 @@ const initState = {
         administrador: null
     },
     producaoMainData: [],
-    producaoA   companhamento: []
+    producaoAcompanhamento: []
 }
 
 const RootReducer = (state = initState, action) => {
