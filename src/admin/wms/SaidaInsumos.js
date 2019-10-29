@@ -124,6 +124,7 @@ class SaidaInsumos extends Component {
         .then(res => {
             this.setState({btnSalvarLoading: false})
             this.showNotification(res.data.msg, res.data.success)
+            id = 0
             this.props.form.resetFields()
             this.setState({
                 btnSalvarLoading: false
