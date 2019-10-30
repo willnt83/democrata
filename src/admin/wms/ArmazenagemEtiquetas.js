@@ -5,7 +5,7 @@ import axios from "axios"
 
 
 class ArmazenagemEtiquetas extends Component {
-    constructor(props) {
+    constructor(props){
         super()
     }
 
@@ -85,6 +85,14 @@ class ArmazenagemEtiquetas extends Component {
         })
     }
 
+    closeModal = () => {
+        // Reset states
+        this.props.form.resetFields()
+        this.setState({insumosArmazenados: []})
+
+        this.props.showArmazenagemEtiquetasModalF(false)
+    }
+
     componentDidUpdate(prevProps, prevState){
         // Evento: Modal aberto
         if(!prevProps.showArmazenagemEtiquetasModal && this.props.showArmazenagemEtiquetasModal){
@@ -101,10 +109,10 @@ class ArmazenagemEtiquetas extends Component {
                 <Modal
                     title="Geração de Etiquetas de Armazenagem"
                     visible={this.props.showArmazenagemEtiquetasModal}
-                    onCancel={() => this.props.showArmazenagemEtiquetasModalF(false)}
+                    onCancel={this.closeModal}
                     width={1300}
                     footer={[
-                        <Button key="back" onClick={() => this.props.showArmazenagemEtiquetasModalF(false)}><Icon type="close" /> Fechar</Button>,
+                        <Button key="back" onClick={() => this.closeModal}><Icon type="close" /> Fechar</Button>,
                         <Button key="submit" type="primary" loading={this.state.btnGerarEtiquetas} onClick={() => this.handleFormSubmit()}><Icon type="barcode" /> Gerar Etiquetas</Button>
                     ]}
                 >

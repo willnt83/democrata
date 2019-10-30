@@ -17,6 +17,7 @@ class ArmazenagemInsumos extends Component {
         insumosInfo: [],
         insumos: [],
         insumosOptions: [],
+        pedidosOptions: [],
         almoxarifadosOptions: [],
         almoxarifadosPosicoes: [],
         dynamicFieldsRendered: false,
@@ -122,13 +123,31 @@ class ArmazenagemInsumos extends Component {
         })
     }
 
-    requestGetPedidosComInsumosArmazenar = () => {
-
+    requestGetPedidosArmazenarAvailables = () => {
+        axios
+        .get(this.props.backEndPoint + '/getPedidosCompraInsumosArmazenarAvailables')
+        .then(res => {
+            if(res.data.payload){
+                var pedidosOptions = res.data.payload.map(pedido => {
+                    return({
+                        id: pedido.idPedido,
+                        fornecedor: pedido.nomeFornecedor
+                    })
+                })
+                this.setState({pedidosOptions})
+            }
+            else{
+                console.log('Nenhum registro encontrado')
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
     }
 
-    requestGetInsumosArmazenar = () => {
+    requestGetInsumosArmazenar = (idPedido) => {
         axios
-        .get(this.props.backEndPoint + '/getInsumosArmazenar')
+        .get(this.props.backEndPoint + '/getInsumosArmazenar?id_pedido='+idPedido)
         .then(res => {
             if(res.data.payload){
                 //console.log('res.data.payload', res.data.payload)
@@ -161,7 +180,24 @@ class ArmazenagemInsumos extends Component {
                         return index
                     })
                 })
-                this.setState({insumosArmazenados: res.data.payload, dynamicFieldsRendered: true})
+
+                var pedidosOptions = this.state.pedidosOptions
+                var hit = false
+                res.data.payload.forEach(insumo => {
+                    pedidosOptions.forEach(pedido => {
+                        if(insumo.idPedido === pedido.id)
+                            hit = true
+                    })
+                    if(!hit){
+                        pedidosOptions.push({
+                            id: insumo.idPedido,
+                            fornecedor: insumo.nomeFornecedor
+                        })
+                    }
+                })
+
+
+                this.setState({insumosArmazenados: res.data.payload, pedidosOptions, dynamicFieldsRendered: true})
             }
             else{
                 console.log('Nenhum registro encontrado')
@@ -223,7 +259,8 @@ class ArmazenagemInsumos extends Component {
             */
 
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
-                var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+parseFloat(quantidadeArmazenar)
+                //var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+parseFloat(quantidadeArmazenar)
+                var content = 'Quantidade entrada: '+quantidadeEntrada
                 var insumosInfo = this.state.insumosInfo
                 insumosInfo.splice(row, 1, content)
                 //console.log('insumosInfo', insumosInfo)
@@ -276,6 +313,13 @@ class ArmazenagemInsumos extends Component {
         })
         //console.log('insumosTemp depois', insumosTemp)
         return insumosTemp
+    }
+
+    changePedido = (idPedido, k) => {
+        var strObj = '{"insumo['+k+']": ""}'
+        var obj  = JSON.parse(strObj)
+        this.props.form.setFieldsValue(obj)
+        this.requestGetInsumosArmazenar(idPedido)
     }
 
     changeInsumo = (idEntradaInsumo, k) => {
@@ -416,17 +460,42 @@ class ArmazenagemInsumos extends Component {
     }
 
     componentDidUpdate(prevProps, prevState){
-        if(this.state.dynamicFieldsRendered && this.state.insumosOptions.length > 0 && this.state.almoxarifadosOptions.length > 0){
-            id = (this.state.insumosArmazenados.length)
-            // Insumo
+        //if(this.state.dynamicFieldsRendered && this.state.insumosOptions.length > 0 && this.state.almoxarifadosOptions.length > 0){
+        if(this.state.dynamicFieldsRendered){
+            id = this.state.insumosArmazenados.length
+            // Pedido
             var strObj = '{'
             var comma = ''
+            var insumosOptions = this.state.insumosOptions
+            this.state.insumosArmazenados.forEach((insumo, index) => {
+                comma = index === 0 ? '' : ', '
+                strObj += comma+'"pedido['+index+']": '+insumo.idPedido+''
+
+                // Montando insumosOptions temporário
+                insumosOptions.push({
+                    id: insumo.idEntradaInsumo,
+                    ins: insumo.insumo.ins,
+                    description: insumo.insumo.nome,
+                    idPedido: insumo.idPedido
+                })
+                this.setState({insumosOptions})
+            })
+            strObj += '}'
+            var obj  = JSON.parse(strObj)
+            this.props.form.setFieldsValue(obj)
+
+            // insumosOptions
+
+
+            // Insumo
+            strObj = '{'
+            comma = ''
             this.state.insumosArmazenados.forEach((insumo, index) => {
                 comma = index === 0 ? '' : ', '
                 strObj += comma+'"insumo['+index+']": '+insumo.idEntradaInsumo+''
             })
             strObj += '}'
-            var obj  = JSON.parse(strObj)
+            obj  = JSON.parse(strObj)
             this.props.form.setFieldsValue(obj)
 
             // Almoxarifado
@@ -478,7 +547,9 @@ class ArmazenagemInsumos extends Component {
         if(!prevProps.showArmazenagemModal && this.props.showArmazenagemModal){
             // Edit
             if(this.props.idArmazenagem) this.requestGetInsumosArmazenados(this.props.idArmazenagem)
-            this.requestGetInsumosArmazenar()
+
+            this.requestGetPedidosArmazenarAvailables()
+            //this.requestGetInsumosArmazenar()
             this.getAlmoxarifados()
         }
 
@@ -497,10 +568,8 @@ class ArmazenagemInsumos extends Component {
     }
 
     render(){
-        /*
-        console.log('this.state.insumos', this.state.insumos)
-        console.log('this.state.insumosInfo', this.state.insumosInfo)
-        */
+        //console.log('this.state.insumosOptions', this.state.insumosOptions)
+
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
@@ -508,7 +577,31 @@ class ArmazenagemInsumos extends Component {
         const porcionamentos = keys.map(k => (
             <React.Fragment key={k}>
                 <Row gutter={5}>
-                    <Col span={10} id="insumo" style={{position: 'relative'}}>
+                    <Col span={4} id="pedido" style={{position: 'relative'}}>
+                        <Form.Item style={{marginBottom: 0}}>
+                            {getFieldDecorator(`pedido[${k}]`, {
+                                rules: [{
+                                    required: true, message: "Informe o pedido"
+                                }],
+                            })(
+                                <Select
+                                    showSearch
+                                    optionFilterProp="children"
+                                    style={{ width: '100%' }}
+                                    getPopupContainer={() => document.getElementById('colArmazenagem')}
+                                    allowClear={true}
+                                    onChange={(value) => this.changePedido(value, k)}
+                                >
+                                    {
+                                        this.state.pedidosOptions.map((option) => {
+                                            return (<Select.Option key={option.id} value={option.id}>{option.id} - {option.fornecedor}</Select.Option>)
+                                        })
+                                    }
+                                </Select>
+                            )}
+                        </Form.Item>
+                    </Col>
+                    <Col span={6} id="insumo" style={{position: 'relative'}}>
                         <Form.Item style={{marginBottom: 0}}>
                             {getFieldDecorator(`insumo[${k}]`, {
                                 rules: [{
@@ -639,7 +732,8 @@ class ArmazenagemInsumos extends Component {
                                 {
                                     porcionamentos.length > 0 ?
                                     <Row className="bold" style={{marginBottom: 10}}>
-                                        <Col span={10}>INS - Insumo</Col>
+                                        <Col span={4}>Pedido - Fornecedor</Col>
+                                        <Col span={6}>INS - Insumo</Col>
                                         <Col span={5}>Almoxarifado</Col>
                                         <Col span={5}>Posição</Col>
                                         <Col span={4}>Quantidade</Col>
