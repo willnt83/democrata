@@ -26,7 +26,7 @@ class SaidaInsumos extends Component {
         showSaidaBarCode: false,
         insumosData: [],
         insertingInsumoData: false,
-        insumosRetirados: []        
+        insumosRetirados: []
     }
 
     showNotification = (msg, success) => {
@@ -129,7 +129,7 @@ class SaidaInsumos extends Component {
             this.setState({
                 btnSalvarLoading: false
             })
-            this.props.showSaidaModalF(false)
+            this.closeModal()
             this.props.requestGetSaidas()
         })
         .catch(error =>{
@@ -368,7 +368,26 @@ class SaidaInsumos extends Component {
             this.setState({insertingInsumoData: false})
             this.showSaidaBarCodeF(false)
         }
-        
+    }
+
+    closeModal = () => {
+        id = 0
+        this.setState({
+            insumos: [],
+            insumosOptions: [],
+            insumosInfo: [],
+            dynamicFieldsRendered: false,
+            almoxarifados: [],
+            quantidades: [],
+            btnSalvarLoading: false,
+            showSaidaBarCode: false,
+            insumosData: [],
+            insertingInsumoData: false,
+            insumosRetirados: []
+        })
+
+        this.props.form.resetFields()
+        this.props.showSaidaModalF(false)
     }
 
     render(){
@@ -449,11 +468,11 @@ class SaidaInsumos extends Component {
                 <Modal
                     title="Saída de Insumos"
                     visible={this.props.showSaidaModal}
-                    onCancel={() => this.props.showSaidaModalF(false)}
+                    onCancel={this.closeModal}
                     width={1300}
                     footer={[
                         <Button key="barcode" type="link" title="Saída por Código de Barras" onClick={() => this.showSaidaBarCodeF(true)} style={{marginLeft: '1px'}}><Icon type="barcode" /> Utilizar Código de Barras</Button>,
-                        <Button key="back" onClick={() => this.props.showSaidaModalF(false)}><Icon type="close" /> Fechar</Button>,
+                        <Button key="back" onClick={this.closeModal}><Icon type="close" /> Fechar</Button>,
                         <Button key="submit" type="primary" loading={this.state.btnSalvarLoading} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >

@@ -106,7 +106,7 @@ class LancamentoProducao extends Component{
         .then(res => {
             if(res.data.success){
                 this.props.showNotification(res.data.msg, res.data.success)
-                var range = this.getMonthDateRange(2019, this.state.mesSelecionado)
+                //var range = this.getMonthDateRange(2019, this.state.mesSelecionado)
                 //this.getCodigosDeBarrasLancados(this.state.idFuncionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
 
                 //Atualizará aqui
@@ -150,7 +150,7 @@ class LancamentoProducao extends Component{
                     mesSelecionado: values.mesLancamento,
                     idFuncionario: values.funcionario,
                 })
-                this.getCodigosDeBarrasLancados(values.funcionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
+                //this.getCodigosDeBarrasLancados(values.funcionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
             }
             else{
                 console.log('erro no formulário')

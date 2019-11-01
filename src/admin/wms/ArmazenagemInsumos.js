@@ -145,13 +145,13 @@ class ArmazenagemInsumos extends Component {
         })
     }
 
-    requestGetInsumosArmazenar = (idPedido) => {
+    requestGetInsumosArmazenar = (idPedido, k) => {
         axios
         .get(this.props.backEndPoint + '/getInsumosArmazenar?id_pedido='+idPedido)
         .then(res => {
             if(res.data.payload){
                 //console.log('res.data.payload', res.data.payload)
-                var insumosOptions = res.data.payload.map(insumo => {
+                var insumosArmazenar = res.data.payload.map(insumo => {
                     return({
                         id: insumo.idEntradaInsumo,
                         ins: insumo.insumo.ins,
@@ -159,6 +159,10 @@ class ArmazenagemInsumos extends Component {
                         idPedido: insumo.idPedido
                     })
                 })
+
+                var insumosOptions = this.state.insumosOptions
+                insumosOptions.splice(k, 1, insumosArmazenar)
+
                 this.setState({insumosOptions, insumos: res.data.payload})
             }
             else{
@@ -171,6 +175,7 @@ class ArmazenagemInsumos extends Component {
     }
 
     requestGetInsumosArmazenados = (idArmazenagem) => {
+        console.log('requestGetInsumosArmazenados')
         axios
         .get(this.props.backEndPoint + '/getInsumosArmazenados?id_armazenagem='+idArmazenagem)
         .then(res => {
@@ -208,29 +213,6 @@ class ArmazenagemInsumos extends Component {
         })
     }
 
-    createUpdateInsumosArmazenagem = (request) => {
-        axios.post(this.props.backEndPoint + '/createUpdateArmazenagem', request)
-        .then(res => {
-            this.showNotification(res.data.msg, res.data.success)
-            this.props.form.resetFields()
-            this.setState({
-                btnSalvarLoading: false,
-                almoxarifadosOptions: [],
-                almoxarifadosPosicoes: [],
-                idPedidoInsumo: null,
-                quantidadeArmazenar: null,
-                insumos: [],
-                insumosInfo: [],
-                insumosArmazenados: []
-            })
-            this.props.showArmazenagemModalF(false)
-            this.props.requestGetArmazenagens()
-        })
-        .catch(error =>{
-            console.log(error)
-        })
-    }
-
     showQuantidades = (idEntradaInsumo, k, insumosTemp) => {
         /*
         console.log('---===showQuantidades===---')
@@ -259,8 +241,8 @@ class ArmazenagemInsumos extends Component {
             */
 
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
-                //var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+parseFloat(quantidadeArmazenar)
-                var content = 'Quantidade entrada: '+quantidadeEntrada
+                var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+parseFloat(quantidadeArmazenar)
+                //var content = 'Quantidade entrada: '+quantidadeEntrada
                 var insumosInfo = this.state.insumosInfo
                 insumosInfo.splice(row, 1, content)
                 //console.log('insumosInfo', insumosInfo)
@@ -272,14 +254,13 @@ class ArmazenagemInsumos extends Component {
 
     // Contabiliza quantidade de insumos que estão sendo armazenados no lançamento e atualiza insumosTemp
     contabilizaQuantidades = (idEntradaInsumo) => {
-        //console.log('---===contabilizaQuantidades===---')
+        console.log('---===contabilizaQuantidades===---')
         const keys = this.props.form.getFieldValue('keys')
         var somatoriaEntradas = 0
         var quantidadeJaArmazenada = 0
-        /*
+
         console.log('keys', keys)
         console.log('idEntradaInsumo', idEntradaInsumo)
-        */
 
         // Calculando somatória informadas nos campos quantidades para o insumo em questão
         keys.forEach(row => {
@@ -290,7 +271,7 @@ class ArmazenagemInsumos extends Component {
                     somatoriaEntradas += parseFloat(this.props.form.getFieldValue(`quantidade[${row}]`))
             }
         })
-        //console.log('somatoriaEntradas', somatoriaEntradas)
+        console.log('somatoriaEntradas', somatoriaEntradas)
 
         // Verifica se o insumo em questão já foi armazenado e subtrai a quantidade
         //console.log('this.state.insumosArmazenados', this.state.insumosArmazenados)
@@ -301,17 +282,17 @@ class ArmazenagemInsumos extends Component {
         //console.log('quantidadeJaArmazenada', quantidadeJaArmazenada)
         somatoriaEntradas -= quantidadeJaArmazenada
 
-        //console.log('somatoriaEntradas final', somatoriaEntradas)
+        console.log('somatoriaEntradas final', somatoriaEntradas)
 
         var insumosTemp = cloneDeep(this.state.insumos)
-        //console.log('insumosTemp antes', insumosTemp)
+        console.log('insumosTemp antes', insumosTemp)
 
         insumosTemp.forEach((insumo, index) => {
             if(insumo.idEntradaInsumo === idEntradaInsumo){
                 insumosTemp[index].insumo.quantidadeArmazenar -= parseFloat(somatoriaEntradas)
             }
         })
-        //console.log('insumosTemp depois', insumosTemp)
+        console.log('insumosTemp depois', insumosTemp)
         return insumosTemp
     }
 
@@ -319,7 +300,7 @@ class ArmazenagemInsumos extends Component {
         var strObj = '{"insumo['+k+']": ""}'
         var obj  = JSON.parse(strObj)
         this.props.form.setFieldsValue(obj)
-        this.requestGetInsumosArmazenar(idPedido)
+        this.requestGetInsumosArmazenar(idPedido, k)
     }
 
     changeInsumo = (idEntradaInsumo, k) => {
@@ -339,6 +320,7 @@ class ArmazenagemInsumos extends Component {
 
         if(e.target.value > 0){
             var idEntradaInsumo = this.props.form.getFieldValue(`insumo[${pos}]`)
+            console.log('idEntradaInsumo', idEntradaInsumo)
             var insumosTemp = this.contabilizaQuantidades(idEntradaInsumo)
             var result = this.validacaoQuantidade(idEntradaInsumo, pos, insumosTemp)
             if(result === true){
@@ -402,6 +384,29 @@ class ArmazenagemInsumos extends Component {
         })
     }
 
+    createUpdateInsumosArmazenagem = (request) => {
+        axios.post(this.props.backEndPoint + '/createUpdateArmazenagem', request)
+        .then(res => {
+            this.showNotification(res.data.msg, res.data.success)
+            this.props.form.resetFields()
+            this.setState({
+                btnSalvarLoading: false,
+                almoxarifadosOptions: [],
+                almoxarifadosPosicoes: [],
+                idPedidoInsumo: null,
+                quantidadeArmazenar: null,
+                insumos: [],
+                insumosInfo: [],
+                insumosArmazenados: []
+            })
+            this.props.showArmazenagemModalF(false)
+            this.props.requestGetArmazenagens()
+        })
+        .catch(error =>{
+            console.log(error)
+        })
+    }
+
     addComposicaoRow = () => {
         const keys = this.props.form.getFieldValue('keys')
         const nextKeys = keys.concat(id++)
@@ -460,6 +465,7 @@ class ArmazenagemInsumos extends Component {
     }
 
     componentDidUpdate(prevProps, prevState){
+        // Edição - Atribuindo valores aos campos
         //if(this.state.dynamicFieldsRendered && this.state.insumosOptions.length > 0 && this.state.almoxarifadosOptions.length > 0){
         if(this.state.dynamicFieldsRendered){
             id = this.state.insumosArmazenados.length
@@ -467,25 +473,25 @@ class ArmazenagemInsumos extends Component {
             var strObj = '{'
             var comma = ''
             var insumosOptions = this.state.insumosOptions
+            var content = []
             this.state.insumosArmazenados.forEach((insumo, index) => {
                 comma = index === 0 ? '' : ', '
                 strObj += comma+'"pedido['+index+']": '+insumo.idPedido+''
 
                 // Montando insumosOptions temporário
-                insumosOptions.push({
+                content.push({
                     id: insumo.idEntradaInsumo,
                     ins: insumo.insumo.ins,
                     description: insumo.insumo.nome,
                     idPedido: insumo.idPedido
                 })
+
+                insumosOptions.splice(index, 1, content)
                 this.setState({insumosOptions})
             })
             strObj += '}'
             var obj  = JSON.parse(strObj)
             this.props.form.setFieldsValue(obj)
-
-            // insumosOptions
-
 
             // Insumo
             strObj = '{'
@@ -568,7 +574,7 @@ class ArmazenagemInsumos extends Component {
     }
 
     render(){
-        //console.log('this.state.insumosOptions', this.state.insumosOptions)
+        console.log('this.state.insumosOptions', this.state.insumosOptions)
 
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
@@ -617,9 +623,11 @@ class ArmazenagemInsumos extends Component {
                                     onBlur={(value) => this.changeInsumo(value, k)}
                                 >
                                     {
-                                        this.state.insumosOptions.map((option) => {
+                                        this.state.insumosOptions.length > 0 && this.state.insumosOptions[k] ?
+                                        this.state.insumosOptions[k].map((option) => {
                                             return (<Select.Option key={option.id} value={option.id}>{option.ins} - {option.description}</Select.Option>)
                                         })
+                                        :null
                                     }
                                 </Select>
                             )}
