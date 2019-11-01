@@ -31,7 +31,9 @@ class LancamentoProducao extends Component{
             tableData: [],
             funcionariosOptions: [],
             barcodeReader: false,
-            lancamentoManual: false
+            lancamentoManual: false,
+            btnLancarLoading: false,
+            tableLoading: false
         }
         this.handleScanLancamento = this.handleScanLancamento.bind(this)
     }
@@ -72,14 +74,16 @@ class LancamentoProducao extends Component{
     }
 
     requestGetCodigoDeBarrasInfo = (codigo) => {
+        this.setState({tableLoading: true})
         axios
         .get(this.props.backEndPoint + '/getCodigoDeBarrasInfo?codigo='+codigo)
         .then(res => {
-            console.log('response', res.data.payload)
             var tableData = this.state.tableData
             tableData.push(res.data.payload)
+            this.setState({tableData, tableLoading: false})
         })
         .catch(error => {
+            this.setState({tableLoading: false})
             console.log(error)
         })
     }
@@ -101,6 +105,7 @@ class LancamentoProducao extends Component{
     */
 
     requestLancamentoProducao = (request) => {
+        this.setState({btnLancarLoading: true})
         axios
         .post(this.props.backEndPoint + '/lancamentoCodigoDeBarras', request)
         .then(res => {
@@ -121,8 +126,11 @@ class LancamentoProducao extends Component{
             else{
                 this.props.showNotification(res.data.msg, res.data.success)
             }
+
+            this.setState({btnLancarLoading: false})
         })
         .catch(error => {
+            this.setState({btnLancarLoading: false})
             console.log(error)
         })
     }
@@ -209,39 +217,39 @@ class LancamentoProducao extends Component{
         const { getFieldDecorator } = this.props.form
 
         const columns = [{
-            title: 'ID',
-            dataIndex: 'id',
-            sorter: (a, b) => a.key - b.key,
+            title: 'Código',
+            dataIndex: 'codigo',
+            sorter: (a, b) => a.codigo - b.codigo,
         },
         {
             title: 'Produção',
-            dataIndex: 'producao.nome',
-            sorter: (a, b) => this.compareByAlph(a.producao.nome, b.producao.nome)
+            dataIndex: 'nomeProducao',
+            sorter: (a, b) => this.compareByAlph(a.nomeProducao, b.nomeProducao)
         },
         {
             title: 'Produto',
-            dataIndex: 'produto.nome',
-            sorter: (a, b) => this.compareByAlph(a.produto.nome, b.produto.nome)
+            dataIndex: 'nomeProduto',
+            sorter: (a, b) => this.compareByAlph(a.nomeProduto, b.nomeProduto)
         },
         {
             title: 'Cor',
-            dataIndex: 'produto.cor',
-            sorter: (a, b) => this.compareByAlph(a.produto.cor, b.produto.cor)
+            dataIndex: 'corProduto',
+            sorter: (a, b) => this.compareByAlph(a.corProduto, b.corProduto)
         },
         {
             title: 'Conjunto',
-            dataIndex: 'conjunto.nome',
-            sorter: (a, b) => this.compareByAlph(a.conjunto.nome, b.conjunto.nome)
+            dataIndex: 'nomeConjunto',
+            sorter: (a, b) => this.compareByAlph(a.nomeConjunto, b.nomeConjunto)
         },
         {
             title: 'Setor',
-            dataIndex: 'setor.nome',
-            sorter: (a, b) => this.compareByAlph(a.setor.nome, b.setor.nome)
+            dataIndex: 'nomeSetor',
+            sorter: (a, b) => this.compareByAlph(a.nomeSetor, b.nomeSetor)
         },
         {
             title: 'Subproduto',
-            dataIndex: 'subproduto.nome',
-            sorter: (a, b) => this.compareByAlph(a.subproduto.nome, b.subproduto.nome)
+            dataIndex: 'nomeSubproduto',
+            sorter: (a, b) => this.compareByAlph(a.nomeSubproduto, b.nomeSubproduto)
         }]
 
         return(
@@ -362,7 +370,7 @@ class LancamentoProducao extends Component{
                                                     />
                                                 )}
                                             </Form.Item>
-                                            <Button key="submit" type="primary" onClick={this.lancamentoManual}><Icon type="save" /> Lançar</Button>
+                                            <Button key="submit" type="primary" onClick={this.lancamentoManual} loading={this.state.btnLancarLoading}><Icon type="save" /> Lançar</Button>
                                         </Form>
                                     </Col>
                                     : null
@@ -375,8 +383,9 @@ class LancamentoProducao extends Component{
                             <Table
                                 columns={columns}
                                 dataSource={this.state.tableData}
-                                rowKey='id'
+                                rowKey='codigo'
                                 pagination={false}
+                                loading={this.state.tableLoading}
                             />
                             : null
                         }

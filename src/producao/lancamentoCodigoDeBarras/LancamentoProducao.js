@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Modal, Select, Icon, Button, Divider, Table, Input, notification } from 'antd'
+import { Row, Col, Form, Modal, Select, Icon, Button, Divider, Table, Input } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -31,28 +31,11 @@ class LancamentoProducao extends Component{
             tableData: [],
             funcionariosOptions: [],
             barcodeReader: false,
-            lancamentoManual: false
+            lancamentoManual: false,
+            btnLancarLoading: false,
+            tableLoading: false
         }
         this.handleScanLancamento = this.handleScanLancamento.bind(this)
-    }
-
-    showNotification = (msg, success) => {
-        var type = null
-        var style = null
-        if(success){
-            type = 'check-circle'
-            style = {color: '#4ac955', fontWeight: '800'}
-        }
-        else {
-            type = 'exclamation-circle'
-            style = {color: '#f5222d', fontWeight: '800'}
-        }
-        const args = {
-            message: msg,
-            icon:  <Icon type={type} style={style} />,
-            duration: 1
-        }
-        notification.open(args)
     }
 
     handleScanLancamento(data){
@@ -64,7 +47,7 @@ class LancamentoProducao extends Component{
             this.requestLancamentoProducao(request)
         }
         else{
-            this.showNotification('Selecione um funcionário', false)
+            this.props.showNotification('Selecione um funcionário', false)
         }
     }
 
@@ -90,6 +73,22 @@ class LancamentoProducao extends Component{
         })
     }
 
+    requestGetCodigoDeBarrasInfo = (codigo) => {
+        this.setState({tableLoading: true})
+        axios
+        .get(this.props.backEndPoint + '/getCodigoDeBarrasInfo?codigo='+codigo)
+        .then(res => {
+            var tableData = this.state.tableData
+            tableData.push(res.data.payload)
+            this.setState({tableData, tableLoading: false})
+        })
+        .catch(error => {
+            this.setState({tableLoading: false})
+            console.log(error)
+        })
+    }
+
+    /*
     getCodigosDeBarrasLancados = (idFuncionario, dtInicial, dtFinal) => {
         axios
         .get(this.props.backEndPoint + '/getCodigosDeBarrasLancados?idFuncionario='+idFuncionario+'&dataInicial='+dtInicial+'&dataFinal='+dtFinal)
@@ -103,21 +102,35 @@ class LancamentoProducao extends Component{
             console.log(error)
         })
     }
+    */
 
     requestLancamentoProducao = (request) => {
+        this.setState({btnLancarLoading: true})
         axios
         .post(this.props.backEndPoint + '/lancamentoCodigoDeBarras', request)
         .then(res => {
             if(res.data.success){
-                this.showNotification(res.data.msg, res.data.success)
-                var range = this.getMonthDateRange(2019, this.state.mesSelecionado)
-                this.getCodigosDeBarrasLancados(this.state.idFuncionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
+                this.props.showNotification(res.data.msg, res.data.success)
+                //var range = this.getMonthDateRange(2019, this.state.mesSelecionado)
+                //this.getCodigosDeBarrasLancados(this.state.idFuncionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
+
+                //Atualizará aqui
+                this.requestGetCodigoDeBarrasInfo(request.barcode)
+
+                if(this.state.lancamentoManual){
+                    this.props.form.setFieldsValue({
+                        codigoDeBarras: ''
+                    })
+                }
             }
             else{
-                this.showNotification(res.data.msg, res.data.success)
+                this.props.showNotification(res.data.msg, res.data.success)
             }
+
+            this.setState({btnLancarLoading: false})
         })
         .catch(error => {
+            this.setState({btnLancarLoading: false})
             console.log(error)
         })
     }
@@ -145,7 +158,7 @@ class LancamentoProducao extends Component{
                     mesSelecionado: values.mesLancamento,
                     idFuncionario: values.funcionario,
                 })
-                this.getCodigosDeBarrasLancados(values.funcionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
+                //this.getCodigosDeBarrasLancados(values.funcionario, range.start.format('DD/MM/YYYY'), range.end.format('DD/MM/YYYY'))
             }
             else{
                 console.log('erro no formulário')
@@ -170,7 +183,8 @@ class LancamentoProducao extends Component{
             nomeMesSelecionado: null,
             idFuncionario: null,
             nomeFuncionario: null,
-            tableData: []
+            tableData: [],
+            lancamentoManual: false
         })
         this.props.showModalLancamentoProducaoF(false)
     }
@@ -203,39 +217,39 @@ class LancamentoProducao extends Component{
         const { getFieldDecorator } = this.props.form
 
         const columns = [{
-            title: 'ID',
-            dataIndex: 'id',
-            sorter: (a, b) => a.key - b.key,
+            title: 'Código',
+            dataIndex: 'codigo',
+            sorter: (a, b) => a.codigo - b.codigo,
         },
         {
             title: 'Produção',
-            dataIndex: 'producao.nome',
-            sorter: (a, b) => this.compareByAlph(a.producao.nome, b.producao.nome)
+            dataIndex: 'nomeProducao',
+            sorter: (a, b) => this.compareByAlph(a.nomeProducao, b.nomeProducao)
         },
         {
             title: 'Produto',
-            dataIndex: 'produto.nome',
-            sorter: (a, b) => this.compareByAlph(a.produto.nome, b.produto.nome)
+            dataIndex: 'nomeProduto',
+            sorter: (a, b) => this.compareByAlph(a.nomeProduto, b.nomeProduto)
         },
         {
             title: 'Cor',
-            dataIndex: 'produto.cor',
-            sorter: (a, b) => this.compareByAlph(a.produto.cor, b.produto.cor)
+            dataIndex: 'corProduto',
+            sorter: (a, b) => this.compareByAlph(a.corProduto, b.corProduto)
         },
         {
             title: 'Conjunto',
-            dataIndex: 'conjunto.nome',
-            sorter: (a, b) => this.compareByAlph(a.conjunto.nome, b.conjunto.nome)
+            dataIndex: 'nomeConjunto',
+            sorter: (a, b) => this.compareByAlph(a.nomeConjunto, b.nomeConjunto)
         },
         {
             title: 'Setor',
-            dataIndex: 'setor.nome',
-            sorter: (a, b) => this.compareByAlph(a.setor.nome, b.setor.nome)
+            dataIndex: 'nomeSetor',
+            sorter: (a, b) => this.compareByAlph(a.nomeSetor, b.nomeSetor)
         },
         {
             title: 'Subproduto',
-            dataIndex: 'subproduto.nome',
-            sorter: (a, b) => this.compareByAlph(a.subproduto.nome, b.subproduto.nome)
+            dataIndex: 'nomeSubproduto',
+            sorter: (a, b) => this.compareByAlph(a.nomeSubproduto, b.nomeSubproduto)
         }]
 
         return(
@@ -243,11 +257,11 @@ class LancamentoProducao extends Component{
                 title="Lançamento de Produção"
                 visible={this.props.showModalLancamentoProducao}
                 onCancel={this.closeModal}
+                maskClosable={false}
                 footer={[
                     <Button type="primary" key="back" onClick={this.closeModal}> Fechar</Button>,
                 ]}
                 width={1200}
-                maskClosable={false}
             >
                 <Row>
                     <Col span={24} id="colLancamentoProducao" style={{position: 'relative'}}>
@@ -273,6 +287,8 @@ class LancamentoProducao extends Component{
                                                 ]
                                             })(
                                                 <Select
+                                                    showSearch
+                                                    optionFilterProp="children"
                                                     style={{ width: '100%' }}
                                                     placeholder="Selecione"
                                                     getPopupContainer={() => document.getElementById('colLancamentoProducao')}
@@ -298,6 +314,8 @@ class LancamentoProducao extends Component{
                                                 ]
                                             })(
                                                 <Select
+                                                    showSearch
+                                                    optionFilterProp="children"
                                                     style={{ width: '100%' }}
                                                     placeholder="Selecione"
                                                     getPopupContainer={() => document.getElementById('colLancamentoProducao')}
@@ -329,7 +347,6 @@ class LancamentoProducao extends Component{
                                     <span className="bold">Funcionário: {this.state.nomeFuncionario}</span>
                                     <span className="bold" onClick={this.alterarFuncionario} style={{marginLeft: 10, cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Alterar</span>
                                 </Col>
-
                                 <Col span={24}>
                                     <span className="bold" onClick={this.habilitarLancamentoManual} style={{cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Lançamento Manual</span>
                                 </Col>
@@ -353,7 +370,7 @@ class LancamentoProducao extends Component{
                                                     />
                                                 )}
                                             </Form.Item>
-                                            <Button key="submit" type="primary" onClick={this.lancamentoManual}><Icon type="save" /> Lançar</Button>
+                                            <Button key="submit" type="primary" onClick={this.lancamentoManual} loading={this.state.btnLancarLoading}><Icon type="save" /> Lançar</Button>
                                         </Form>
                                     </Col>
                                     : null
@@ -363,16 +380,13 @@ class LancamentoProducao extends Component{
                         <Divider />
                         {
                             this.state.tableData.length > 0 ?
-                            <Row style={{overflowX: 'scroll'}}>
-                                <Col span={24}>
-                                    <Table
-                                        columns={columns}
-                                        dataSource={this.state.tableData}
-                                        rowKey='id'
-                                        pagination={false}
-                                    />
-                                </Col>
-                            </Row>
+                            <Table
+                                columns={columns}
+                                dataSource={this.state.tableData}
+                                rowKey='codigo'
+                                pagination={false}
+                                loading={this.state.tableLoading}
+                            />
                             : null
                         }
                     </Col>

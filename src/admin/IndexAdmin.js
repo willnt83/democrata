@@ -25,7 +25,7 @@ import DiasNaoUteis from "./cadastros/DiasNaoUteis"
 import Producao from "./gerenciamentoProducao/Producao"
 import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
 
-//WMS
+// WMS
 import Insumos	 from "./wms/Insumos"
 import UnidadesMedida	 from "./wms/UnidadesMedida"
 import Almoxarifados from "./wms/Almoxarifados"
@@ -36,12 +36,12 @@ import Entrada from "./wms/Entrada"
 import Armazenagem from "./wms/Armazenagem"
 import Saida from "./wms/Saida"
 
-//WMS - Produtos
+// WMS - Produtos
 import WMSProdAlmoxarifados from "./wms-produtos/Almoxarifados"
 import WMSProdPosicoes from "./wms-produtos/Posicoes"
 
 
-
+// Relatórios
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
 import RelatorioFuncionariosCadastrados from "./relatorios/RelatorioFuncionariosCadastrados"
 import RelatorioProducoes from "./relatorios/RelatorioProducoes"
@@ -49,6 +49,7 @@ import RelatorioFuncionariosPontuacoes from "./relatorios/RelatorioFuncionariosP
 import RelatorioGeralProducao from "./relatorios/RelatorioGeralProducao"
 import RelatorioNaoProduzidos from "./relatorios/RelatorioNaoProduzidos"
 import RelatorioEstoqueProdutos from "./relatorios/RelatorioEstoqueProdutos"
+import RelatorioSaidaProdutos from "./relatorios/RelatorioSaidaProdutos"
 import RelatorioEntradaInsumos from "./relatorios/RelatorioEntradaInsumos"
 import RelatorioArmazenagemInsumos from "./relatorios/RelatorioArmazenagemInsumos"
 import RelatorioSaidaInsumos from "./relatorios/RelatorioSaidaInsumos"
@@ -267,6 +268,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Estoque de Produtos</div>,
 		main: () => <RelatorioEstoqueProdutos />
+	},
+	{
+		path: "/admin/relatorios/saida-de-produtos",
+		exact: true,
+		sidebar: () => <div>Saida de Produtos</div>,
+		main: () => <RelatorioSaidaProdutos />
 	},
 	{
 		path: "/admin/relatorios/entrada-insumos",
