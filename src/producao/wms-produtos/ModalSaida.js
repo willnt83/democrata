@@ -51,17 +51,13 @@ class ModalSaida extends Component{
         console.error(err)
     }
 
-    requestGetSaidaProdutos = (idSaida, idSaidaProduto) => {
-        var parameters = [];
-        if(idSaida) parameters.push('id_saida_produtos='+idSaida);
-        if(idSaidaProduto) parameters.push('id='+idSaidaProduto);
-        axios.get(this.props.backEndPoint + '/wms-produtos/getSaidaProdutos?'+parameters.join('&'))
+    requestGetSaidaProdutos = (idSaida) => {
+        axios.get(this.props.backEndPoint + '/wms-produtos/getSaidaProdutos?id_saida='+idSaida)
         .then(res => {
             console.log(res);
             if(res.data.success)
                 this.updateTableData(res.data.payload);
             else {
-                console.log(res.error)
                 this.props.showNotification(res.data.msg, false)
             }
         })
@@ -71,6 +67,7 @@ class ModalSaida extends Component{
         })
     }
 
+    /*
     requestGetCodigoDeBarrasInfo = (codigo) => {
         axios.get(this.props.backEndPoint + '/getCodigoDeBarrasInfo?codigo='+codigo)
         .then(res => {
@@ -80,6 +77,7 @@ class ModalSaida extends Component{
             console.log(error)
         })
     }
+    */
 
     requestLancamentoSaidaProdutos = (request) => {
         axios.post(this.props.backEndPoint + '/wms-produtos/lancamentoSaidaProdutos', request)
@@ -88,6 +86,7 @@ class ModalSaida extends Component{
                 this.props.showNotification(res.data.msg, res.data.success)
                 this.setState({idSaida: res.data.payload.idSaida, idSaidaProduto: res.data.payload.idSaidaProduto})
                 this.requestGetSaidaProdutos(res.data.payload.idSaida, res.data.payload.idSaidaProduto)
+                this.props.form.setFieldsValue({produtoBarcode: null})
             }
             else{
                 this.props.showNotification(res.data.msg, res.data.success)
@@ -99,14 +98,7 @@ class ModalSaida extends Component{
     }
 
     updateTableData = (data) => {
-        if(data && data.length > 0) {
-            var tableData = this.state.tableData
-            if(tableData.length > 0)
-                tableData.concat(data);
-            else
-                tableData = data;
-            this.setState({tableData})
-        }
+        this.setState({tableData: data})
     }
 
     closeModal = () => {
@@ -136,6 +128,7 @@ class ModalSaida extends Component{
     }
 
     render(){
+        console.log('tableData', this.state.tableData)
         const { getFieldDecorator } = this.props.form
 
         const columns = [
@@ -151,7 +144,7 @@ class ModalSaida extends Component{
             },
             {
                 title: 'Cor',
-                dataIndex: 'cor.descricao',
+                dataIndex: 'produto.cor',
                 sorter: (a, b) => this.compareByAlph(a.cor.descricao, b.cor.descricao)
             }
         ]
@@ -223,7 +216,7 @@ class ModalSaida extends Component{
                         <Table
                             columns={columns}
                             dataSource={this.state.tableData}
-                            rowKey='id'
+                            rowKey='codigo'
                             pagination={false}
                         />
                         : null
