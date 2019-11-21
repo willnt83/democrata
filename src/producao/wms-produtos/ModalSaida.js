@@ -20,6 +20,7 @@ class ModalSaida extends Component{
     }
 
     handleScan = (data) => {
+        data = '429-390-187-8-50-55';
         this.readingBarcode(data);
     }
 
@@ -54,12 +55,10 @@ class ModalSaida extends Component{
     requestGetSaidaProdutos = (idSaida) => {
         axios.get(this.props.backEndPoint + '/wms-produtos/getSaidaProdutos?id_saida='+idSaida)
         .then(res => {
-            console.log(res);
             if(res.data.success)
-                this.updateTableData(res.data.payload);
-            else {
+                this.setState({tableData: res.data.payload});
+            else
                 this.props.showNotification(res.data.msg, false)
-            }
         })
         .catch(error => {
             console.log(error);
@@ -67,7 +66,6 @@ class ModalSaida extends Component{
         })
     }
 
-    /*
     requestGetCodigoDeBarrasInfo = (codigo) => {
         axios.get(this.props.backEndPoint + '/getCodigoDeBarrasInfo?codigo='+codigo)
         .then(res => {
@@ -77,7 +75,7 @@ class ModalSaida extends Component{
             console.log(error)
         })
     }
-    */
+
 
     requestLancamentoSaidaProdutos = (request) => {
         axios.post(this.props.backEndPoint + '/wms-produtos/lancamentoSaidaProdutos', request)
@@ -98,7 +96,9 @@ class ModalSaida extends Component{
     }
 
     updateTableData = (data) => {
-        this.setState({tableData: data})
+        var tableData = this.state.tableData
+        tableData.push(data)
+        this.setState({tableData})
     }
 
     closeModal = () => {
@@ -128,7 +128,6 @@ class ModalSaida extends Component{
     }
 
     render(){
-        console.log('tableData', this.state.tableData)
         const { getFieldDecorator } = this.props.form
 
         const columns = [
