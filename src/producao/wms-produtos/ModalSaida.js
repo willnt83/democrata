@@ -20,7 +20,6 @@ class ModalSaida extends Component{
     }
 
     handleScan = (data) => {
-        data = '429-390-187-8-50-55';
         this.readingBarcode(data);
     }
 
