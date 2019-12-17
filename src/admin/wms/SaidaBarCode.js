@@ -45,7 +45,6 @@ class SaidaBarCode extends Component {
     }
 
     handleScanInsumosSaida(data){
-        console.log(data)
         if(data){
             this.returnInsumosArmazenagemByBarCode(data)
         }
@@ -78,7 +77,7 @@ class SaidaBarCode extends Component {
     loadInsumosData = (barcode) => {
         let arrBarcode = barcode.split('-')
         axios
-        .get(this.props.backEndPoint + '/getInsumosDisponiveisParaSaida?id_insumo='+arrBarcode[0]+'&id_almoxarifado='+arrBarcode[1]+'&id_posicao='+arrBarcode[2])
+        .get(this.props.backEndPoint + '/getInsumosDisponiveisParaSaida?id_insumo='+arrBarcode[1]+'&id_almoxarifado='+arrBarcode[2]+'&id_posicao='+arrBarcode[3])
         .then(res => {
             if(res.data.payload && res.data.payload.length > 0){
                 let barcodes      = this.state.barcodes

@@ -64,13 +64,17 @@ class LancamentoAgrupado extends Component{
         axios
         .get(this.props.backEndPoint + '/getFuncionarios?id='+idFuncionario)
         .then(res => {
-            this.setState({
-                funcionarioSelecionado: {
-                    id: res.data.payload[0].id,
-                    descricao: res.data.payload[0].nome
-                }
-            })
-            this.mesFuncionarioSelecionados()
+            if(res.data.success){
+                this.setState({
+                    funcionarioSelecionado: {
+                        id: res.data.payload[0].id,
+                        descricao: res.data.payload[0].nome
+                    }
+                })
+                this.mesFuncionarioSelecionados()
+            }
+            else
+                this.props.showNotification(res.data.msg, res.data.success)
         })
         .catch(error => {
             console.log('error', error)

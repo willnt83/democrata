@@ -78,6 +78,8 @@ class Produtos extends Component {
                         ativoDescription: ativo,
                         ativoValue: produto.ativo,
                         cor: produto.cor,
+                        maoDeObra: produto.maoDeObra,
+                        materiaPrima: produto.materiaPrima,
                         linhaDeProducao: produto.linhaDeProducao,
                         setores: produto.setores
                     })
@@ -257,6 +259,8 @@ class Produtos extends Component {
                 sku: record.sku,
                 ativo: record.ativoValue,
                 cor: record.cor.id,
+                maoDeObra: record.maoDeObra,
+                materiaPrima: record.materiaPrima,
                 linhaDeProducao: record.linhaDeProducao.id,
                 keys
             })
@@ -305,6 +309,8 @@ class Produtos extends Component {
                     codigo: values.codigo,
                     sku: values.sku,
                     cor: values.cor,
+                    maoDeObra: values.maoDeObra,
+                    materiaPrima: values.materiaPrima,
                     ativo: values.ativo,
                     idLinhaDeProducao: values.linhaDeProducao,
                     setoresConjuntos: this.state.setores.map((setor, index) => {
@@ -455,6 +461,16 @@ class Produtos extends Component {
             sorter: (a, b) => this.compareByAlph(a.cor.nome, b.cor.nome)
         },
         {
+            title: 'Mão de Obra',
+            dataIndex: 'maoDeObra',
+            sorter: (a, b) => this.compareByAlph(a.maoDeObra, b.maoDeObra)
+        },
+        {
+            title: 'Matéria Prima',
+            dataIndex: 'materiaPrima',
+            sorter: (a, b) => this.compareByAlph(a.materiaPrima, b.materiaPrima)
+        },
+        {
             title: 'Linha de Produção',
             dataIndex: 'linhaDeProducao.nome',
             sorter: (a, b) => this.compareByAlph(a.linhaDeProducao.nome, b.linhaDeProducao.nome)
@@ -519,6 +535,7 @@ class Produtos extends Component {
                     title="Cadastro de Produtos"
                     visible={this.state.showProdutosModal}
                     onCancel={() => this.showProdutosModal(false)}
+                    maskClosable={false}
                     footer={[
                         <Button key="back" onClick={() => this.showProdutosModal(false)}><Icon type="close" /> Cancelar</Button>,
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarProduto} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
@@ -590,6 +607,22 @@ class Produtos extends Component {
                                                 })
                                             }
                                         </Select>
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Custo da Mão de Obra">
+                                    {getFieldDecorator('maoDeObra')(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o custo da mão de obra"
+                                        />
+                                    )}
+                                </Form.Item>
+                                <Form.Item label="Custo da Matéria Prima">
+                                    {getFieldDecorator('materiaPrima')(
+                                        <Input
+                                            id="nome"
+                                            placeholder="Digite o custo da matéria prima"
+                                        />
                                     )}
                                 </Form.Item>
                                 <Form.Item label="Ativo">

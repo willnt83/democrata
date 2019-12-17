@@ -153,7 +153,7 @@ class LancamentoProducao extends Component{
     mesFuncionarioSelecionados = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if(!err){
-                var range = this.getMonthDateRange(2019, values.mesLancamento)
+                //var range = this.getMonthDateRange(2019, values.mesLancamento)
                 this.setState({
                     mesSelecionado: values.mesLancamento,
                     idFuncionario: values.funcionario,

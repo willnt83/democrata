@@ -33,6 +33,7 @@ class ArmazenagemEtiquetas extends Component {
                     dynamicFieldsRendered: true,
                     insumosArmazenados: res.data.payload.map(insumo => {
                         return({
+                            idArmazenagemInsumo: insumo.idArmazenagemInsumo,
                             idInsumo: insumo.insumo.id,
                             codigo: insumo.insumo.ins,
                             nome: insumo.insumo.nome,
@@ -71,13 +72,17 @@ class ArmazenagemEtiquetas extends Component {
         this.setState({btnGerarEtiquetas: true})
         this.props.form.validateFieldsAndScroll((err, values) => {
             if(!err){
-                var request = []
+                var insumos = []
                 values.quantidadeEtiquetas.forEach((qtd, index) => {
-                    request.push({
+                    insumos.push({
                         ...this.state.insumosArmazenados[index],
                         quantidadeEtiquetas: qtd
                     })
                 })
+                var request = {
+                    idArmazenagem: this.props.idArmazenagem,
+                    insumos
+                }
                 this.requestGeracaoEtiquetasArmazenagem(request)
             }
             else
@@ -103,7 +108,6 @@ class ArmazenagemEtiquetas extends Component {
 
     render(){
         const { getFieldDecorator } = this.props.form
-
         return(
             <React.Fragment>
                 <Modal
@@ -117,7 +121,12 @@ class ArmazenagemEtiquetas extends Component {
                     ]}
                 >
                     <Row>
-                        <Col span={24} style={{position: 'relative'}}>
+                        <Col span={24}>
+                            <span className="bold">ID Armazenagem:</span> {this.props.idArmazenagem}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={24} style={{position: 'relative', marginTop: 10}}>
                             <Form layout="vertical">
                                 
                                 {
@@ -133,7 +142,7 @@ class ArmazenagemEtiquetas extends Component {
                                         {
                                             this.state.insumosArmazenados.map((insumo, k) =>{
                                                 return(
-                                                    <Row className="mt20" key={insumo.idInsumo}>
+                                                    <Row className="mt20" key={insumo.idArmazenagemInsumo}>
                                                         <Col span={4}>{insumo.idInsumo}</Col>
                                                         <Col span={5}>{insumo.nome} ({insumo.codigo})</Col>
                                                         <Col span={6}>{insumo.localFisico}</Col>

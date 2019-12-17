@@ -175,7 +175,6 @@ class ArmazenagemInsumos extends Component {
     }
 
     requestGetInsumosArmazenados = (idArmazenagem) => {
-        console.log('requestGetInsumosArmazenados')
         axios
         .get(this.props.backEndPoint + '/getInsumosArmazenados?id_armazenagem='+idArmazenagem)
         .then(res => {
@@ -558,24 +557,9 @@ class ArmazenagemInsumos extends Component {
             //this.requestGetInsumosArmazenar()
             this.getAlmoxarifados()
         }
-
-        // Disable do botão +
-       
-        /*
-        if(this.state.prevKeys.length !== prevState.prevKeys.length){
-            
-            const keys = this.props.form.getFieldValue('keys')
-            if(keys.length > this.state.insumosTemp.length)
-                this.setState({addBtnDisabled: true})
-            else
-                this.setState({addBtnDisabled: false})
-        }
-        */
     }
 
     render(){
-        console.log('this.state.insumosOptions', this.state.insumosOptions)
-
         const { getFieldDecorator, getFieldValue } = this.props.form
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
