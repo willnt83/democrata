@@ -9,6 +9,7 @@ import moment from 'moment'
 import LancamentoProducao from './LancamentoProducao'
 import LancamentoAgrupado from './LancamentoAgrupado'
 import ConferenciaProducao from './ConferenciaProducao'
+import DefeitosProducao from './DefeitosProducao'
 import EstornoProducao from './EstornoProducao'
 import 'moment/locale/pt-br'
 moment.locale('pt-br')
@@ -43,6 +44,7 @@ class Producao extends Component {
         showModalLancamentoProducao: false,
         showModalLancamentoAgrupado: false,
         showModalConferenciaProducao: false,
+        showModalDefeitosProducao: false,
         showModalEstornoProducao: false
     }
 
@@ -315,6 +317,10 @@ class Producao extends Component {
         this.setState({showModalConferenciaProducao: bool})
     }
 
+    showModalDefeitosProducaoF = (bool) => {
+        this.setState({showModalDefeitosProducao: bool})
+    }
+
     showModalEstornoProducaoF = (bool) => {
         this.setState({showModalEstornoProducao: bool})
     }
@@ -457,23 +463,24 @@ class Producao extends Component {
             <Content
                 style={{
                     margin: "24px 16px",
-                    padding: 24,
+                    padding: "21px 24px 24px 24px",
                     background: "#fff",
                     minHeight: 280
                 }}
             >
 
                 <Row style={{ marginBottom: 16 }}>
-                    <Col span={14}>
-                        <Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10}}><Icon type="barcode" /> Lançamento</Button>
-                        <Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10}}><Icon type="barcode" /> Lançamento Agrupado</Button>
-                        <Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /> Conferência</Button>
-                        <Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /> Estorno</Button>
+                    <Col span={16}>
+                        <Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="barcode" /> Lançamento</Button>
+                        <Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="barcode" /> Lançamento Agrupado</Button>
+                        <Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="check" /> Conferência</Button>
+                        <Button className="buttonBlue" onClick={() => this.showModalDefeitosProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="tool" /> Defeitos</Button>
+                        <Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="undo" /> Estorno</Button>
                     </Col>
-                    <Col span={10} align="end">
-                        <Button className="buttonBlue" onClick={() => this.goToAcompanharProducao()} style={{marginRight: 10}}><Icon type="eye" /> Visão Geral</Button>
+                    <Col span={8} align="end">
+                        <Button className="buttonBlue" onClick={() => this.goToAcompanharProducao()} style={{marginRight: 10, marginTop: 3}}><Icon type="eye" /> Visão Geral</Button>
                         <Tooltip title="Criar novo PCP" placement="right">
-                            <Button className="buttonGreen" onClick={() => this.loadProducaoModal()}><Icon type="plus" /> Novo PCP</Button>
+                            <Button className="buttonGreen" onClick={() => this.loadProducaoModal()} style={{marginRight: 10, marginTop: 3}}><Icon type="plus" /> Novo PCP</Button>
                         </Tooltip>
                     </Col>
                 </Row>
@@ -576,6 +583,11 @@ class Producao extends Component {
                 <ConferenciaProducao
                     showModalConferenciaProducao={this.state.showModalConferenciaProducao}
                     showModalConferenciaProducaoF={this.showModalConferenciaProducaoF}
+                    showNotification={this.showNotification}
+                />
+                <DefeitosProducao
+                    showModalDefeitosProducao={this.state.showModalDefeitosProducao}
+                    showModalDefeitosProducaoF={this.showModalDefeitosProducaoF}
                     showNotification={this.showNotification}
                 />
                 <EstornoProducao
