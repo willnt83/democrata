@@ -8,6 +8,7 @@ import axios from "axios"
 import LancamentoProducao from './lancamentoCodigoDeBarras/LancamentoProducao'
 import LancamentoAgrupado from './lancamentoCodigoDeBarras/LancamentoAgrupado'
 //import ConferenciaProducao from './lancamentoCodigoDeBarras/ConferenciaProducao'
+import DefeitosProducao from './lancamentoCodigoDeBarras/DefeitosProducao'
 import EstornoProducao from './lancamentoCodigoDeBarras/EstornoProducao'
 import Expedicao from './lancamentoCodigoDeBarras/Expedicao'
 
@@ -29,6 +30,7 @@ class IndexProducao extends Component {
 		showModalLancamentoProducao: false,
 		showModalLancamentoAgrupado: false,
 		showModalConferenciaProducao: false,
+		showModalDefeitosProducao: false,
 		showModalEstornoProducao: false,
 		showModalExpedicao: false,
 	};
@@ -97,6 +99,10 @@ class IndexProducao extends Component {
         this.setState({showModalConferenciaProducao: bool})
     }
 
+	showModalDefeitosProducaoF = (bool) => {
+		this.setState({showModalDefeitosProducao: bool})
+	}
+
     showModalEstornoProducaoF = (bool) => {
         this.setState({showModalEstornoProducao: bool})
 	}
@@ -130,6 +136,7 @@ class IndexProducao extends Component {
 												<Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10}}><Icon type="barcode" /></Button>
 												{/*<Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>*/}
 												<Button className="buttonGreen" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="check" /></Button>
+												<Button className="buttonBlue" onClick={() => this.showModalDefeitosProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="tool" /></Button>
 												<Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10}}><Icon type="undo" /></Button>
 												{/*<Button className="buttonPurple" onClick={() => this.showModalExpedicaoF(true)} style={{marginRight: 10}}><Icon type="export" /></Button>*/}
 											</Col>
@@ -259,6 +266,11 @@ class IndexProducao extends Component {
                     showModalConferenciaProducaoF={this.showModalConferenciaProducaoF}
                     showNotification={this.showNotification}
                 />*/}
+				<DefeitosProducao
+                    showModalDefeitosProducao={this.state.showModalDefeitosProducao}
+                    showModalDefeitosProducaoF={this.showModalDefeitosProducaoF}
+                    showNotification={this.showNotification}
+                />
                 <EstornoProducao
                     showModalEstornoProducao={this.state.showModalEstornoProducao}
                     showModalEstornoProducaoF={this.showModalEstornoProducaoF}
