@@ -471,16 +471,16 @@ class Producao extends Component {
 
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={16}>
-                        <Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="barcode" /> Lançamento</Button>
-                        <Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="barcode" /> Lançamento Agrupado</Button>
-                        <Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="check" /> Conferência</Button>
-                        <Button className="buttonBlue" onClick={() => this.showModalDefeitosProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="tool" /> Defeitos</Button>
-                        <Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 10, marginTop: 3}}><Icon type="undo" /> Estorno</Button>
+                        <Button className="buttonOrange" onClick={() => this.showModalLancamentoProducaoF(true)} style={{marginRight: 5, marginTop: 3, fontSize: '13px'}}><Icon type="barcode" /> Lançamento</Button>
+                        <Button className="buttonYellow" onClick={() => this.showModalLancamentoAgrupadoF(true)} style={{marginRight: 5, marginTop: 3, fontSize: '13px'}}><Icon type="barcode" /> Lançamento Agrupado</Button>
+                        <Button className="buttonGreen" onClick={() => this.showModalConferenciaProducaoF(true)} style={{marginRight: 5, marginTop: 3, fontSize: '13px'}}><Icon type="check" /> Conferência</Button>
+                        <Button className="buttonBlue" onClick={() => this.showModalDefeitosProducaoF(true)} style={{marginRight: 5, marginTop: 3, fontSize: '13px'}}><Icon type="tool" /> Defeitos</Button>
+                        <Button className="buttonRed" onClick={() => this.showModalEstornoProducaoF(true)} style={{marginRight: 5, marginTop: 3, fontSize: '13px'}}><Icon type="undo" /> Estorno</Button>
                     </Col>
                     <Col span={8} align="end">
-                        <Button className="buttonBlue" onClick={() => this.goToAcompanharProducao()} style={{marginRight: 10, marginTop: 3}}><Icon type="eye" /> Visão Geral</Button>
+                        <Button className="buttonBlue" onClick={() => this.goToAcompanharProducao()} style={{marginRight: 5, marginTop: 3, fontSize: '13px'}}><Icon type="eye" /> Visão Geral</Button>
                         <Tooltip title="Criar novo PCP" placement="right">
-                            <Button className="buttonGreen" onClick={() => this.loadProducaoModal()} style={{marginRight: 10, marginTop: 3}}><Icon type="plus" /> Novo PCP</Button>
+                            <Button className="buttonGreen" onClick={() => this.loadProducaoModal()} style={{marginRight: 5, marginTop: 3, fontSize: '13px'}}><Icon type="plus" /> Novo PCP</Button>
                         </Tooltip>
                     </Col>
                 </Row>
