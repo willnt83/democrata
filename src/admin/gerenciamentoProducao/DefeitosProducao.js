@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Modal, Select, Icon, Button, Divider, Table, InputNumber, Tag, Popconfirm } from 'antd'
+import { Row, Col, Form, Modal, Icon, Button, Divider, Table, Input, InputNumber, Tag, Popconfirm } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -160,75 +160,36 @@ class DefeitosProducao extends Component{
 
         this.state = {
             mostrar: false,
-            producoesOptions: [],
-            setoresOptions: [],
             subprodutosOptions: [],
-            idProducao: null,
-            idSetor: null,
-            idSubproduto: null,
-            nomeProducao: null,
             tableData: [],
             tableKeys: [],
-            barcodeReader: false
+            barcodeReader: false,
+            lancamentoManual: false,
+            btnLancarLoading: false,
+            btnSalvarLoading: false
         }
-        this.handleScanConferencia = this.handleScanConferencia.bind(this)
+        this.handleScanCodigoDeBarras = this.handleScanCodigoDeBarras.bind(this)
     }
 
-    handleScanConferencia(data){
-        if(this.state.idFuncionario !== null){
+    handleScanCodigoDeBarras(data){
+        if(data)
             this.requestGetCodigoDeBarra(data)
-        }
-        else{
-            this.props.showNotification('Selecione uma produção', false)
-        }
+        else
+            this.props.showNotification('Erro ao realizar a leitura. Tente novamente', false)
+    }
+
+    lancamentoManual = (bool) => {
+        this.setState({lancamentoManual: bool})
     }
 
     handleError(err){
         console.error(err)
     }
 
-    requestGetProducoesTitulo = () => {
-        axios
-        .get(this.props.backEndPoint + '/getProducoesTitulo')
-        .then(res => {
-            this.setState({
-                producoesOptions: res.data.payload.map(producao => {
-                    return({
-                        value: producao.id,
-                        description: producao.id+' - '+producao.nome
-                    })
-                })
-            })
-        })
-        .catch(error => {
-            console.log(error)
-        })
-    }
-
-    requestGetSetoresTitulo = () => {
-        axios
-        .get(this.props.backEndPoint + '/getSetoresTitulo')
-        .then(res => {
-            this.setState({
-                setoresOptions: res.data.payload.map(setor => {
-                    return({
-                        value: setor.id,
-                        description: setor.id+' - '+setor.nome
-                    })
-                })
-            })
-        })
-        .catch(error => {
-            console.log(error)
-        })
-    }
-
     requestGetCodigoDeBarra = (barcode) => {
+        this.setState({btnLancarLoading: true})
         axios
-        .get(this.props.backEndPoint    + '/getCodigoDeBarra?idProducao='+this.state.idProducao
-                                        + '&idSetor='+this.state.idSetor
-                                        + '&idSubproduto='+ this.state.idSubproduto
-                                        + '&barcode='+barcode )
+        .get(this.props.backEndPoint    + '/getCodigoDeBarra?barcode='+barcode )
         .then(res => {
             if(res.data.success){
                 let barcodeData = res.data.payload
@@ -240,7 +201,7 @@ class DefeitosProducao extends Component{
                     // } else {
                         if(tableKeys.indexOf(barcodeData.id) === -1) {
                             // Adding data
-                            barcodeData.quantidade = 1
+                            barcodeData.quantidade = barcodeData.codigoDeBarras.qtdeDefeito
                             tableData.push(barcodeData)
                             tableKeys.push(barcodeData.id)
                             this.setState({tableData, tableKeys})
@@ -249,18 +210,21 @@ class DefeitosProducao extends Component{
                         }
                     // }
                 } else {
-                    this.props.showNotification('Código de Barras incorreto para a produção escolhida.', false)
+                    this.props.showNotification('Código de Barras não existente', false)
                 }
             } else {
                 this.props.showNotification(res.data.msg, false)
             }
+            this.setState({btnLancarLoading: false})
         })
         .catch(error => {
+            this.setState({btnLancarLoading: false})
             console.log(error)
         })
     }
 
     requestDefeitosProducao = (request) => {
+        this.setState({btnSalvarLoading: true})
         axios
         .post(this.props.backEndPoint + '/defeitoCodigoDeBarras', request)
         .then(res => {
@@ -271,61 +235,18 @@ class DefeitosProducao extends Component{
             else{
                 this.props.showNotification(res.data.msg, res.data.success)
             }
+            this.setState({btnSalvarLoading: false})
         })
         .catch(error => {
+            this.setState({btnSalvarLoading: false})
             console.log(error)
         })
-    }
+    }   
 
-    producaoChange = (value, e) => {
-        this.setState({
-            idProducao: value,
-            nomeProducao: e.props.children
-        })
-    }
-
-    setorChange = (value) => {
-        this.setState({
-            idSetor: value
-        })
-        axios
-        .get(this.props.backEndPoint + '/getSubprodutosPorProducaoSetor?idProducao='+this.state.idProducao+'&idSetor='+value)
-        .then(res => {
-            console.log('res.data.payload', res.data.payload)
-            this.setState({
-                subprodutosOptions: res.data.payload.map(subproduto => {
-                    return({
-                        value: subproduto.id,
-                        description: subproduto.nome
-                    })
-                })
-            })
-        })
-        .catch(error => {
-            console.log(error)
-        })
-    }
-
-    subprodutoChange = (value, e) => {
-        this.setState({idSubproduto: value})
-    }    
-
-    selecionada = () => {
+    handleLancamento = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if(!err){
-                this.setState({mostrar: true})
-            }
-            else{
-                console.log('erro no formulário')
-            }
-        })
-    }
-
-    barcodeTest = () => {
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if(!err){
-                this.requestGetCodigoDeBarra(values.barcodeTeste)
-                this.setState({mostrar: true})
+                this.requestGetCodigoDeBarra(values.codigoDeBarras)
             }
             else{
                 console.log('erro no formulário')
@@ -354,20 +275,21 @@ class DefeitosProducao extends Component{
 
     saveBarcodes = () => {
         let tableData = this.state.tableData;
-        let requestData = tableData.map(record => {
-            return {
-                id: record.id,
-                quantidade: record.quantidade
-            }
-        })
-        this.requestDefeitosProducao(requestData)
+            if(tableData && tableData.length > 0) {
+            let requestData = tableData.map(record => {
+                return {
+                    id: record.id,
+                    quantidade: record.quantidade
+                }
+            })
+            this.requestDefeitosProducao(requestData)
+        } else {
+            this.props.showNotification('Não há registro válido para inserir.', false)
+        }
     }
 
     alterarProducao = () => {
         this.setState({
-            mostrar: false,
-            idProducao: null,
-            nomeProducao: null,
             tableData: [],
             tableKeys: []
         })
@@ -375,10 +297,7 @@ class DefeitosProducao extends Component{
 
     closeModal = () => {
         this.setState({
-            mostrar: false,
             barcodeReader: false,
-            idProducao: null,
-            nomeProducao: null,
             tableData: [],
             tableKeys: []
         })
@@ -387,15 +306,13 @@ class DefeitosProducao extends Component{
 
     componentWillReceiveProps(nextProps){
         if(!this.props.showModalDefeitosProducao && nextProps.showModalDefeitosProducao){
-            this.requestGetProducoesTitulo()
-            this.requestGetSetoresTitulo()
             this.setState({barcodeReader: true})
         }
     }
 
     render(){
         const { getFieldDecorator } = this.props.form
-        
+
         const components = {
             body: {
               row: EditableFormRow,
@@ -420,13 +337,37 @@ class DefeitosProducao extends Component{
             };
           }); 
 
+        const inputLancamentoManual =
+            <React.Fragment>
+                <Form.Item label="Código de Barras" style={{marginBottom: '0px'}}>
+                    {getFieldDecorator('codigoDeBarras', {
+                        rules: [
+                            {
+                                required: true, message: 'Por favor informe o código de barras',
+                            }
+                        ]
+                    })(
+                        <Input
+                            id="codigoDeBarras"
+                            placeholder="Digite o código de barras"
+                        />
+                    )}
+                </Form.Item>
+                <Button key="submit" type="primary" onClick={this.handleLancamento} loading={this.state.btnLancarLoading}><Icon type="save" /> Lançar</Button>
+            </React.Fragment>
+
         return(
             <Modal
                 title="Defeitos de Produção"
                 visible={this.props.showModalDefeitosProducao}
                 onCancel={this.closeModal}
                 footer={[
-                    <Button type="primary" key="back" onClick={this.closeModal}><Icon type="close" /> Fechar</Button>,
+                    <Popconfirm title="Deseja salvar os códigos de barras?" onConfirm={() => this.saveBarcodes()}>
+                        <Button className="buttonGreen" loading={this.state.btnSalvarLoading}><Icon type="check" /> Salvar</Button>
+                    </Popconfirm>,
+                    <Popconfirm title="Deseja fechar? Todos as alterações serão perdidas" onConfirm={this.closeModal}>
+                        <Button type="primary" key="back"><Icon type="close" /> Fechar</Button>
+                    </Popconfirm>
                 ]}
                 width={1200}
             >
@@ -436,141 +377,34 @@ class DefeitosProducao extends Component{
                             this.state.barcodeReader ?
                             <BarcodeReader
                                 onError={this.handleError}
-                                onScan={this.handleScanConferencia}
+                                onScan={this.handleScanCodigoDeBarras}
                             />
                             :null
                         }
-                        {
-                            !this.state.mostrar ?
-                            <Form layout="vertical">
-                                <Row gutter={10}>
-                                    <Col span={6}>
-                                        <Form.Item label="Produção">
-                                            {getFieldDecorator('producao', {
-                                                rules: [
-                                                    {
-                                                        required: true, message: 'Por favor selecione a produção',
-                                                    }
-                                                ]
-                                            })(
-                                                <Select
-                                                    showSearch
-                                                    optionFilterProp="children"
-                                                    style={{ width: '100%' }}
-                                                    placeholder="Selecione"
-                                                    getPopupContainer={() => document.getElementById('colDefeitosProducao')}
-                                                    allowClear={true}
-                                                    onChange={this.producaoChange}
-                                                >
-                                                    {
-                                                        this.state.producoesOptions.map((option) => {
-                                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                        })
-                                                    }
-                                                </Select>
-                                            )}
-                                        </Form.Item>
-                                        <Form.Item label="Setor">
-                                            {getFieldDecorator('setor', {
-                                                rules: [
-                                                    {
-                                                        required: true, message: 'Por favor selecione o setor',
-                                                    }
-                                                ]
-                                            })(
-                                                <Select
-                                                    showSearch
-                                                    optionFilterProp="children"
-                                                    style={{ width: '100%' }}
-                                                    placeholder="Selecione"
-                                                    getPopupContainer={() => document.getElementById('colDefeitosProducao')}
-                                                    allowClear={true}
-                                                    onChange={this.setorChange}
-                                                >
-                                                    {
-                                                        this.state.setoresOptions.map((option) => {
-                                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                        })
-                                                    }
-                                                </Select>
-                                            )}
-                                        </Form.Item>
-                                        <Form.Item label="Subproduto">
-                                            {getFieldDecorator('subproduto', {
-                                                rules: [
-                                                    {
-                                                        required: true, message: 'Por favor selecione o subproduto',
-                                                    }
-                                                ]
-                                            })(
-                                                <Select
-                                                    showSearch
-                                                    optionFilterProp="children"
-                                                    style={{ width: '100%' }}
-                                                    placeholder="Selecione"
-                                                    getPopupContainer={() => document.getElementById('colDefeitosProducao')}
-                                                    allowClear={true}
-                                                    onChange={this.subprodutoChange}
-                                                >
-                                                    {
-                                                        this.state.subprodutosOptions.map((option) => {
-                                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                        })
-                                                    }
-                                                </Select>
-                                            )}
-                                        </Form.Item>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col span={6}>
-                                        <Button className="buttonGreen" key="submit" onClick={() => this.selecionada()}><Icon type="check" /> Selecionar</Button>
-                                    </Col>
-                                </Row>
-                            </Form>
-                            :
-                            <Row>
-                                <Col span={24}>
-                                    <span className="bold">Produção: {this.state.nomeProducao}</span>
-                                    <span className="bold" onClick={this.alterarProducao} style={{marginLeft: 10, cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Alterar</span>
-                                </Col>
+                        <Form layout="vertical">
+                            <Row style={{marginBottom: 10}}>
                                 {
-                                    this.state.tableData.length > 0 ?
-                                    <Col span={24} style={{marginTop: '10px', textAlign: 'center'}}>
-                                        <Button className="buttonGreen" onClick={() => this.saveBarcodes()}><Icon type="check" /> Salvar</Button>
+                                    !this.state.lancamentoManual ?
+                                    <Col span={24} onClick={() => this.lancamentoManual(true)} style={{textAlign: 'right', cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>
+                                        <span className="bold" onClick={this.habilitarLancamentoManual} style={{cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Lançamento Manual</span>
                                     </Col>
-                                    : null
+                                    :
+                                    <Col span={24} onClick={() => this.lancamentoManual(false)} style={{textAlign: 'right', cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>
+                                        <span className="bold" onClick={this.habilitarLancamentoManual} style={{cursor: 'pointer', color: '#3c3fe0', textDecoration: 'underline'}}>Código de Barras</span>
+                                    </Col>
                                 }
-                                {/* <Row>
-                                    <Form layout="vertical">
-                                        <Row>
-                                            <Col span={14} id="colChaveNF" style={{position: 'relative'}}>                            
-                                                <Form.Item
-                                                    label="Codigo de Barras"
-                                                >
-                                                    {getFieldDecorator('barcodeTeste', {
-                                                        rules: [
-                                                            {
-                                                                required: true, message: 'Por favor informe o barcode',
-                                                            }
-                                                        ]
-                                                    })(
-                                                        <Input
-                                                            id="barcodeTeste"
-                                                            placeholder="Digite o barcode"
-                                                        />
-                                                    )}
-                                                </Form.Item>                              
-                                            </Col> 
-                                        </Row>
-                                        <Row>
-                                            <Button className="buttonGreen" key="submit" onClick={() => this.barcodeTest()}><Icon type="check" /> Selecionar</Button>
-                                        </Row>
-                                    </Form>
-                                </Row> */}
                             </Row>
-                            
-                        }
+                            <Row>
+                                {
+                                    !this.state.lancamentoManual ?
+                                    <Col span={24}><span className="bold">Aguardando leitura do código de barras do produto...</span></Col>
+                                    :
+                                    <Col span={24}>
+                                        {inputLancamentoManual}
+                                    </Col>
+                                }
+                            </Row>
+                        </Form> 
                         <Divider />
                         {
                             this.state.tableData.length > 0 ?

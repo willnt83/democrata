@@ -377,7 +377,7 @@ class PedidosCompra extends Component {
                         return ({
                             item: this.state.itemsValues[index] ? parseInt(this.state.itemsValues[index]) : null,
                             idInsumo: insumo,
-                            quantidade: parseFloat(values.quantidades[index]).toFixed(2)
+                            quantidade: parseFloat(values.quantidades[index]).toFixed(6)
                         })
                     })
                     .filter(insumo => {
