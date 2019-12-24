@@ -196,19 +196,21 @@ class DefeitosProducao extends Component{
                 let tableData   = this.state.tableData
                 let tableKeys   = this.state.tableKeys
                 if(barcodeData) {
-                    // if(barcodeData.codigoDeBarras.lancaco !== 'S'){
-                    //     this.props.showNotification('Código de Barras ainda não lançado.', false)
-                    // } else {
+                    if(barcodeData.codigoDeBarras.lancaco !== 'S'){
+                        this.props.showNotification('Código de Barras ainda não lançado.', false)
+                    } else {
                         if(tableKeys.indexOf(barcodeData.id) === -1) {
-                            // Adding data
-                            barcodeData.quantidade = barcodeData.codigoDeBarras.qtdeDefeito
+                            if(!barcodeData.codigoDeBarras.qtdeDefeito || barcodeData.codigoDeBarras.qtdeDefeito <= 0)
+                                barcodeData.quantidade = 1
+                            else
+                                barcodeData.quantidade = barcodeData.codigoDeBarras.qtdeDefeito
                             tableData.push(barcodeData)
                             tableKeys.push(barcodeData.id)
                             this.setState({tableData, tableKeys})
                         } else {
                             this.props.showNotification('Código de Barras já inserido.', false)
                         }
-                    // }
+                    }
                 } else {
                     this.props.showNotification('Código de Barras não existente', false)
                 }
