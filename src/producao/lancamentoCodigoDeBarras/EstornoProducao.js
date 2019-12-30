@@ -9,9 +9,14 @@ class EstornoProducao extends Component{
     constructor(props){
         super(props)
         this.state = {
+            mostrar: false,
             idProducao: null,
+            idSetor: null,
+            idSubproduto: null,
             nomeProducao: null,
             producoesOptions: [],
+            setoresOptions: [],
+            subprodutosOptions: [],
             tableData: [],
             barcodeReader: false
         }
@@ -53,11 +58,28 @@ class EstornoProducao extends Component{
         })
     }
 
-    requestGetCodigosDeBarrasEstornados = (idProducao) => {
+    requestGetSetoresTitulo = () => {
         axios
-        .get(this.props.backEndPoint + '/getCodigosDeBarrasEstornados?idProducao='+idProducao)
+        .get(this.props.backEndPoint + '/getSetoresTitulo')
         .then(res => {
-            console.log('response', res.data.payload)
+            this.setState({
+                setoresOptions: res.data.payload.map(setor => {
+                    return({
+                        value: setor.id,
+                        description: setor.id+' - '+setor.nome
+                    })
+                })
+            })
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }    
+
+    requestGetCodigosDeBarrasEstornados = (idProducao, idSetor, idSubproduto) => {
+        axios
+        .get(this.props.backEndPoint + '/getCodigosDeBarrasEstornados?idProducao='+idProducao+'&idSetor='+idSetor+'&idSubproduto='+idSubproduto)
+        .then(res => {
             this.setState({
                 tableData: res.data.payload
             })
@@ -73,7 +95,7 @@ class EstornoProducao extends Component{
         .then(res => {
             if(res.data.success){
                 this.props.showNotification(res.data.msg, res.data.success)
-                this.requestGetCodigosDeBarrasEstornados(this.state.idProducao)
+                this.requestGetCodigosDeBarrasEstornados(this.state.idProducao, this.state.idSetor, this.state.idSubproduto)
             }
             else{
                 this.props.showNotification(res.data.msg, res.data.success)
@@ -85,17 +107,40 @@ class EstornoProducao extends Component{
     }
 
     producaoChange = (value, e) => {
-        console.log('-producaoChange-')
         this.setState({
             nomeProducao: e.props.children
         })
     }
 
-    producaoSelecionada = () => {
+    setorChange = (value) => {
+        console.log('setor', value)
+        this.setState({
+            idSetor: value
+        })
+
+        axios
+        .get(this.props.backEndPoint + '/getSubprodutosPorProducaoSetor?idProducao='+this.state.idProducao+'&idSetor='+value)
+        .then(res => {
+            console.log('res.data.payload', res.data.payload)
+            this.setState({
+                subprodutosOptions: res.data.payload.map(subproduto => {
+                    return({
+                        value: subproduto.id,
+                        description: subproduto.nome
+                    })
+                })
+            })
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }    
+
+    selecionada = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if(!err){
-                this.setState({idProducao: values.producao})
-                this.requestGetCodigosDeBarrasEstornados(values.producao)
+                this.setState({mostrar: true})
+                this.requestGetCodigosDeBarrasEstornados(values.producao, values.setor, values.subproduto)
             }
             else{
                 console.log('erro no formulário')
@@ -105,6 +150,7 @@ class EstornoProducao extends Component{
 
     alterarProducao = () => {
         this.setState({
+            mostrar: false,
             idProducao: null,
             nomeProducao: null,
             tableData: []
@@ -113,6 +159,7 @@ class EstornoProducao extends Component{
 
     closeModal = () => {
         this.setState({
+            mostrar: false,
             barcodeReader: false,
             idProducao: null,
             nomeProducao: null,
@@ -124,6 +171,7 @@ class EstornoProducao extends Component{
     componentWillReceiveProps(nextProps){
         if(!this.props.showModalEstornoProducao && nextProps.showModalEstornoProducao){
             this.requestGetProducoesTitulo()
+            this.requestGetSetoresTitulo()
             this.setState({barcodeReader: true})
         }
     }
@@ -181,7 +229,6 @@ class EstornoProducao extends Component{
                     <Button type="primary" key="back" onClick={this.closeModal}><Icon type="close" /> Fechar</Button>,
                 ]}
                 width={1200}
-                maskClosable={false}
             >
                 <Row>
                     <Col span={24} id="colEstornoProducao" style={{position: 'relative'}}>
@@ -194,7 +241,7 @@ class EstornoProducao extends Component{
                             :null
                         }
                         {
-                            this.state.idProducao === null ?
+                            !this.state.mostrar ?
                             <Form layout="vertical">
                                 <Row gutter={10}>
                                     <Col span={6}>
@@ -207,6 +254,8 @@ class EstornoProducao extends Component{
                                                 ]
                                             })(
                                                 <Select
+                                                    showSearch
+                                                    optionFilterProp="children"
                                                     style={{ width: '100%' }}
                                                     placeholder="Selecione"
                                                     getPopupContainer={() => document.getElementById('colEstornoProducao')}
@@ -221,11 +270,60 @@ class EstornoProducao extends Component{
                                                 </Select>
                                             )}
                                         </Form.Item>
+                                        <Form.Item label="Setor">
+                                            {getFieldDecorator('setor', {
+                                                rules: [
+                                                    {
+                                                        required: true, message: 'Por favor selecione o setor',
+                                                    }
+                                                ]
+                                            })(
+                                                <Select
+                                                    showSearch
+                                                    optionFilterProp="children"
+                                                    style={{ width: '100%' }}
+                                                    placeholder="Selecione"
+                                                    getPopupContainer={() => document.getElementById('colEstornoProducao')}
+                                                    allowClear={true}
+                                                    onChange={this.setorChange}
+                                                >
+                                                    {
+                                                        this.state.setoresOptions.map((option) => {
+                                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                        })
+                                                    }
+                                                </Select>
+                                            )}
+                                        </Form.Item>
+                                        <Form.Item label="Subproduto">
+                                            {getFieldDecorator('subproduto', {
+                                                rules: [
+                                                    {
+                                                        required: true, message: 'Por favor selecione o subproduto',
+                                                    }
+                                                ]
+                                            })(
+                                                <Select
+                                                    showSearch
+                                                    optionFilterProp="children"
+                                                    style={{ width: '100%' }}
+                                                    placeholder="Selecione"
+                                                    getPopupContainer={() => document.getElementById('colEstornoProducao')}
+                                                    allowClear={true}
+                                                >
+                                                    {
+                                                        this.state.subprodutosOptions.map((option) => {
+                                                            return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                        })
+                                                    }
+                                                </Select>
+                                            )}
+                                        </Form.Item>                                        
                                     </Col>
                                 </Row>
                                 <Row>
                                     <Col span={6}>
-                                        <Button className="buttonGreen" key="submit" onClick={() => this.producaoSelecionada()}><Icon type="check" /> Selecionar</Button>
+                                        <Button className="buttonGreen" key="submit" onClick={() => this.selecionada()}><Icon type="check" /> Selecionar</Button>
                                     </Col>
                                 </Row>
                             </Form>
