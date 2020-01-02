@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
-import { Icon, Modal, Button, Row, Col, Form, Select, InputNumber, notification } from 'antd'
+import { Icon, Modal, Button, Row, Col, Form, Select, Input, Divider, InputNumber, notification } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import cloneDeep from 'lodash/cloneDeep';
+
+import '../static/inputs.css';
 
 let id = 0
 
@@ -14,7 +16,8 @@ class ArmazenagemInsumos extends Component {
 
     state = {
         showArmazenagemLancamentoModal: false,
-        insumosInfo: [],
+        qtdeEntradaValues: [],
+        qtdeArmazenadaValues: [],
         insumos: [],
         insumosOptions: [],
         pedidosOptions: [],
@@ -251,12 +254,11 @@ class ArmazenagemInsumos extends Component {
         const keys = this.props.form.getFieldValue('keys')
         keys.forEach(row => {
             if(this.props.form.getFieldValue(`insumo[${row}]`) === this.props.form.getFieldValue(`insumo[${k}]`)){
-                var content = 'Quantidade entrada: '+quantidadeEntrada+' | Quantidade a ser armazenada: '+parseFloat(quantidadeArmazenar)
-                //var content = 'Quantidade entrada: '+quantidadeEntrada
-                var insumosInfo = this.state.insumosInfo
-                insumosInfo.splice(row, 1, content)
-                //console.log('insumosInfo', insumosInfo)
-                this.setState({insumosInfo})
+                let qtdeEntradaValues       = this.state.qtdeEntradaValues
+                let qtdeArmazenadaValues    = this.state.qtdeArmazenadaValues
+                qtdeEntradaValues[row]      = quantidadeEntrada
+                qtdeArmazenadaValues[row]   = quantidadeArmazenar
+                this.setState({qtdeEntradaValues, qtdeArmazenadaValues})
             }
         })
     }
@@ -408,7 +410,8 @@ class ArmazenagemInsumos extends Component {
                 idPedidoInsumo: null,
                 quantidadeArmazenar: null,
                 insumos: [],
-                insumosInfo: [],
+                qtdeEntradaValues: [],
+                qtdeArmazenadaValues: [],
                 insumosArmazenados: []
             })
             this.props.showArmazenagemModalF(false)
@@ -456,7 +459,8 @@ class ArmazenagemInsumos extends Component {
             idPedidoInsumo: null,
             quantidadeArmazenar: null,
             insumos: [],
-            insumosInfo: [],
+            qtdeEntradaValues: [],
+            qtdeArmazenadaValues: [],
             insumosArmazenados: []
         })
 
@@ -602,8 +606,8 @@ class ArmazenagemInsumos extends Component {
         const porcionamentos = keys.map(k => (
             <React.Fragment key={k}>
                 <Row gutter={5}>
-                    <Col span={4} id="pedido" style={{position: 'relative'}}>
-                        <Form.Item style={{marginBottom: 0}}>
+                    <Col span={6} id="pedido" style={{position: 'relative'}}>
+                        <Form.Item label="Pedido/Fornecedor" style={{marginBottom: 0}}>
                             {getFieldDecorator(`pedido[${k}]`, {
                                 rules: [{
                                     required: true, message: "Informe o pedido"
@@ -626,8 +630,8 @@ class ArmazenagemInsumos extends Component {
                             )}
                         </Form.Item>
                     </Col>
-                    <Col span={6} id="insumo" style={{position: 'relative'}}>
-                        <Form.Item style={{marginBottom: 0}}>
+                    <Col span={18} id="insumo" style={{position: 'relative'}}>
+                        <Form.Item label="INS/Insumo"  style={{marginBottom: 0}}>
                             {getFieldDecorator(`insumo[${k}]`, {
                                 rules: [{
                                     required: true, message: "Informe o insumo"
@@ -652,8 +656,8 @@ class ArmazenagemInsumos extends Component {
                             )}
                         </Form.Item>
                     </Col>
-                    <Col span={5} id="almoxarifado" style={{position: 'relative'}}>
-                        <Form.Item style={{marginBottom: 0}}>
+                    <Col span={6} id="almoxarifado" style={{position: 'relative'}}>
+                        <Form.Item label="Almoxarifado" style={{marginBottom: 0}}>
                             {getFieldDecorator(`almoxarifado[${k}]`, {
                                 rules: [{
                                     required: true, message: "Informe o almoxarifado"
@@ -676,8 +680,8 @@ class ArmazenagemInsumos extends Component {
                             )}
                         </Form.Item>
                     </Col>
-                    <Col span={5} id="posicao" style={{position: 'relative'}}>
-                        <Form.Item style={{marginBottom: 0}}>
+                    <Col span={6} id="posicao" style={{position: 'relative'}}>
+                        <Form.Item label="Posição" style={{marginBottom: 0}}>
                             {getFieldDecorator(`posicao[${k}]`, {
                                 rules: [{
                                     required: true, message: "Informe a posição para armazenagem"
@@ -708,8 +712,8 @@ class ArmazenagemInsumos extends Component {
                             )}
                         </Form.Item>
                     </Col>
-                    <Col span={4}>
-                        <Form.Item style={{marginBottom: 0}}>
+                    <Col span={3}>
+                        <Form.Item label="Quantidade" style={{marginBottom: 0}}>
                             {getFieldDecorator(`quantidade[${k}]`, {
                                 rules: [
                                     {
@@ -728,6 +732,32 @@ class ArmazenagemInsumos extends Component {
                                     //onBlur={this.changeQuantidade}
                                 />
                             )}
+                        </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                        <Form.Item label="Quantidade Entrada" labelAlign="center" style={{marginBottom: 0}}>
+                            <Input
+                                placeholder="0"
+                                value={this.state.qtdeEntradaValues[k]}
+                                disabled={true}
+                                className="circle-input-ligthgray"
+                                style={{cursor: "auto"}}
+                            />                            
+                        </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                        <Form.Item label="Quantidade a ser Armazenada" labelAlign="center" style={{marginBottom: 0}}>
+                            <Input
+                                placeholder="0"
+                                value={this.state.qtdeArmazenadaValues[k]}
+                                disabled={true}
+                                className="circle-input-ligthgray"
+                                style={{cursor: "auto"}}
+                            />                             
+                        </Form.Item>
+                    </Col>
+                    <Col span={1}>
+                        <Form.Item label="" style={{marginTop: 32, marginLeft: 15}}>
                             {keys.length > 1 ? (
                                 <Icon
                                     className="dynamic-delete-button"
@@ -735,15 +765,11 @@ class ArmazenagemInsumos extends Component {
                                     disabled={keys.length === 1}
                                     onClick={() => this.removeComposicaoRow(k)}
                                 />
-                            ) : null}
-                        </Form.Item>
-                    </Col>
+                            ) : null}                            
+                            </Form.Item>                        
+                    </Col>              
                 </Row>
-                <Row gutter={5} style={{marginBottom: 25}}>
-                    <Col span={10} className="bold">
-                        {this.state.insumosInfo[k]}
-                    </Col>
-                </Row>
+                <Divider />
             </React.Fragment>
         ))
 
@@ -762,18 +788,6 @@ class ArmazenagemInsumos extends Component {
                     <Row>
                         <Col span={24} id="colArmazenagem" style={{position: 'relative'}}>
                             <Form layout="vertical">
-                                {
-                                    porcionamentos.length > 0 ?
-                                    <Row className="bold" style={{marginBottom: 10}}>
-                                        <Col span={4}>Pedido - Fornecedor</Col>
-                                        <Col span={6}>INS - Insumo</Col>
-                                        <Col span={5}>Almoxarifado</Col>
-                                        <Col span={5}>Posição</Col>
-                                        <Col span={4}>Quantidade</Col>
-                                    </Row>
-                                    :null
-                                }
-                                
                                 {porcionamentos}
                                 <Row>
                                     <Col span={24}>

@@ -196,7 +196,7 @@ class DefeitosProducao extends Component{
                 let tableData   = this.state.tableData
                 let tableKeys   = this.state.tableKeys
                 if(barcodeData) {
-                    if(barcodeData.codigoDeBarras.lancaco !== 'S'){
+                    if(barcodeData.codigoDeBarras.lancado !== 'Y'){
                         this.props.showNotification('Código de Barras ainda não lançado.', false)
                     } else {
                         if(tableKeys.indexOf(barcodeData.id) === -1) {
