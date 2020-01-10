@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import axios from "axios"
 import cloneDeep from 'lodash/cloneDeep';
 
-import '../static/inputs.css';
+//import '../static/inputs.css';
 
 let id = 0
 

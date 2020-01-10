@@ -107,8 +107,6 @@ class LancamentoAgrupado extends Component{
             if(res.data.success){
                 this.props.showNotification(res.data.msg, res.data.success)
                 this.requestGetCodigoDeBarrasInfo(request.barcode)
-
-                console.log('lançado...')
                 this.setState({
                     funcionarioSelecionado: {
                         id: null,
@@ -219,9 +217,6 @@ class LancamentoAgrupado extends Component{
     }
 
     render(){
-        console.log('--------------------------------------------')
-        console.log('barcodeReaderFuncionario', this.state.barcodeReaderFuncionario)
-        console.log('barcodeReaderLancamento', this.state.barcodeReaderLancamento)
         const { getFieldDecorator } = this.props.form
 
         const columns = [
