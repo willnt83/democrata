@@ -1,0 +1,7 @@
+.circle-input-ligthgray {
+    background-color: #fafafa !important;
+    color: rgba(0, 0, 0, 0.65) !important;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+}

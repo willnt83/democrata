@@ -8,6 +8,8 @@ import moment from 'moment'
 import 'moment/locale/pt-br'
 import _ from 'lodash';
 
+import NumericInput from '../shared/NumericInput';
+
 const { Content } = Layout
 
 let id = 0
@@ -239,11 +241,13 @@ class PedidosCompra extends Component {
     componentWillUpdate(){
         if(this.state.dynamicFieldsRendered){            
             var insumos = []
-            var quantidades = []
+            var valor = []
+            var quantidades = []            
 
             this.state.insumos.forEach(insumo => {
                 insumos.push(insumo.id)
-                quantidades.push(insumo.quantidade)
+                valor.push(insumo.valor)
+                quantidades.push(insumo.quantidade)                
                 this.state.itemsValues.push(insumo.item)
                 this.state.insValues.push(insumo.ins)
                 this.state.unidademedidaValues.push(insumo.unidademedida)
@@ -255,6 +259,7 @@ class PedidosCompra extends Component {
 
             this.props.form.setFieldsValue({
                 insumos,
+                valor,
                 quantidades
             })
 
@@ -377,7 +382,8 @@ class PedidosCompra extends Component {
                         return ({
                             item: this.state.itemsValues[index] ? parseInt(this.state.itemsValues[index]) : null,
                             idInsumo: insumo,
-                            quantidade: parseFloat(values.quantidades[index]).toFixed(6)
+                            valor: parseFloat(values.valor[index]),
+                            quantidade: parseFloat(values.quantidades[index])
                         })
                     })
                     .filter(insumo => {
@@ -462,9 +468,9 @@ class PedidosCompra extends Component {
         const composicaoItems = keys.map((k, index) => (
             <Row key={k} style={{marginBottom: '15px'}}>                
                 <Col span={24}>
-                    <Col span={19} id="colInsumos" style={{position: 'relative'}}>
+                    <Col span={15} id="colInsumos" style={{position: 'relative'}}>
                         <Col span={24}>
-                            <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
+                            <Form.Item label="INS/Insumos (Matérias-Primas)" style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`insumos[${k}]`, {
                                     rules: [
                                         {
@@ -518,9 +524,20 @@ class PedidosCompra extends Component {
                             ) : null
                         }
                     </Col>
+                    <Col span={4} id="colValor" style={{position: 'relative'}}>
+                        <Form.Item label="Valor" style={{paddingBottom: '0px', marginBottom: '0px'}}>
+                            {getFieldDecorator(`valor[${k}]`, {})(
+                                <NumericInput 
+                                    id="valor" 
+                                    placeholder="Valor" 
+                                    maxLength={25} 
+                                />
+                            )}                            
+                        </Form.Item>
+                    </Col>
                     <Col span={4} id="colQtde" style={{position: 'relative'}}>
                         <Col span={24}>
-                            <Form.Item style={{paddingBottom: '0px', marginBottom: '0px'}}>
+                            <Form.Item label="Quantidade" style={{paddingBottom: '0px', marginBottom: '0px'}}>
                                 {getFieldDecorator(`quantidades[${k}]`, {
                                     rules: [
                                         {
@@ -531,9 +548,10 @@ class PedidosCompra extends Component {
                                         }                                        
                                     ]
                                 })(
-                                    <Input
+                                    <NumericInput
                                         id="quantidade"
                                         placeholder="Quantidade"
+                                        maxLength={25}
                                     />
                                 )}
                             </Form.Item>
@@ -541,7 +559,7 @@ class PedidosCompra extends Component {
                         <Col span={24} style={{paddingLeft: '2px', fontSize: '12px'}}>
                             <span><strong>Conferido:</strong>{this.state.qtdeConferidaValues[k]}</span>
                         </Col>
-                    </Col>                     
+                    </Col>
                     <Col span={1} id="colDelete" style={{position: 'relative'}}>
                         <Form.Item style={{paddingBottom: '0px', marginBottom: '0px', marginTop: '4px', textAlign: 'center'}}>
                             {keys.length > 1 && this.state.qtdeConferidaValues[k] <= 0 ? (
@@ -638,7 +656,7 @@ class PedidosCompra extends Component {
                         <Button key="back" onClick={() => this.showPedidosCompraModal(false)}><Icon type="close" /> Cancelar</Button>,
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarPedidoCompra} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
-                    width={900}
+                    width={1300}
                 >
                     <Form layout="vertical">                        
                         <Row gutter={3}>
@@ -757,7 +775,6 @@ class PedidosCompra extends Component {
                             </Col>
                         </Row>
                         <Divider />
-                        <h4>INS / Insumos (Matérias-Primas)</h4>  
                         {composicaoItems}
                         <Row>
                             <Col span={24}>

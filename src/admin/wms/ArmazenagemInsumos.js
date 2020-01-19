@@ -725,7 +725,7 @@ class ArmazenagemInsumos extends Component {
                                 ],
                             })(
                                 <InputNumber
-                                    style={{ width: '75%', marginRight: 8 }}
+                                    style={{ width: '100%', marginRight: 8 }}
                                     placeholder="Qtd"
                                     min={0} 
                                     max={9999999}
