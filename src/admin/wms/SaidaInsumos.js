@@ -397,8 +397,8 @@ class SaidaInsumos extends Component {
 
         const porcionamentos = keys.map(k => (
             <React.Fragment key={k}>
-                <Row gutter={10} style={{marginTop: 10}}>
-                    <Col span={5} id="insumo" style={{position: 'relative'}}>
+                <Row style={{marginTop: 10}}>
+                    <Col span={18} id="insumo" style={{position: 'relative'}}>
                         <Form.Item style={{marginBottom: 0}}>
                             {getFieldDecorator(`insumo[${k}]`, {
                                 rules: [{
@@ -408,31 +408,29 @@ class SaidaInsumos extends Component {
                                 <Select
                                     showSearch
                                     optionFilterProp="children"
-                                    style={{ width: '100%' }}
+                                    style={{ width: '95%' }}
                                     allowClear={true}
                                     onChange={(value) => this.changeInsumo(value, k)}
                                     getPopupContainer={() => document.getElementById('colSaida')}
                                 >
                                     {
                                         this.state.insumosOptions.map((option) => {
-                                            return (<Select.Option key={option.id} value={option.id}>{option.id} - {option.nomeInsumo}</Select.Option>)
+                                        return (<Select.Option 
+                                            key={option.id} value={option.id}>{option.id} - {option.nomeInsumo} - {option.nomeAlmoxarifado} - {option.nomePosicao}
+                                            
+
+                                            </Select.Option>)
                                         })
                                     }
                                 </Select>
                             )}
                         </Form.Item>
                     </Col>
-                    <Col span={5} className="bold">
-                        {this.state.insumosInfo[k] ? this.state.insumosInfo[k].nomeAlmoxarifado : null}
-                    </Col>
-                    <Col span={5} className="bold">
-                        {this.state.insumosInfo[k] ? this.state.insumosInfo[k].nomePosicao : null}
-                    </Col>
-                    <Col span={5} className="bold">
+                    <Col span={3} className="bold">
                         {this.state.insumosInfo[k] ? this.state.insumosInfo[k].quantidadeDisponivel : null}
                     </Col>
                     
-                        <Col span={4}>
+                        <Col span={3}>
                             <Form.Item style={{marginBottom: 0}}>
                                 {getFieldDecorator(`quantidade[${k}]`, {
                                     rules: [{
@@ -440,7 +438,7 @@ class SaidaInsumos extends Component {
                                     }],
                                 })(
                                     <Input
-                                        style={{ width: '75%', marginRight: 8 }}
+                                        style={{ width: '95%', marginRight: 8 }}
                                         placeholder="Qtd"
                                         onBlur={this.changeQuantidade}
 
@@ -482,11 +480,9 @@ class SaidaInsumos extends Component {
                                 {
                                     porcionamentos.length > 0 ?
                                     <Row className="bold" style={{marginBottom: 10}}>
-                                        <Col span={5}>Insumo</Col>
-                                        <Col span={5}>Almoxarifado</Col>
-                                        <Col span={5}>Posição</Col>
-                                        <Col span={5}>Quantidade Disponível</Col>
-                                        <Col span={4}>Quantidade</Col>
+                                        <Col span={17}>Id Armaz. - Insumo - Almoxarifado - Posição</Col>
+                                        <Col span={4}>Quantidade Disponível</Col>
+                                        <Col span={3}>Quantidade</Col>
                                     </Row>
                                     :null
                                 }

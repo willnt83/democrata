@@ -22,6 +22,12 @@ import LinhaDeProducao from "./cadastros/LinhaDeProducao"
 import Cores from "./cadastros/Cores"
 import DiasNaoUteis from "./cadastros/DiasNaoUteis"
 
+
+//PCP
+import Consolidado from "./pcp/Consolidado"
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 import Producao from "./gerenciamentoProducao/Producao"
 import Acompanhamento from "./gerenciamentoProducao/Acompanhamento"
 
@@ -135,6 +141,18 @@ const routes = [
 		sidebar: () => <div>Produção</div>,
 		main: () => <Producao />
 	},
+	{
+		path: "/admin/pcp/consolidado",
+		exact: true,
+		sidebar: () => <div>Consolidado</div>,
+		main: () => <Consolidado />
+	},
+	/*{
+		path: "/admin/pcp/capacidadeProdutiva",
+		exact: true,
+		sidebar: () => <div>Capacidade Produtiva</div>,
+		main: () => <CapacidadeProdutiva />
+	},*/
 	{
 		path: "/admin/producao/acompanhamento",
 		exact: true,

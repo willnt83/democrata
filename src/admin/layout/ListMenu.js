@@ -126,6 +126,30 @@ class ListMenu extends Component{
                             <span>Produção</span>
                         </Link>
                     </Menu.Item>
+
+                    <SubMenu key="pcp" title={<span><Icon type="experiment" /><span>PCP</span></span>}>
+                        <SubMenu key="pcpCadastros" title={<span><Icon type="bars" /><span>Cadastros</span></span>}>
+                            <Menu.Item key="pcpConsolidado">
+                                <Link to="/admin/pcp/consolidado">
+                                    <Icon type="container" />
+                                    <span>Consolidado</span>
+                                </Link>
+                            </Menu.Item> 
+                            <Menu.Item key="pcpCapProdutiva">
+                                <Link to="/admin/pcp/capacidadeProdutiva">
+                                    <Icon type="stock" />
+                                    <span>Cap.Produtiva</span>
+                                </Link>
+                            </Menu.Item>
+                        </SubMenu>
+                        <Menu.Item key="pcpGerador">
+                            <Link to="/admin/geradorPCP">
+                                <Icon type="project" />
+                                <span>Gerador PCP</span>
+                            </Link>
+                        </Menu.Item>
+                    </SubMenu>
+                    
                     <SubMenu key="sub2" title={<span><Icon type="solution" /><span>WMS</span></span>}>
                         <SubMenu key="sub3" title={<span><Icon type="bars" /><span>Cadastros</span></span>}>
                             <Menu.Item key="6">
