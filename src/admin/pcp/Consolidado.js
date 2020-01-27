@@ -36,7 +36,7 @@ class Consolidado extends Component {
                     return({
                         key: consolidado.id,
                         descricao: consolidado.descricao,
-                        linha: consolidado.linha,
+                        data_tempo: consolidado.data_tempo,
                         ativo: ativo,
                         ativoValue: consolidado.ativo
                     })
@@ -72,7 +72,7 @@ class Consolidado extends Component {
         // Se estiver fechando
         if(!showConsolidadoModal){
             this.props.form.resetFields()
-            this.setState({corId: null})
+            this.setState({consolidadoId: null})
         }
         this.setState({showConsolidadoModal})
     }
@@ -148,8 +148,8 @@ class Consolidado extends Component {
             sorter: (a, b) => this.compareByAlph(a.description, b.description)
         }, {
             title: 'Data Acordada',
-            dataIndex: 'descricao',
-            sorter: (a, b) => this.compareByAlph(a.description, b.description)
+            dataIndex: 'data_acordada',
+            sorter: (a, b) => a.data_tempo - b.data_tempo
         }, {
             title: 'Ativo',
             dataIndex: 'ativo',
@@ -229,6 +229,18 @@ class Consolidado extends Component {
                                     })(
                                         <Input
                                             id="descricao"
+                                            placeholder="Digite a descrição"
+                                        />
+                                    )},
+                                    {getFieldDecorator('sku', {
+                                        rules: [
+                                            {
+                                                required: true, message: 'Por favor informe a descrição do consolidado',
+                                            }
+                                        ]
+                                    })(
+                                        <Input
+                                            id="sku"
                                             placeholder="Digite a descrição"
                                         />
                                     )}
