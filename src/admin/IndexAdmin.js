@@ -25,6 +25,7 @@ import DiasNaoUteis from "./cadastros/DiasNaoUteis"
 
 //PCP
 import Consolidado from "./pcp/Consolidado"
+import CapacidadeProdutiva from "./pcp/CapacidadeProdutiva"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -147,12 +148,12 @@ const routes = [
 		sidebar: () => <div>Consolidado</div>,
 		main: () => <Consolidado />
 	},
-	/*{
+	{
 		path: "/admin/pcp/capacidadeProdutiva",
 		exact: true,
 		sidebar: () => <div>Capacidade Produtiva</div>,
 		main: () => <CapacidadeProdutiva />
-	},*/
+	},
 	{
 		path: "/admin/producao/acompanhamento",
 		exact: true,

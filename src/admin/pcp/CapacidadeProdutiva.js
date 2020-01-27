@@ -1,8 +1,12 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Notification,Button, Row, Col, Form,DatePicker, Select } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
+import ptBr from 'antd/lib/locale-provider/pt_BR'
+import moment from 'moment'
 import axios from "axios"
+import 'moment/locale/pt-br'
+moment.locale('pt-br')
 
 const { Content } = Layout
 
@@ -22,22 +26,22 @@ class CapacidadeProdutiva extends Component {
         tableData: [],
         showCoresModal: false,
         tableLoading: false,
-        buttonSalvarCor: false
+        buttonSalvarCapacidadeProdutiva: false
     }
 
-    requestGetCores = () => {
+    requestGetCapacidadeProdutiva = () => {
         this.setState({tableLoading: true})
         axios
         .get(this.props.backEndPoint + '/getCapacidadeProdutiva')
         .then(res => {
             if(res.data.payload){
                 var tableData = res.data.payload.map(capacidadeProdutiva => {
-                    var ativo = cor.ativo === 'Y' ? 'Sim' : 'Não'
                     return({
-                        key: cor.id,
-                        nome: cor.nome,
-                        ativo: ativo,
-                        ativoValue: cor.ativo
+                        key: capacidadeProdutiva.id,
+                        id_linha: capacidadeProdutiva.id_linha,
+                        linha: capacidadeProdutiva.linha,
+                        data: capacidadeProdutiva.data,
+                        capacidade: capacidadeProdutiva.capacidade
                     })
                 })
                 this.setState({tableData})
@@ -53,52 +57,53 @@ class CapacidadeProdutiva extends Component {
         })
     }
 
-    requestCreateUpdateCor = (request) => {
+    requestCreateUpdateCapacidadeProdutiva = (request) => {
         this.setState({buttonSalvarCor: true})
-        axios.post(this.props.backEndPoint + '/createUpdateCor', request)
+        axios.post(this.props.backEndPoint + '/createUpdateCapacidadeProdutiva', request)
         .then(res => {
-            this.showCoresModal(false)
-            this.requestGetCores()
-            this.setState({buttonSalvarCor: false})
+            this.showCapacidadeProdutivaModal(false)
+            this.requestGetCapacidadePordutiva()
+            this.setState({buttonSalvarCapacidadeProdutiva: false})
         })
         .catch(error =>{
             console.log(error)
-            this.setState({buttonSalvarCor: false})
+            this.setState({buttonSalvarCapacidadeProdutiva: false})
         })
     }
 
-    showCoresModal = (showCoresModal) => {
+    showCapacidadeProdutivaModal = (showCapacidadeProdutivaModal) => {
         // Se estiver fechando
-        if(!showCoresModal){
+        if(!showCapacidadeProdutivaModal){
             this.props.form.resetFields()
             this.setState({corId: null})
         }
-        this.setState({showCoresModal})
+        this.setState({showCapacidadeProdutivaModal})
     }
 
-    loadCoresModal = (record) => {
+    loadCapacidadeProdutivaModal = (record) => {
         if(typeof(record) !== "undefined") {
             // Edit
             this.props.form.setFieldsValue({
-                nome: record.nome,
-                ativo: record.ativoValue
+                id_linha: record.id_linha,
+                data: record.data,
+                capacidade: record.capacidade
             })
-            this.setState({corId: record.key})
+            this.setState({capacidadeProdutivaId: record.key})
         }
         else{
             this.props.form.setFieldsValue({
-                ativo: 'Y'
+                //ativo: 'Y'
             })
         }
-        this.showCoresModal(true)
+        this.showCapacidadeProdutivaModal(true)
     }
 
-    handleDeleteCor = (id) => {
+    handleDeleteCapacidadeProdutiva = (id) => {
         this.setState({tableLoading: true})
         axios
-        .get(this.props.backEndPoint + '/deleteCor?id='+id)
+        .get(this.props.backEndPoint + '/deleteCapacidadeProdutiva?id='+id)
         .then(res => {
-            this.requestGetCores()
+            this.requestGetCapacidadeProdutiva()
         })
         .catch(error => {
             console.log(error)
@@ -108,13 +113,14 @@ class CapacidadeProdutiva extends Component {
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
-                var id = this.state.corId ? this.state.corId : null
+                var id = this.state.capacidadeProdutivaId ? this.state.capacidadeProdutivaId : null
                 var request = {
                     id: id,
-                    nome: values.nome,
-                    ativo: values.ativo
+                    id_linha: values.id_linha,
+                    data: values.data,
+                    capacidade: values.capacidade
                 }
-                this.requestCreateUpdateCor(request)
+                this.requestCreateUpdateCapacidadeProdutiva(request)
             }
             else{
                 console.log('erro no formulário')
@@ -131,7 +137,7 @@ class CapacidadeProdutiva extends Component {
     }
 
     componentWillMount(){
-        this.requestGetCores()
+        this.requestGetCapacidadeProdutiva()
     }
 
     render(){
@@ -142,10 +148,15 @@ class CapacidadeProdutiva extends Component {
             dataIndex: 'key',
             sorter: (a, b) => a.key - b.key,
         }, {
-            title: 'Descrição',
-            dataIndex: 'nome',
+            title: 'Linha',
+            dataIndex: 'linha',
             sorter: (a, b) => this.compareByAlph(a.description, b.description)
-        }, {
+        },{
+            title: 'Data',
+            dataIndex: 'data',
+            sorter: (a, b) => this.compareByAlph(a.description, b.description)
+        },
+        /*{
             title: 'Ativo',
             dataIndex: 'ativo',
             align: 'center',
@@ -159,7 +170,7 @@ class CapacidadeProdutiva extends Component {
             }],
             filterMultiple: false,
             onFilter: (value, record) => record.ativo.indexOf(value) === 0
-        }, {
+        }, */{
             title: 'Operação',
             colSpan: 2,
             dataIndex: 'operacao',
@@ -168,9 +179,9 @@ class CapacidadeProdutiva extends Component {
             render: (text, record) => {
                 return(
                     <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadCoresModal(record)} />
-                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteCor(record.key)}>
-                            <a href="/admin/cadastros/cores" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
+                        <Icon type="edit" style={{cursor: 'pointer'}} onClick={() => this.loadCapacidadeProdutivaModal(record)} />
+                        <Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteCapacidadeProdutiva(record.key)}>
+                            <a href="/admin/pcp/cores" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} /></a>
                         </Popconfirm>
                     </React.Fragment>
                 )
@@ -189,8 +200,8 @@ class CapacidadeProdutiva extends Component {
 
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
-                        <Tooltip title="Cadastrar Nova Cor" placement="right">
-                            <Button className="buttonGreen" onClick={() => this.loadCoresModal()}><Icon type="plus" /> Nova Cor</Button>
+                        <Tooltip title="Cadastrar Capacidade Produtiva" placement="right">
+                            <Button className="buttonGreen" onClick={() => this.loadCapacidadeProdutivaModal()}><Icon type="plus" /> CapacidadeProdutiva</Button>
                         </Tooltip>
                     </Col>
                 </Row>
@@ -200,58 +211,74 @@ class CapacidadeProdutiva extends Component {
                     dataSource={this.state.tableData}
                     loading={this.state.tableLoading}
                 />
+
+                {///MODAL UPDATE E CREATE CAPACIDADE PRODUTIVA
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                }
+
                 <Modal
-                    title="Cadastro de Cores"
-                    visible={this.state.showCoresModal}
-                    onCancel={() => this.showCoresModal(false)}
+                    title="Cadastro de Capacidade Produtiva"
+                    visible={this.state.showCapacidadeProdutivaModal}
+                    onCancel={() => this.showCapacidadeProdutivaModal(false)}
                     footer={[
-                        <Button key="back" onClick={() => this.showCoresModal(false)}><Icon type="close" /> Cancelar</Button>,
-                        <Button key="submit" type="primary" loading={this.state.buttonSalvarCor} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
+                        <Button key="back" onClick={() => this.showCapacidadeProdutivaModal(false)}><Icon type="close" /> Cancelar</Button>,
+                        <Button key="submit" type="primary" loading={this.state.buttonSalvarCapacidadeProdutiva} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
                 >
                     <Row>
-                        <Col span={24} id="colCadastroDeCores" style={{position: 'relative'}}>
+                        <Col span={24} id="colCadastroDeCapacidadeProdutiva" style={{position: 'relative'}}>
                             <Form layout="vertical">
-                                <Form.Item
-                                    label="Nome"
-                                >
-                                    {getFieldDecorator('nome', {
+                                <Form.Item label="ID LINHA">
+                                    {getFieldDecorator('id_linha', {
                                         rules: [
                                             {
-                                                required: true, message: 'Por favor informe o nome da cor',
+                                                required: true, message: 'Por favor informe o id da linha',
                                             }
                                         ]
                                     })(
                                         <Input
-                                            id="nome"
-                                            placeholder="Digite o nome da cor"
+                                            id="id_linha"
+                                            placeholder="Digite o nome id da linha"
                                         />
                                     )}
                                 </Form.Item>
-                                <Form.Item label="Ativo">
-                                    {getFieldDecorator('ativo', {
+                                
+                                <Row>
+                                    <Col span={24} id="colFiltroData" style={{position: 'relative'}}>
+                                    <Form layout="vertical">
+                                <Form.Item
+                                label="Data">
+                                {getFieldDecorator('data', {
+                                    rules: [{ required: true, message: 'Campo Dat obrigatório' }]
+                                })(
+                                    <DatePicker
+                                        locale={ptBr}
+                                        format="DD/MM/YYYY"
+                                        placeholder="Selecione a data"
+                                        style={ {width: '100%'} }
+                                        getCalendarContainer={() => document.getElementById('colFiltroData')}
+                                    />
+                                )}
+                            </Form.Item>
+
+                                <Form.Item label="capacidadeProdutiva">
+                                    {getFieldDecorator('capacidade', {
                                         rules: [
                                             {
-                                                required: true, message: 'Por favor selecione',
+                                                required: true, message: 'Por favor informe o capacidade produtiva',
                                             }
                                         ]
                                     })(
-                                        <Select
-                                            showSearch
-                                            optionFilterProp="children"
-                                            style={{ width: '100%' }}
-                                            placeholder="Selecione"
-                                            getPopupContainer={() => document.getElementById('colCadastroDeCores')}
-                                            allowClear={true}
-                                        >
-                                            {
-                                                ativoOptions.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
+                                        <Input
+                                            id="capacidade"
+                                            placeholder="Digite a capacidade produtiva"
+                                        />
                                     )}
                                 </Form.Item>
+                                </Form>
+                    </Col>
+                </Row>
+                               
                             </Form>
                         </Col>
                     </Row>
@@ -273,4 +300,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(Cores))
+export default connect(MapStateToProps, mapDispatchToProps)(Form.create()(CapacidadeProdutiva))
