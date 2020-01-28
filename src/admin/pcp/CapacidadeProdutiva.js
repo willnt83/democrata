@@ -58,7 +58,7 @@ class CapacidadeProdutiva extends Component {
     }
 
     requestCreateUpdateCapacidadeProdutiva = (request) => {
-        this.setState({buttonSalvarCor: true})
+        this.setState({buttonSalvarCapacidadeProdutiva: true})
         axios.post(this.props.backEndPoint + '/createUpdateCapacidadeProdutiva', request)
         .then(res => {
             this.showCapacidadeProdutivaModal(false)
@@ -75,7 +75,7 @@ class CapacidadeProdutiva extends Component {
         // Se estiver fechando
         if(!showCapacidadeProdutivaModal){
             this.props.form.resetFields()
-            this.setState({corId: null})
+            this.setState({capacidadeProdutivaId: null})
         }
         this.setState({showCapacidadeProdutivaModal})
     }
@@ -115,7 +115,6 @@ class CapacidadeProdutiva extends Component {
             if (!err){
                 var id = this.state.capacidadeProdutivaId ? this.state.capacidadeProdutivaId : null
                 var request = {
-                    id: id,
                     id_linha: values.id_linha,
                     data: values.data,
                     capacidade: values.capacidade
@@ -227,6 +226,7 @@ class CapacidadeProdutiva extends Component {
                 >
                     <Row>
                         <Col span={24} id="colCadastroDeCapacidadeProdutiva" style={{position: 'relative'}}>
+                            
                             <Form layout="vertical">
                                 <Form.Item label="ID LINHA">
                                     {getFieldDecorator('id_linha', {
@@ -245,39 +245,38 @@ class CapacidadeProdutiva extends Component {
                                 
                                 <Row>
                                     <Col span={24} id="colFiltroData" style={{position: 'relative'}}>
-                                    <Form layout="vertical">
-                                <Form.Item
-                                label="Data">
-                                {getFieldDecorator('data', {
-                                    rules: [{ required: true, message: 'Campo Dat obrigatório' }]
-                                })(
-                                    <DatePicker
-                                        locale={ptBr}
-                                        format="DD/MM/YYYY"
-                                        placeholder="Selecione a data"
-                                        style={ {width: '100%'} }
-                                        getCalendarContainer={() => document.getElementById('colFiltroData')}
-                                    />
-                                )}
-                            </Form.Item>
+                                        <Form layout="vertical">
+                                            <Form.Item label="Data">
+                                                {getFieldDecorator('data', {
+                                                    rules: [{ required: true, message: 'Campo Dat obrigatório' }]
+                                                })(
+                                                    <DatePicker
+                                                        locale={ptBr}
+                                                        format="DD/MM/YYYY"
+                                                        placeholder="Selecione a data"
+                                                        style={ {width: '100%'} }
+                                                        getCalendarContainer={() => document.getElementById('colFiltroData')}
+                                                    />
+                                                )}
+                                            </Form.Item>
 
-                                <Form.Item label="capacidadeProdutiva">
-                                    {getFieldDecorator('capacidade', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe o capacidade produtiva',
-                                            }
-                                        ]
-                                    })(
-                                        <Input
-                                            id="capacidade"
-                                            placeholder="Digite a capacidade produtiva"
-                                        />
-                                    )}
-                                </Form.Item>
-                                </Form>
-                    </Col>
-                </Row>
+                                            <Form.Item label="capacidadeProdutiva">
+                                                {getFieldDecorator('capacidade', {
+                                                    rules: [
+                                                        {
+                                                            required: true, message: 'Por favor informe o capacidade produtiva',
+                                                        }
+                                                    ]
+                                                })(
+                                                    <Input
+                                                        id="capacidade"
+                                                        placeholder="Digite a capacidade produtiva"
+                                                    />
+                                                )}
+                                             </Form.Item>
+                                        </Form>
+                                    </Col>
+                                </Row>
                                
                             </Form>
                         </Col>
