@@ -1,7 +1,7 @@
 const initState = {
     backEndPoint: 'http://localhost', //localhost
     //backEndPoint: 'https://hmback.democratadecor.tk', // homolog
-    //backEndPoint: 'https://back.democratadecor.tk', // producao
+    //backEndPoint: 'http://back.mundomoveis.ml/public', // producao
     pageTitle: null,
     session: {
         idSession: null,
@@ -35,7 +35,7 @@ const RootReducer = (state = initState, action) => {
         return {
             backEndPoint: 'http://localhost', //localhost
             //backEndPoint: 'https://hmback.democratadecor.tk', // homolog
-            //backEndPoint: 'https://back.democratadecor.tk', // producao
+            //backEndPoint: 'http://back.mundomoveis.ml/public', // producao
             pageTitle: null,
             session: {
                 idSession: null,

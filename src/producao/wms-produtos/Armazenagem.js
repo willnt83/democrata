@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
 import ModalArmazenagem from './ModalArmazenagem'
+import ModalAlteracaoEndereco from './ModalAlteracaoEndereco'
 
 const { Content } = Layout
 
@@ -12,6 +13,7 @@ class Armazenagem extends Component{
         super(props)
         this.state = {
             showModalArmazenagem: false,
+            showModalAlteracaoEndereco: false,
             idArmazenagem: null,
             tableData: []
         }
@@ -73,6 +75,10 @@ class Armazenagem extends Component{
             this.requestGetArmazenagens()
     }
 
+    showModalAlteracaoEnderecoF = (bool) => {
+        this.setState({showModalAlteracaoEndereco: bool})
+    }
+
     componentDidMount(){
         this.requestGetArmazenagens()
     }
@@ -125,7 +131,8 @@ class Armazenagem extends Component{
             >
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={24} align="end">
-                        <Button className="buttonGreen" onClick={() => this.showModalArmazenagemF(true)}><Icon type="plus" /> Nova Armazenagem</Button>
+                        <Button className="buttonOrange" onClick={() => this.showModalAlteracaoEnderecoF(true)}><Icon type="redo" /> Alterar Endereço</Button>
+                        <Button className="buttonGreen" onClick={() => this.showModalArmazenagemF(true)} style={{ marginLeft: 10 }}><Icon type="plus" /> Nova Armazenagem</Button>
                     </Col>
                 </Row>
 
@@ -141,6 +148,12 @@ class Armazenagem extends Component{
                     idArmazenagem={this.state.idArmazenagem}
                     showModalArmazenagem={this.state.showModalArmazenagem}
                     showModalArmazenagemF={this.showModalArmazenagemF}
+                />
+
+                <ModalAlteracaoEndereco
+                    showNotification={this.showNotification}
+                    showModalAlteracaoEndereco={this.state.showModalAlteracaoEndereco}
+                    showModalAlteracaoEnderecoF={this.showModalAlteracaoEnderecoF}
                 />
             </Content>
         )

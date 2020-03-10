@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Icon, Button, Row, Col, PopConfirm,notification, Form, DatePicker } from 'antd'
+import { Layout, Icon, Button, Row, Col, notification, Form, DatePicker } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import ptBr from 'antd/lib/locale-provider/pt_BR'

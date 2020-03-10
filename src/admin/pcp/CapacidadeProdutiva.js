@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Notification,Button, Row, Col, Form,DatePicker, Select } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form,DatePicker } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import ptBr from 'antd/lib/locale-provider/pt_BR'
@@ -9,11 +9,6 @@ import 'moment/locale/pt-br'
 moment.locale('pt-br')
 
 const { Content } = Layout
-
-const ativoOptions = [
-    {value: 'Y', description: 'Sim'},
-    {value: 'N', description: 'Não'}
-]
 
 class CapacidadeProdutiva extends Component {
     constructor(props) {
@@ -113,7 +108,6 @@ class CapacidadeProdutiva extends Component {
     handleFormSubmit = () => {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err){
-                var id = this.state.capacidadeProdutivaId ? this.state.capacidadeProdutivaId : null
                 var request = {
                     id_linha: values.id_linha,
                     data: values.data,
