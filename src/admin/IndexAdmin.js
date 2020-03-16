@@ -52,6 +52,7 @@ import WMSProdPosicoes from "./wms-produtos/Posicoes"
 import RelatorioProdutosCadastrados from "./relatorios/RelatorioProdutosCadastrados"
 import RelatorioFuncionariosCadastrados from "./relatorios/RelatorioFuncionariosCadastrados"
 import RelatorioProducoes from "./relatorios/RelatorioProducoes"
+import RelatorioProducoesAnalitico from "./relatorios/RelatorioProducoesAnalitico"
 import RelatorioFuncionariosPontuacoes from "./relatorios/RelatorioFuncionariosPontuacoes"
 import RelatorioGeralProducao from "./relatorios/RelatorioGeralProducao"
 import RelatorioNaoProduzidos from "./relatorios/RelatorioNaoProduzidos"
@@ -263,6 +264,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Relatórios/Produções</div>,
 		main: () => <RelatorioProducoes />
+	},
+	{
+		path: "/admin/relatorios/producoes-analitico",
+		exact: true,
+		sidebar: () => <div>Relatórios/Produções Analítico</div>,
+		main: () => <RelatorioProducoesAnalitico />
 	},
 	{
 		path: "/admin/relatorios/pontuacoes-por-funcionarios",
