@@ -58,6 +58,7 @@ import RelatorioGeralProducao from "./relatorios/RelatorioGeralProducao"
 import RelatorioNaoProduzidos from "./relatorios/RelatorioNaoProduzidos"
 import RelatorioEstoqueProdutos from "./relatorios/RelatorioEstoqueProdutos"
 import RelatorioSaidaProdutos from "./relatorios/RelatorioSaidaProdutos"
+import RelatorioPedidoInsumos from "./relatorios/RelatorioPedidoInsumos"
 import RelatorioEntradaInsumos from "./relatorios/RelatorioEntradaInsumos"
 import RelatorioArmazenagemInsumos from "./relatorios/RelatorioArmazenagemInsumos"
 import RelatorioSaidaInsumos from "./relatorios/RelatorioSaidaInsumos"
@@ -300,6 +301,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>Saida de Produtos</div>,
 		main: () => <RelatorioSaidaProdutos />
+	},
+	{
+		path: "/admin/relatorios/pedido-insumos",
+		exact: true,
+		sidebar: () => <div>Relatórios/Pedidos de Insumos</div>,
+		main: () => <RelatorioPedidoInsumos />
 	},
 	{
 		path: "/admin/relatorios/entrada-insumos",
