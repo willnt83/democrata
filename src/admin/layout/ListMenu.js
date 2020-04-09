@@ -148,6 +148,12 @@ class ListMenu extends Component{
                                 <span>Gerador PCP</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item key="pcpAgenda">
+                            <Link to="/admin/pcp/agenda">
+                                <Icon type="calendar" />
+                                <span>Agenda</span>
+                            </Link>
+                        </Menu.Item>
                     </SubMenu>
                     
                     <SubMenu key="sub2" title={<span><Icon type="solution" /><span>WMS</span></span>}>

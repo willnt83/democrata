@@ -26,6 +26,8 @@ import DiasNaoUteis from "./cadastros/DiasNaoUteis"
 //PCP
 import Consolidado from "./pcp/Consolidado"
 import CapacidadeProdutiva from "./pcp/CapacidadeProdutiva"
+import Agenda from "./pcp/agenda/Agenda"
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -157,6 +159,12 @@ const routes = [
 		main: () => <CapacidadeProdutiva />
 	},
 	{
+		path: "/admin/pcp/agenda",
+		exact: true,
+		sidebar: () => <div>Agenda</div>,
+		main: () => <Agenda />
+	},
+	{
 		path: "/admin/producao/acompanhamento",
 		exact: true,
 		sidebar: () => <div>Produção/Acompanhamento</div>,
@@ -228,26 +236,6 @@ const routes = [
 		sidebar: () => <div>Posição</div>,
 		main: () => <WMSProdPosicoes />
 	},
-	/*
-	{
-		path: "/admin/wms-produto/armazem/entrada",
-		exact: true,
-		sidebar: () => <div>Entrada</div>,
-		main: () => <WMSProdEntrada />
-	},
-	{
-		path: "/admin/wms-produto/armazem/armazenagem",
-		exact: true,
-		sidebar: () => <div>Armazenagem</div>,
-		main: () => <WMSProdArmazenagem />
-	},
-	{
-		path: "/admin/wms-produto/armazem/saida",
-		exact: true,
-		sidebar: () => <div>Saída</div>,
-		main: () => <WMSProdSaida />
-	},
-	*/
 	{
 		path: "/admin/relatorios/produtos-cadastrados",
 		exact: true,
