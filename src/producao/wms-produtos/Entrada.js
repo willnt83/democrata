@@ -1,9 +1,15 @@
 import React, { Component } from 'react'
-import { Layout, Row, Col, Form, Icon, Button, Table, notification } from 'antd'
+import { Layout, Row, Col, Form, Icon, Button, Table, notification, DatePicker, Popconfirm } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
 import ModalEntrada from './ModalEntrada'
+import ptBr from 'antd/lib/locale-provider/pt_BR'
+import moment from 'moment'
+import 'moment/locale/pt-br'
+moment.locale('pt-br')
+
+const today = moment().format('DD/MM/YYYY')
 
 const { Content } = Layout
 
@@ -13,13 +19,15 @@ class Entrada extends Component{
         this.state = {
             showModalEntrada: false,
             idEntrada: null,
-            tableData: []
+            tableData: [],
+            tableLoading: false
         }
-        this.handleScanLancamento = this.handleScanLancamento.bind(this)
     }
 
-    requestGetEntradas = () => {
-        axios.get(this.props.backEndPoint + '/wms-produtos/getEntradas')
+    requestGetEntradas = (entradaData) => {
+        this.setState({tableLoading: true})
+        var entradaDataObj = moment(entradaData, 'DD/MM/YYYY')
+        axios.get(this.props.backEndPoint + '/wms-produtos/getEntradaProdutos?dt_lancamento='+entradaDataObj.format('YYYY-MM-DD'))
         .then(res => {
             if(res.data.payload){
                 this.setState({tableData: res.data.payload})
@@ -27,11 +35,29 @@ class Entrada extends Component{
             else{
                 console.log('Nenhum registro encontrado')
             }
+            this.setState({tableLoading: false})
+        })
+        .catch(error => {
+            this.setState({tableLoading: false})
+            console.log(error)
+        })
+    }
+
+    estornarEntradaProduto = (idEntradaProduto) => {
+        var request = {
+            idUsuario: this.props.session.usuario.id,
+            idEntradaProduto: idEntradaProduto
+        }
+
+        axios.post(this.props.backEndPoint + '/wms-produtos/estornarEntradaProduto', request)
+        .then(res => {
+            this.props.showNotification(res.data.msg, res.data.success)
+            this.requestGetEntradas(today)
+
         })
         .catch(error => {
             console.log(error)
         })
-        
     }
 
     showNotification = (msg, success) => {
@@ -53,63 +79,43 @@ class Entrada extends Component{
         notification.open(args)
     }
 
-    handleScanLancamento(data){
-        if(this.state.idFuncionario !== null){
-            var request = {
-                idFuncionario: this.state.idFuncionario,
-                barcode: data
-            }
-            this.requestLancamentoProducao(request)
-        }
-        else{
-            this.showNotification('Selecione um funcionário', false)
-        }
-    }
-
-    showModalEntradaF = (bool, idEntrada = null) => {
-        this.setState({showModalEntrada: bool, idEntrada})
-    }
-
     componentDidMount(){
-        this.requestGetEntradas()
+        this.requestGetEntradas(today)
     }
 
     render(){
-        const columns = [{
-            title: 'ID',
-            dataIndex: 'id',
-            align: 'center',
-            sorter: (a, b) => a.id - b.id,
-        },
-        {
-            title: 'Data da Entrada',
-            dataIndex: 'dataEntrada',
-            align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.dataEntrada, b.dataEntrada)
-        },
-        {
-            title: 'Usuario',
-            dataIndex: 'nomeUsuario',
-            align: 'center',
-            sorter: (a, b) => this.compareByAlph(a.nomeUsuario, b.nomeUsuario)
-        },    
-        {
-            title: 'Operação',
-            colSpan: 2,
-            dataIndex: 'operacao',
-            align: 'center',
-            width: 150,
-            render: (text, record) => {
-                return(
-                    <React.Fragment>
-                        <Icon type="edit" style={{cursor: 'pointer'}} title="Alterar Entrada" onClick={() => this.showModalEntradaF(true, record.id)} />
-                        {/*<Popconfirm title="Confirmar remoção?" onConfirm={() => this.handleDeleteEntrada(record.id)}>
-                            <a href="/admin/wms/armazem/entrada" style={{marginLeft: 20}}><Icon type="delete" style={{color: 'red'}} title="Excluir Entrada" /></a>
-                        </Popconfirm>*/}
-                    </React.Fragment>
-                )
+        const columns = [
+            {
+                title: 'ID Entrada',
+                dataIndex: 'id',
+                align: 'center',
+                sorter: (a, b) => a.id - b.id,
+            },
+            {
+                title: 'Produto',
+                dataIndex: 'nomeProduto',
+                align: 'center',
+                sorter: (a, b) => a.nomeProduto - b.nomeProduto,
+            },
+            {
+                title: 'Cor',
+                dataIndex: 'corProduto',
+                align: 'center',
+                sorter: (a, b) => a.corProduto - b.corProduto,
+            },
+            {
+                dataIndex: 'operacao',
+                align: 'center',
+                width: 150,
+                render: (text, record) => {
+                    return(
+                        <Popconfirm title="Realmente deseja estornar a entrada deste produto?" onConfirm={() => this.estornarEntradaProduto(record.id)}>
+                            <Icon type="undo" style={{color: 'red'}} />
+                        </Popconfirm>
+                    )
+                }
             }
-        }]
+        ]
 
         return(
             <Content
@@ -121,8 +127,15 @@ class Entrada extends Component{
                 }}
             >
                 <Row style={{ marginBottom: 16 }}>
-                    <Col span={24} align="end">
-                        <Button className="buttonGreen" onClick={() => this.showModalEntradaF(true)}><Icon type="plus" /> Nova Entrada</Button>
+                    <Col span={24} id="colSelectDate">
+                        <DatePicker
+                            locale={ptBr}
+                            defaultValue={moment(today, 'DD/MM/YYYY')}
+                            format="DD/MM/YYYY"
+                            style={ {width: '30%'} }
+                            getCalendarContainer={() => document.getElementById('colSelectDate')}
+                            onChange={(date, datestring) => this.requestGetEntradas(date)}
+                        />
                     </Col>
                 </Row>
 
@@ -132,13 +145,6 @@ class Entrada extends Component{
                     loading={this.state.tableLoading}
                     rowKey='id'
                 />
-
-                <ModalEntrada
-                    showNotification={this.showNotification}
-                    idEntrada={this.state.idEntrada}
-                    showModalEntrada={this.state.showModalEntrada}
-                    showModalEntradaF={this.showModalEntradaF}
-                />
             </Content>
         )
     }
@@ -146,7 +152,8 @@ class Entrada extends Component{
 
 const MapStateToProps = (state) => {
 	return {
-        backEndPoint: state.backEndPoint
+        backEndPoint: state.backEndPoint,
+        session: state.session
 	}
 }
 

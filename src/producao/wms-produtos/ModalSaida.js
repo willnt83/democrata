@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Modal, Button, Divider, Table, Input } from 'antd'
+import { Row, Col, Form, Modal, Button, Divider, Table, Input, Icon, Popconfirm } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -112,6 +112,22 @@ class ModalSaida extends Component{
         this.props.showModalSaidaF(false)
     }
 
+    estornarSaidaProduto = (idSaidaProduto) => {
+        var request = {
+            idUsuario: this.props.session.usuario.id,
+            idSaidaProduto: idSaidaProduto
+        }
+        axios.post(this.props.backEndPoint + '/wms-produtos/estornarSaidaProduto', request)
+        .then(res => {
+            this.props.showNotification(res.data.msg, res.data.success)
+            this.requestGetSaidaProdutos(this.props.idSaida)
+
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }
+
     componentWillReceiveProps(nextProps){
         // Modal aberto
         if(!this.props.showModalSaida && nextProps.showModalSaida){
@@ -144,6 +160,19 @@ class ModalSaida extends Component{
                 title: 'Cor',
                 dataIndex: 'produto.cor',
                 sorter: (a, b) => this.compareByAlph(a.cor.descricao, b.cor.descricao)
+            },
+            {
+                colSpan: 2,
+                dataIndex: 'operacao',
+                align: 'center',
+                width: 150,
+                render: (text, record) => {
+                    return(
+                        <Popconfirm title="Realmente deseja estornar a saída deste produto?" onConfirm={() => this.estornarSaidaProduto(record.id)}>
+                            <Icon type="undo" style={{color: 'red'}} />
+                        </Popconfirm>
+                    )
+                }
             }
         ]
 

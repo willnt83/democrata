@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Form, Modal, Button, Divider, Table, Input, Select, Icon } from 'antd'
+import { Row, Col, Form, Modal, Button, Divider, Table, Input, Select, Icon, Popconfirm } from 'antd'
 import { connect } from 'react-redux'
 import axios from "axios"
 import { withRouter } from "react-router-dom"
@@ -143,7 +143,29 @@ class ModalArmazenagem extends Component{
     requestGetArmazenagemProdutos = (idArmazenagem) => {
         axios.get(this.props.backEndPoint + '/wms-produtos/getArmazenagemProdutos?id_armazenagem='+idArmazenagem)
         .then(res => {
-            this.setState({tableData: res.data.payload})
+            var tableData = res.data.payload.map(produto => {
+                var estoque = produto.estoque === 'Y' ? 'Sim' : 'Não'
+                return({
+                    id: produto.id,
+                    idArmazenagem: produto.idArmazenagem,
+                    codigo: produto.codigo,
+                    estoque: estoque,
+                    produto: {
+                        id: produto.produto.id,
+                        nome: produto.produto.nome,
+                        cor: produto.produto.cor
+                    },
+                    almoxarifado: {
+                        id: produto.almoxarifado.id,
+                        nome: produto.almoxarifado.nome
+                    },
+                    posicao: {
+                        id: produto.posicao.id,
+                        nome: produto.posicao.nome
+                    }
+                })
+            })
+            this.setState({tableData})
         })
         .catch(error => {
             console.log(error)
@@ -216,11 +238,22 @@ class ModalArmazenagem extends Component{
         this.props.showModalArmazenagemF(false)
     }
 
-    /*
-    alterarProduto = () => {
-        this.setState({tempCodigo: null, produtoDisplay: null})
+    estornarArmazenagemProduto = (idArmazenagemProduto) => {
+        var request = {
+            idUsuario: this.props.session.usuario.id,
+            idArmazenagemProduto: idArmazenagemProduto
+        }
+
+        axios.post(this.props.backEndPoint + '/wms-produtos/estornarArmazenagemProduto', request)
+        .then(res => {
+            this.props.showNotification(res.data.msg, res.data.success)
+            this.requestGetArmazenagemProdutos(this.props.idArmazenagem)
+
+        })
+        .catch(error => {
+            console.log(error)
+        })
     }
-    */
 
     componentWillReceiveProps(nextProps){
         // Modal aberto
@@ -258,6 +291,25 @@ class ModalArmazenagem extends Component{
                 title: 'Posicão',
                 dataIndex: 'posicao.nome',
                 sorter: (a, b) => this.compareByAlph(a.posicao.nome, b.posicao.nome)
+            },
+            {
+                title: 'Estoque',
+                dataIndex: 'estoque',
+                align: 'center',
+                sorter: (a, b) => this.compareByAlph(a.estoque, b.estoque)
+            },
+            {
+                colSpan: 2,
+                dataIndex: 'operacao',
+                align: 'center',
+                width: 150,
+                render: (text, record) => {
+                    return(
+                        <Popconfirm title="Realmente deseja estornar a armazenagem deste produto?" onConfirm={() => this.estornarArmazenagemProduto(record.id)}>
+                            <Icon type="undo" style={{color: 'red'}} />
+                        </Popconfirm>
+                    )
+                }
             }
         ]
 
