@@ -20,12 +20,32 @@ class Entrada extends Component{
             showModalEntrada: false,
             idEntrada: null,
             tableData: [],
-            tableLoading: false
+            tableLoading: false,
+            ultimaDataBuscada: null
         }
     }
 
+    showNotification = (msg, success) => {
+        var type = null
+        var style = null
+        if(success){
+            type = 'check-circle'
+            style = {color: '#4ac955', fontWeight: '800'}
+        }
+        else {
+            type = 'exclamation-circle'
+            style = {color: '#f5222d', fontWeight: '800'}
+        }
+        const args = {
+            message: msg,
+            icon:  <Icon type={type} style={style} />,
+            duration: 10
+        }
+        notification.open(args)
+    }
+
     requestGetEntradas = (entradaData) => {
-        this.setState({tableLoading: true})
+        this.setState({tableLoading: true, ultimaDataBuscada: entradaData})
         var entradaDataObj = moment(entradaData, 'DD/MM/YYYY')
         axios.get(this.props.backEndPoint + '/wms-produtos/getEntradaProdutos?dt_lancamento='+entradaDataObj.format('YYYY-MM-DD'))
         .then(res => {
@@ -51,32 +71,13 @@ class Entrada extends Component{
 
         axios.post(this.props.backEndPoint + '/wms-produtos/estornarEntradaProduto', request)
         .then(res => {
-            this.props.showNotification(res.data.msg, res.data.success)
-            this.requestGetEntradas(today)
-
+            this.showNotification(res.data.msg, res.data.success)
+            if(res.data.success)
+                this.requestGetEntradas(this.state.ultimaDataBuscada)
         })
         .catch(error => {
             console.log(error)
         })
-    }
-
-    showNotification = (msg, success) => {
-        var type = null
-        var style = null
-        if(success){
-            type = 'check-circle'
-            style = {color: '#4ac955', fontWeight: '800'}
-        }
-        else {
-            type = 'exclamation-circle'
-            style = {color: '#f5222d', fontWeight: '800'}
-        }
-        const args = {
-            message: msg,
-            icon:  <Icon type={type} style={style} />,
-            duration: 3
-        }
-        notification.open(args)
     }
 
     componentDidMount(){
