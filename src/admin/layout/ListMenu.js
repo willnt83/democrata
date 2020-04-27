@@ -195,6 +195,12 @@ class ListMenu extends Component{
                                 <span>Ped. de Compra</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item key="estoque-de-insumos">
+                            <Link to="/admin/wms/estoque-de-insumos">
+                                <Icon type="database" />
+                                <span>Estoque de Insumos</span>
+                            </Link>
+                        </Menu.Item>
                         <SubMenu key="sub4" title={<span><Icon type="bank" /><span>Armazém</span></span>}>
                             <Menu.Item key="80">
                                 <Link to="/admin/wms/armazem/entrada">

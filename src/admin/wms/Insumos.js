@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, Divider } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
@@ -315,7 +315,6 @@ class Insumos extends Component {
                     minHeight: 280
                 }}
             >
-
                 <Row style={{ marginBottom: 16 }}>
                     <Col span={12} style={{ textAlign: 'left' }}>
                         <Tooltip title="Improtar CSV" placement="right">

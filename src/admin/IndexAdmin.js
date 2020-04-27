@@ -41,6 +41,7 @@ import Almoxarifados from "./wms/Almoxarifados"
 import Fornecedores from "./wms/Fornecedores"
 import PosicaoArmazem from "./wms/PosicaoArmazem"
 import PedidosCompra from "./wms/PedidosCompra"
+import EstoqueInsumos from "./wms/EstoqueInsumos"
 import Entrada from "./wms/Entrada"
 import Armazenagem from "./wms/Armazenagem"
 import Saida from "./wms/Saida"
@@ -205,6 +206,12 @@ const routes = [
 		exact: true,
 		sidebar: () => <div>WMS/Pedidos de Compra</div>,
 		main: () => <PedidosCompra />
+	},
+	{
+		path: "/admin/wms/estoque-de-insumos",
+		exact: true,
+		sidebar: () => <div>WMS/Consulta de Estoque de Insumos</div>,
+		main: () => <EstoqueInsumos />
 	},
 	{
 		path: "/admin/wms/armazem/entrada",
