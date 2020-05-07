@@ -12,7 +12,7 @@ import DefeitosProducao from './lancamentoCodigoDeBarras/DefeitosProducao'
 import EstornoProducao from './lancamentoCodigoDeBarras/EstornoProducao'
 import Expedicao from './lancamentoCodigoDeBarras/Expedicao'
 
-import Entrada from './wms-produtos/Entrada'
+import Estornos from './wms-produtos/Estornos'
 import Armazenagem from './wms-produtos/Armazenagem'
 import Saida from './wms-produtos/Saida'
 
@@ -143,8 +143,8 @@ class IndexProducao extends Component {
 								</Content>
 				},
 				{
-					path: '/producao/wms-producao/entrada',
-					main: () => <Entrada />
+					path: '/producao/wms-producao/estornos',
+					main: () => <Estornos />
 				},
 				{
 					path: '/producao/wms-producao/armazenagem',
@@ -179,9 +179,9 @@ class IndexProducao extends Component {
 								</Menu.Item>
 								<SubMenu key="sub1" title={<span><Icon type="bars" /><span>WMS Produção</span></span>}>
 									{<Menu.Item key="2">
-										<Link to="/producao/wms-producao/entrada">
+										<Link to="/producao/wms-producao/estornos">
 											<Icon type="right-square" />
-											<span className="nav-text">Entrada</span>
+											<span className="nav-text">Estornos</span>
 										</Link>
 									</Menu.Item>}
 									<Menu.Item key="3">
