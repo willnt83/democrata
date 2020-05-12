@@ -1,17 +1,23 @@
 import React, { Component } from 'react'
-import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, Divider, notification } from 'antd'
+import { Layout, Table, Icon, Popconfirm, Modal, Input, Button, Row, Col, Form, Select, notification, Tabs } from 'antd'
 import { Tooltip } from '@material-ui/core/'
 import { connect } from 'react-redux'
 import axios from "axios"
+import _ from 'lodash';
+
+import NumericInput from '../shared/NumericInput';
+
+import "../static/form.css"
+import "../static/divTable.css"
 
 const { Content } = Layout
+
+const { TabPane } = Tabs;
 
 const ativoOptions = [
     {value: 'Y', description: 'Sim'},
     {value: 'N', description: 'Não'}
 ]
-
-let id = 0
 
 class Produtos extends Component {
     constructor(props) {
@@ -22,11 +28,15 @@ class Produtos extends Component {
     state = {
         produtoId: null,
         tableData: [],
+        tabId: "1",
         showProdutosModal: false,
         tableLoading: false,
         buttonSalvarProduto: false,
         coresOptions: [],
         linhasDeProducaoOptions: [],
+        insumosOptions: [],
+        medidaValues: [],
+        qtdeValues: [],        
         coresSelectStatus: {
             placeholder: 'Carregando...',
             disabled: true
@@ -35,14 +45,23 @@ class Produtos extends Component {
             placeholder: 'Carregando...',
             disabled: true
         },
-        dynamicFieldsRendered: false,
+        insumosSelectStatus: {
+            placeholder: 'Carregando...',
+            disabled: true
+        },        
+        dynamicFieldsConjuntosRendered: false,
+        dynamicFieldsInsumos: {
+            loading: true,
+            rendered: true
+        },
         setores: [],
         conjuntos: [],
+        insumos: [],
         setoresFields: 'none',
         nomeLinhaDeProducao: null,
-        conjuntosOptions: []
+        conjuntosOptions: []        
     }
-
+    
     showNotification = (msg, success) => {
         var type = null
         var style = null
@@ -61,6 +80,21 @@ class Produtos extends Component {
         }
         notification.open(args)
     }
+
+    changeTab = (key) => {
+        this.setState({tabId: key})
+    }
+
+    insertInsumoValues = (index, object) => {
+        let insumos = this.state.insumos
+        if(typeof object.qtd === 'undefined' || !object.qtd) {
+            object.qtd = 0
+        }
+        insumos[index] = object
+        this.setState({
+            insumos
+        })        
+    }    
 
     requestGetProdutosFull = () => {
         this.setState({tableLoading: true})
@@ -131,7 +165,7 @@ class Produtos extends Component {
                 this.setState({
                     nomeLinhaDeProducao: setoresPorLinhadeProducao.nome,
                     setores: setoresPorLinhadeProducao.setores,
-                    dynamicFieldsRendered: true
+                    dynamicFieldsConjuntosRendered: true
                 })
             }
             else{
@@ -226,6 +260,89 @@ class Produtos extends Component {
         })
     }
 
+    loadInsumosOptions = () => {
+        this.setState({tableLoading: true})
+        axios
+        .get(this.props.backEndPoint + '/getInsumos?ativo=Y')
+        .then(res => {
+            if(res.data){
+                let insumosOptions = _.orderBy(res.data.payload.map(insumo => {
+                    return({
+                        id: insumo.id,
+                        name: insumo.ins + ' | ' + insumo.nome,
+                        medida: insumo.unidadeUnidadeMedida
+                    })
+                }),'name', 'asc')
+                .reduce((finalObj, insumo, index) => {                    
+                    finalObj[insumo.id] = insumo
+                    return finalObj
+                }, [])
+                this.setState({                  
+                    insumosOptions: insumosOptions,
+                    insumosSelectStatus: {
+                        placeholder: 'Selecione o insumo',
+                        disabled: false
+                    }
+                })
+            }
+            else{
+                this.showNotification('Nenhum registro encontrado', false)
+            }
+            this.setState({tableLoading: false})
+        })
+        .catch(error => {
+            console.log(error)
+            this.setState({tableLoading: false})
+            this.showNotification('Erro ao efetuar a operação! Tente novamente', false)
+        })        
+    }
+
+    loadInsumosProduto = (produtoId) => {
+        this.setState({
+            dynamicFieldsInsumos: {
+                loading: false,
+                rendered: true
+            }
+        })
+        axios
+        .get(this.props.backEndPoint + '/getProdutoInsumos?id_produto='+produtoId)
+        .then(res => {
+            if(res.data.payload && res.data.payload.length > 0) {
+                var insumos = res.data.payload.map((insumo, index) => {
+                    return {
+                        id: insumo.id,
+                        qtd: insumo.qtd,
+                        medida: insumo.unidade.medida
+                    }
+                })
+                var keysInsumos = insumos.map((insumo, index) => {
+                    return(index)
+                })
+                this.props.form.setFieldsValue({
+                    keysInsumos
+                })
+                this.setState({
+                    insumos: insumos
+                })
+            } else {
+                this.setState({
+                    insumos: []
+                })
+            }
+        })
+        .catch(error => {
+            this.setState({insumos: []})
+        })
+        .finally(()=>{
+            this.setState({
+                dynamicFieldsInsumos: {
+                    loading: true,
+                    rendered: false
+                }
+            })
+        })
+    }
+
     showProdutosModal = (showProdutosModal) => {
         // Se estiver fechando
         if(!showProdutosModal){
@@ -234,20 +351,25 @@ class Produtos extends Component {
                 produtoId: null,
                 setoresFields: 'none'
             })
-            id = 0
             this.props.form.setFieldsValue({
-                keys: []
+                keys: [],
+                keysInsumos: []
             })
+        } else {
+            this.changeTab("1")
         }
         this.setState({showProdutosModal})
-    }
+    }    
 
     loadProdutosModal = (record) => {
         this.loadCoresOptions()
         this.loadLinhasDeProducaoOptions()
         this.loadConjuntosOptions()
-
+        this.loadInsumosOptions()
+        
         if(typeof(record) !== "undefined") {
+            this.loadInsumosProduto(record.key)
+
             var keys = record.setores.map((subproduto, index) => {
                 return(index)
             })
@@ -274,7 +396,7 @@ class Produtos extends Component {
 
             this.setState({
                 produtoId: record.key,
-                dynamicFieldsRendered: true,
+                dynamicFieldsConjuntosRendered: true,
                 setores: record.setores,
                 conjuntos
             })
@@ -299,11 +421,38 @@ class Produtos extends Component {
         })
     }
 
+    handleOnChangeInsumo = (value, event, index) => {
+        let qtd = this.props.form.getFieldValue( `quantidades[${index}]`)
+        this.insertInsumoValues(index, {
+            id: index,
+            qtd: !qtd || qtd === '' || typeof qtd === 'undefined' ? 0 : qtd,
+            medida: this.state.insumosOptions[value].medida                      
+        })        
+    }
+
+    handleInsumoValidator = (rule, value, callback) => {
+        let key = rule.fullField.replace(/insumos|\[|\]/gi,'')
+        key     = key && !isNaN(key) ? parseInt(key) : null
+        if(key != null && value && !isNaN(value) && typeof value !== 'undefined' ) {
+            let idInsumo = parseInt(value)
+            if(idInsumo > 0) {
+                const keys  = this.props.form.getFieldValue('keysInsumos')
+                keys.forEach(row => {
+                    let idInsumoRow = this.props.form.getFieldValue(`insumos[${row}]`)
+                    if(row !== key && idInsumoRow === idInsumo) {
+                        callback('Insumo já selecionado');
+                    }
+                })
+            }
+        }
+        callback()
+    }
+
     handleFormSubmit = () => {
-        this.props.form.validateFieldsAndScroll((err, values) => {
+        this.props.form.validateFieldsAndScroll((err, values) => {            
             if (!err){
-                var id = this.state.produtoId ? this.state.produtoId : null
-                var request = {
+                let id = this.state.produtoId ? this.state.produtoId : null
+                let request = {
                     id: id,
                     nome: values.nome,
                     codigo: values.codigo,
@@ -320,6 +469,12 @@ class Produtos extends Component {
                             ordem: setor.ordem,
                             idConjunto: values.conjuntos[index]
                         })
+                    }),
+                    insumos: values.insumos.map((insumo, index) => {
+                        return {
+                            id: insumo,
+                            qtd: values.quantidades[index]
+                        }
                     })
                 }
                 this.requestCreateUpdateProduto(request)
@@ -337,26 +492,25 @@ class Produtos extends Component {
 
     addComposicaoRow = () => {
         const { form } = this.props
-        const keys = form.getFieldValue('keys')
-        const nextKeys = keys.concat(id++)
-
+        const keys = form.getFieldValue('keysInsumos')
+        let maxInsumo = this.state.insumos.length - 1;
+        let keysInsumos = keys.concat((maxInsumo + 1))
         form.setFieldsValue({
-            keys: nextKeys,
+            keysInsumos
+        })
+        this.insertInsumoValues((maxInsumo + 1), {
+            id: 0,
+            qtd: 0,
+            medida: ''                        
         })
     }
 
     removeComposicaoRow = (k) => {
         const { form } = this.props
-        // can use data-binding to get
-        const keys = form.getFieldValue('keys')
-        // We need at least one passenger
-        if (keys.length === 1){
-            return
-        }
-
-        // can use data-binding to set
+        const keys = form.getFieldValue('keysInsumos')
+        let keysInsumos = keys.filter(key => key !== k)
         form.setFieldsValue({
-            keys: keys.filter(key => key !== k),
+            keysInsumos
         })
     }
 
@@ -373,42 +527,68 @@ class Produtos extends Component {
     }
 
     componentWillUpdate(){
-        if(this.state.dynamicFieldsRendered){
+        if(this.state.dynamicFieldsConjuntosRendered){
             var conjuntos = this.state.conjuntos.map(conjunto => {
                 return(conjunto.id)
             })
 
-            // Atualizando id, que é a variável que controla o add e remove de campos
-            id = (this.state.conjuntos.length)
-
             this.props.form.setFieldsValue({
-                conjuntos
+                conjuntos,
             })
 
             this.setState({
                 setoresFields: 'block',
-                dynamicFieldsRendered: false
+                dynamicFieldsConjuntosRendered: false
+            })
+        }
+
+        if(this.state.dynamicFieldsInsumos.loading && !this.state.dynamicFieldsInsumos.rendered){
+            let initialObj = { insumos: [], quantidades: [] }
+            let objInsumos = this.state.insumos.reduce((finalObj, insumo, index) => {                
+                let thisObj = finalObj ? finalObj : initialObj
+                thisObj.insumos.push(insumo.id) 
+                thisObj.quantidades.push(insumo.qtd)
+                return {
+                    insumos: thisObj.insumos,
+                    quantidades: thisObj.quantidades
+                }
+            }, initialObj)
+
+            let insumos = objInsumos && objInsumos.insumos ? objInsumos.insumos : []
+            let quantidades = objInsumos && objInsumos.quantidades ? objInsumos.quantidades : []
+            this.props.form.setFieldsValue({
+                insumos,
+                quantidades
+            })
+
+            this.setState({
+                dynamicFieldsInsumos: {
+                    loading: true,
+                    rendered: true
+                }
             })
         }
     }
-
+    
     render(){
         const { getFieldDecorator, getFieldValue } = this.props.form
+
+        // Linhas de Produção
+        let linhasItens = null
         getFieldDecorator('keys', { initialValue: [] })
         const keys = getFieldValue('keys')
-
         if(this.state.setores.length > 0){
-            var composicaoItems = keys.map((k, index) => (
-                <Row key={k} gutter={5}>
-                    <Col span={4} align="middle">
+            linhasItens = keys.map((key, index) => (
+                <Row key={`key_${key}`} className="div-table-body">
+                    <Col span={3} id={`colInsumo_${key}`} className="div-table-body-cell">                        
                         {this.state.setores[index].ordem}
                     </Col>
-                    <Col span={8}>
+                    <Col span={5} className="div-table-body-cell">
                         {this.state.setores[index].nome}
                     </Col>
-                    <Col span={12}>
-                        <Form.Item>
-                            {getFieldDecorator(`conjuntos[${k}]`, {
+                    <Col span={16} id={`conjunto_${key}`} className="div-table-body-cell">
+                        <Form.Item style={{margin: '0px'}}>
+                            {getFieldDecorator(`conjuntos[${key}]`, {
                                 rules: [
                                     {
                                         required: true, message: 'Por favor informe o conjunto',
@@ -420,13 +600,13 @@ class Produtos extends Component {
                                     optionFilterProp="children"
                                     style={{ width: '100%' }}
                                     placeholder="Informe o conjunto"
-                                    getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
+                                    getPopupContainer={() => document.getElementById(`colInsumo_${key}`)}
                                     allowClear={true}
                                 >
                                     {
                                         this.state.conjuntosOptions
                                         .filter(option => {
-                                            return (option.idSetor === parseInt(this.state.setores[index].id))
+                                            return (option.idSetor === parseInt(this.state.setores[key].id))
                                         })
                                         .map((option) => {
                                             return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
@@ -435,10 +615,89 @@ class Produtos extends Component {
                                 </Select>
                             )}
                         </Form.Item>
-                    </Col>
+                    </Col>                                   
                 </Row>
             ))
         }
+
+        // Insumos
+        getFieldDecorator('keysInsumos', { initialValue: [] })
+        const keysInsumos = getFieldValue('keysInsumos')
+        let insumosItens = keysInsumos.map((key, index) => (
+            <Row key={`keyInsumos_${key}`} className="div-table-body">
+                <Col span={16} id={`colInsumo_${key}`} className="div-table-body-cell">                        
+                    <Form.Item style={{margin: '0px'}}>
+                        {getFieldDecorator(`insumos[${key}]`, {
+                            rules: [
+                                {
+                                    required: true, message: "Informe o insumo"
+                                },
+                                {
+                                    validator: this.handleInsumoValidator
+                                }
+                            ],
+                        })(
+                            <Select
+                                showSearch                                                    
+                                style={{ width: '100%' }}
+                                optionFilterProp="children"
+                                placeholder={this.state.insumosSelectStatus.placeholder}
+                                disabled={this.state.insumosSelectStatus.disabled}
+                                getPopupContainer={() => document.getElementById(`colInsumo_${key}`)}
+                                onSelect={(value, event) => this.handleOnChangeInsumo(value, event, key)}
+                                allowClear={true}
+                                filterOption={(input, option) =>
+                                    option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                }                                                                                               
+                            >        
+                                {
+                                    this.state.insumosOptions.map((option) => {
+                                        return (
+                                            <Select.Option key={option.id} value={option.id}>
+                                                {option.name}
+                                            </Select.Option>
+                                        )
+                                    })
+                                }
+                            </Select>
+                        )}
+                    </Form.Item>
+                </Col>
+                <Col span={4} className="div-table-body-cell">
+                    {getFieldDecorator(`quantidades[${key}]`, {
+                        rules: [
+                            {
+                                required: true, message: "Informe a quantidade"
+                            }                                       
+                        ]
+                    })(
+                        <NumericInput
+                            id="quantidade"
+                            placeholder="Quantidade"
+                            maxLength={10}
+                        />
+                    )}
+                </Col>            
+                <Col span={3} className="div-table-body-cell">
+                    <Col span={24}>
+                    {
+                        this.state.insumos && this.state.insumos.length > 0 && this.state.insumos[key]
+                        ? this.state.insumos[key].medida
+                        : null
+                    }
+                    </Col>
+                </Col>
+                <Col span={1} id={`colDelete_${key}`} className="div-table-body-cell">
+                    <Icon
+                        className="dynamic-delete-button"
+                        type="minus-circle-o"
+                        title="Deseja excluir o insumo?"
+                        disabled={keys.length === 1}
+                        onClick={() => this.removeComposicaoRow(key)}
+                    />
+                </Col>                     
+            </Row>
+        ))
 
         const columns = [{
             title: 'ID',
@@ -506,9 +765,9 @@ class Produtos extends Component {
                     </React.Fragment>
                 )
             }
-        }]
+        }]        
 
-        return(
+        return( 
             <Content
                 style={{
                     margin: "24px 16px",
@@ -540,156 +799,243 @@ class Produtos extends Component {
                         <Button key="back" onClick={() => this.showProdutosModal(false)}><Icon type="close" /> Cancelar</Button>,
                         <Button key="submit" type="primary" loading={this.state.buttonSalvarProduto} onClick={() => this.handleFormSubmit()}><Icon type="save" /> Salvar</Button>
                     ]}
+                    width={900}
                 >
-                    <Row>
-                        <Col span={24} id="colCadastroDeProdutos" style={{position: 'relative'}}>
-                            <Form layout="vertical">
-                                <Form.Item label="Nome">
-                                    {getFieldDecorator('nome', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe o nome do produto',
-                                            }
-                                        ]
-                                    })(
-                                        <Input
-                                            id="nome"
-                                            placeholder="Digite o nome do produto"
-                                        />
-                                    )}
-                                </Form.Item>
-                                <Form.Item label="Código">
-                                    {getFieldDecorator('codigo', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe o código do produto',
-                                            }
-                                        ]
-                                    })(
-                                        <Input
-                                            id="codigo"
-                                            placeholder="Digite o código do produto"
-                                        />
-                                    )}
-                                </Form.Item>
-                                <Form.Item label="SKU">
-                                    {getFieldDecorator('sku', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Por favor informe o SKU do produto',
-                                            }
-                                        ]
-                                    })(
-                                        <Input
-                                            id="codigo"
-                                            placeholder="Digite o SKU do produto"
-                                        />
-                                    )}
-                                </Form.Item>
-                                <Form.Item label="Cor">
-                                    {getFieldDecorator('cor', {
-                                        rules: [{
-                                            required: true, message: "Informe a cor"
-                                        }],
-                                    })(
-                                        <Select
-                                            showSearch
-                                            optionFilterProp="children"
-                                            style={{ width: '100%' }}
-                                            placeholder={this.state.coresSelectStatus.placeholder}
-                                            disabled={this.state.coresSelectStatus.disabled}
-                                            getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
-                                            allowClear={true}
-                                        >
-                                            {
-                                                this.state.coresOptions.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
-                                    )}
-                                </Form.Item>
-                                <Form.Item label="Custo da Mão de Obra">
-                                    {getFieldDecorator('maoDeObra')(
-                                        <Input
-                                            id="nome"
-                                            placeholder="Digite o custo da mão de obra"
-                                        />
-                                    )}
-                                </Form.Item>
-                                <Form.Item label="Custo da Matéria Prima">
-                                    {getFieldDecorator('materiaPrima')(
-                                        <Input
-                                            id="nome"
-                                            placeholder="Digite o custo da matéria prima"
-                                        />
-                                    )}
-                                </Form.Item>
-                                <Form.Item label="Ativo">
-                                    {getFieldDecorator('ativo', {
-                                        rules: [{
-                                            required: true, message: "Campo obrigatório"
-                                        }],
-                                    })(
-                                        <Select
-                                            showSearch
-                                            optionFilterProp="children"
-                                            style={{ width: '100%' }}
-                                            placeholder="Selecione"
-                                            getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
-                                            allowClear={true}
-                                        >
-                                            {
-                                                ativoOptions.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
-                                    )}
-                                </Form.Item>
-                                <Form.Item label="Linha de Produção">
-                                    {getFieldDecorator('linhaDeProducao', {
-                                        rules: [
-                                            {
-                                                required: true, message: 'Informe a linha de produção',
-                                            }
-                                        ]
-                                    })(
-                                        <Select
-                                            showSearch
-                                            optionFilterProp="children"
-                                            style={{ width: '100%' }}
-                                            placeholder={this.state.linhasDeProducaoSelectStatus.placeholder}
-                                            disabled={this.state.linhasDeProducaoSelectStatus.disabled}
-                                            onChange={this.handleLinhaDeProducaoChange}
-                                            getPopupContainer={() => document.getElementById('colCadastroDeProdutos')}
-                                            allowClear={true}
-                                        >
-                                            {
-                                                this.state.linhasDeProducaoOptions.map((option) => {
-                                                    return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
-                                                })
-                                            }
-                                        </Select>
-                                    )}
-                                </Form.Item>
-                                <Row style={{display: this.state.setoresFields}}>
-                                    <Col span={24}>
-                                        <Divider />
-                                        <h4>Linha de Produção</h4>
-                                        <Row gutter={5} className="gridTitle">
-                                            <Col span={4} align="middle">Ordem</Col>
-                                            <Col span={8}>Setor</Col>
-                                            <Col span={12}>Conjunto</Col>
-                                        </Row>
-                                        {composicaoItems}
-                                    </Col>
-                                </Row>
-                            </Form>
-                        </Col>
-                    </Row>
+                    <Form layout="vertical">
+                        <Tabs defaultActiveKey="1" onChange={this.changeTab} activeKey={this.state.tabId} type="card">
+                            <TabPane tab="Dados Produtos" key="1">
+                                <div style={{minHeight: '380px'}}>
+                                    <Row>
+                                        <Col span={16} id="colNomeProduto" style={{position: 'relative', paddingRight: '5px'}}>
+                                            <Form.Item label="Nome">
+                                                {getFieldDecorator('nome', {
+                                                    rules: [
+                                                        {
+                                                            required: true, message: 'Por favor informe o nome do produto',
+                                                        }
+                                                    ]
+                                                })(
+                                                    <Input
+                                                        id="nome"
+                                                        placeholder="Digite o nome do produto"
+                                                    />
+                                                )}
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={4} id="colVolume" style={{position: 'relative', paddingRight: '5px'}}>
+                                            <Form.Item label="Volume">
+                                                {getFieldDecorator('volume')(
+                                                    <NumericInput
+                                                        justInteger="true"
+                                                        id="volume"
+                                                        placeholder="Volume"
+                                                        maxLength={25}
+                                                    />
+                                                )}
+                                            </Form.Item>
+                                        </Col>                                        
+                                        <Col span={4} id="colAtivoProduto" style={{position: 'relative'}}>
+                                            <Form.Item label="Ativo">
+                                                {getFieldDecorator('ativo', {
+                                                    rules: [{
+                                                        required: true, message: "Campo obrigatório"
+                                                    }],
+                                                })(
+                                                    <Select
+                                                        showSearch
+                                                        optionFilterProp="children"
+                                                        style={{ width: '100%' }}
+                                                        placeholder="Selecione"
+                                                        getPopupContainer={() => document.getElementById('colAtivoProduto')}
+                                                        allowClear={true}
+                                                    >
+                                                        {
+                                                            ativoOptions.map((option) => {
+                                                                return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                            })
+                                                        }
+                                                    </Select>
+                                                )}
+                                            </Form.Item>
+                                        </Col>                                    
+                                    </Row>
+                                    <Row>
+                                        <Col span={12} id="colCodigoProduto" style={{position: 'relative', paddingRight: '5px'}}>
+                                            <Form.Item label="Código">
+                                                {getFieldDecorator('codigo', {
+                                                    rules: [
+                                                        {
+                                                            required: true, message: 'Por favor informe o código do produto',
+                                                        }
+                                                    ]
+                                                })(
+                                                    <Input
+                                                        id="codigo"
+                                                        placeholder="Digite o código do produto"
+                                                    />
+                                                )}
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12} id="colSkuProduto" style={{position: 'relative'}}>
+                                            <Form.Item label="SKU">
+                                                {getFieldDecorator('sku', {
+                                                    rules: [
+                                                        {
+                                                            required: true, message: 'Por favor informe o SKU do produto',
+                                                        }
+                                                    ]
+                                                })(
+                                                    <Input
+                                                        id="codigo"
+                                                        placeholder="Digite o SKU do produto"
+                                                    />
+                                                )}
+                                            </Form.Item>                                    
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col span={12} id="colCustoProduto" style={{position: 'relative', paddingRight: '5px'}}>
+                                            <Form.Item label="Custo da Mão de Obra">
+                                                {getFieldDecorator('maoDeObra')(
+                                                    <Input
+                                                        id="nome"
+                                                        placeholder="Digite o custo da mão de obra"
+                                                    />
+                                                )}
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12} id="colCustoMateriaPrimaProduto" style={{position: 'relative'}}>
+                                            <Form.Item label="Custo da Matéria Prima">
+                                                {getFieldDecorator('materiaPrima')(
+                                                    <Input
+                                                        id="nome"
+                                                        placeholder="Digite o custo da matéria prima"
+                                                    />
+                                                )}
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col span={12} id="colCorProduto" style={{position: 'relative', paddingRight: '5px'}}>
+                                            <Form.Item label="Cor">
+                                                {getFieldDecorator('cor', {
+                                                    rules: [{
+                                                        required: true, message: "Informe a cor"
+                                                    }],
+                                                })(
+                                                    <Select
+                                                        showSearch
+                                                        optionFilterProp="children"
+                                                        style={{ width: '100%' }}
+                                                        placeholder={this.state.coresSelectStatus.placeholder}
+                                                        disabled={this.state.coresSelectStatus.disabled}
+                                                        getPopupContainer={() => document.getElementById('colCorProduto')}
+                                                        allowClear={true}
+                                                    >
+                                                        {
+                                                            this.state.coresOptions.map((option) => {
+                                                                return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                            })
+                                                        }
+                                                    </Select>
+                                                )}
+                                            </Form.Item>
+                                        </Col>                                
+                                        <Col span={12} id="colLinhaProducaoProduto" style={{position: 'relative'}}>
+                                            <Form.Item label="Linha de Produção">
+                                                {getFieldDecorator('linhaDeProducao', {
+                                                    rules: [
+                                                        {
+                                                            required: true, message: 'Informe a linha de produção',
+                                                        }
+                                                    ]
+                                                })(
+                                                    <Select
+                                                        showSearch
+                                                        optionFilterProp="children"
+                                                        style={{ width: '100%' }}
+                                                        placeholder={this.state.linhasDeProducaoSelectStatus.placeholder}
+                                                        disabled={this.state.linhasDeProducaoSelectStatus.disabled}
+                                                        onChange={this.handleLinhaDeProducaoChange}
+                                                        getPopupContainer={() => document.getElementById('colLinhaProducaoProduto')}
+                                                        allowClear={true}
+                                                    >
+                                                        {
+                                                            this.state.linhasDeProducaoOptions.map((option) => {
+                                                                return (<Select.Option key={option.value} value={option.value}>{option.description}</Select.Option>)
+                                                            })
+                                                        }
+                                                    </Select>
+                                                )}
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            </TabPane>
+                            {
+                                (this.state.setores.length > 0) ?(
+                                    <TabPane tab="Linha de Produção" key="2">
+                                    {
+                                        (this.state.dynamicFieldsConjuntosRendered)
+                                        ? (
+                                            <Row style={{marginTop: '10px'}}>
+                                                <Col span={24} style={{textAlign: 'center'}}>
+                                                    Carregando os dados ...
+                                                </Col>
+                                            </Row> 
+                                        )
+                                        : (
+                                            <div className="div-table">
+                                                <Row className="div-table-header">
+                                                    <Col span={3} className="div-table-header-cell">Ordem</Col>                                                        
+                                                    <Col span={5} className="div-table-header-cell">Setor</Col>
+                                                    <Col span={16} className="div-table-header-cell">Conjunto</Col>
+                                                </Row>
+                                                {linhasItens}
+                                            </div>
+                                        )
+                                    }
+                                    </TabPane>
+                                ) : null
+                            }
+                            <TabPane tab="Insumos" key="3">
+                                {
+                                    <div style={{minHeight: '380px'}}>
+                                    {
+                                        (!this.state.dynamicFieldsInsumos.loading || !this.state.dynamicFieldsInsumos.rendered)
+                                        ? (
+                                            <Row style={{marginTop: '10px'}}>
+                                                <Col span={24} style={{textAlign: 'center'}}>
+                                                    Carregando os dados ...
+                                                </Col>
+                                            </Row> 
+                                        )
+                                        : (
+                                            <div>
+                                                <div className="div-table">
+                                                    <Row className="div-table-header">
+                                                        <Col span={16} className="div-table-header-cell">INS | Insumos</Col>                                                        
+                                                        <Col span={4} className="div-table-header-cell">Quantidade</Col>
+                                                        <Col span={3} className="div-table-header-cell">Medida</Col>
+                                                        <Col span={1} className="div-table-header-cell">#</Col>
+                                                    </Row>
+                                                    {insumosItens}
+                                                </div>
+                                                <Row style={{marginTop: '10px'}}>
+                                                    <Col span={24} style={{textAlign: 'center'}}>
+                                                        <Button key="primary" title="Incluir insumo" onClick={this.addComposicaoRow}><Icon type="plus" /></Button>
+                                                    </Col>
+                                                </Row>
+                                            </div>
+                                        )
+                                    }
+                                    </div>
+                                }
+                            </TabPane>
+                        </Tabs>
+                    </Form>
                 </Modal>
-          </Content>
+            </Content>
         )
     }
 }

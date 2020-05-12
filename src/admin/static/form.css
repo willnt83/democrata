@@ -6,3 +6,7 @@
     margin-bottom: 0px;
     padding-bottom: 0px;
 }
+
+.padding-tablecell > td {
+    padding: 10px 5px 5px 16px !important
+}
